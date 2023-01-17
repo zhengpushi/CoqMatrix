@@ -1,0 +1,56 @@
+对Coq中矩阵模型的OCaml程序抽取测试
+
+一、介绍
+1. 从Coq的矩阵模型生成ocaml程序
+2. 增加了 test.ml 这些辅助程序，以便测试
+3. 主要目的是，使用10^3, 10^4, 10^5 维数的矩阵做测试，
+   包括矩阵乘法等运算，观察空间和时间占用情况。
+4. 编译和测试方法
+$ bash make_manually
+$ ./matrix
+5. 测试报告和测试方法见 ocaml-extraction-comparison.pdf
+6. Coq源代码见 matrix.v
+
+
+二、编译问题
+1. 抽取的 matrix.ml 文件，编译时出错（但REPL时没有错误）
+a. 将 ml 文件中的 R_abst, R_repr 手动修改为 __
+module type RbaseSymbolsSig =
+ sig
+  type coq_R
+
+  val coq_Rabst : __
+                    (* cReal -> coq_R *)
+
+  val coq_Rrepr : __
+                    (* coq_R -> cReal *)
+
+同时，将 mli 文件中的签名也修改
+module type RbaseSymbolsSig =
+ sig
+  type coq_R
+
+  val coq_Rabst : __
+                    (* cReal -> coq_R *)
+
+  val coq_Rrepr : __
+                    (* coq_R -> cReal *)
+
+b. 将 ml 文件中的 predT 修改为
+let predT =
+ (fun (_:'a1) -> true)
+
+2. #use 这类指示符只能在 REPL 时使用，编译时需要注释掉
+
+---------------------------------------------------
+
+l2m 函数的类型错误问题 (single_compile 目录的原因）
+现象：
+在REPL中，#use "xx.ml" 时，类型没有错误
+而使用 #load "xx.cmo" 或者 ocamlc 时，都会报 l2m 函数类型错误，
+因为使用 module type 传递 coq_X 类型，而它在实例化中指定为 float。
+解决：
+暂时放在同一个文件中，可以解决。
+备注：
+1. 请使用 make_manually.sh 脚本来编译。
+2. 如何在多态时，能够在Coq和OCaml中不出现错误，这是以后要解决的问题。

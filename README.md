@@ -1,4 +1,4 @@
-# coqmatrix
+# CoqMatrix
 
 ## Introduction
 This is a formal matrix library in Coq, and integrated with multiple different implementations.
