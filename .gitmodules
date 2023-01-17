@@ -1,0 +1,3 @@
+[submodule "coqext"]
+	path = coqext
+	url = https://github.com/zhengpushi/coqext
