@@ -451,7 +451,7 @@ End RingElementTypeQ.
 Module RingElementTypeQc
 <: RingElementType.
   Include ElementTypeQc.
-  
+
   Definition A1 : A := 1.
   Definition Aadd := Qcplus.
   Definition Aopp := Qcopp.
@@ -751,7 +751,32 @@ Module FieldElementTypeQc
     unfold Amul,Ainv,A1,Aeq. unfold ElementTypeQc.Aeq,ElementTypeQc.A. field. auto.
   Qed.
 
-  Add Field Field_thy_inst : Field_thy.
+  (* Bug: when publish the project to opam, CI report error in ocaml4.07.1 as follows,
+
+Error: Illegal application: 
+The term "@fieldAinvProper" of type
+ "forall (A : Type) (Aadd : A -> A -> A) (A0 : A) (Aopp : A -> A) (Amul : A -> A -> A) 
+    (A1 : A) (Ainv : A -> A) (Aeq : A -> A -> Prop),
+  Field Aadd A0 Aopp Amul A1 Ainv Aeq -> Proper (Aeq ==> Aeq) Ainv"
+cannot be applied to the terms
+ "A" : "Type"
+ "Qcplus" : "Qc -> Qc -> Qc"
+ "Q2Qc 0" : "Qc"
+ "Qcopp" : "Qc -> Qc"
+ "Qcmult" : "Qc -> Qc -> Qc"
+ "1" : "Qc"
+ "Ainv" : "Qc -> Qc"
+ "Aeq" : "relation A"
+ "Field_Qc" : "Field Qcplus (Q2Qc 0) Qcopp Qcmult 1 Qcinv eq"
+The 1st term has type "Type@{A.u0}" which should be coercible to "Type@{Field.u0}".
+    
+    But I don't know why?
+    just need comment this declaration.
+*)
+  (* Check @fieldAinvProper Qc Qcplus (Q2Qc (Qmake Z0 xH)) *)
+  (*   Qcopp Qcmult (Q2Qc (Qmake (Zpos xH) xH)) Ainv Aeq. *)
+    
+  (* Add Field Field_thy_inst : Field_thy. *)
   
   Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
   Proof.
