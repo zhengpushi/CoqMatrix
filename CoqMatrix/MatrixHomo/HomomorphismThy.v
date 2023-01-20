@@ -14,7 +14,7 @@
     2022.07.12  by ZhengPu Shi, remove equivalence relation, only use eq
  *)
 
-From CoqExt Require Export BasicConfig HierarchySetoid.
+Require Export BasicConfig HierarchySetoid.
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
 

@@ -20,7 +20,7 @@
 *)
 
 
-From CoqExt Require Export BasicConfig NatExt ZExt QExt QcExt RExt HierarchySetoid.
+Require Export BasicConfig NatExt ZExt QExt QcExt RExt HierarchySetoid.
 
 
 (* ######################################################################### *)

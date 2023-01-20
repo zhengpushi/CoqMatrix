@@ -12,7 +12,7 @@
   2. all definitions are polymorphism.
  *)
 
-From CoqExt Require Export SetoidListListExt.
+Require Export SetoidListListExt.
 
 Require Export Arith.   (* minus_plus *)
 Require Export Lia.

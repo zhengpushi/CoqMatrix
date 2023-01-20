@@ -9,8 +9,8 @@
  *)
 
 Require Import Nat PeanoNat Lia Bool.
-From CoqExt Require Export BasicConfig HierarchySetoid.
-From CoqExt Require RExt.
+Require Export BasicConfig HierarchySetoid.
+Require RExt.
 
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.

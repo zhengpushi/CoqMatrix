@@ -23,7 +23,7 @@
 
  *)
 
-From CoqExt Require Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
+Require Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 Require Export ElementType.
 
 

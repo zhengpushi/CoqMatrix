@@ -24,7 +24,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-From CoqExt Require Export SetoidListListExt.
+Require Export SetoidListListExt.
 Require Export Coq.Vectors.Fin.
 Require Export Coq.Vectors.Vector.
 Require Import Extraction.

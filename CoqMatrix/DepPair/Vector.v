@@ -18,7 +18,7 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
 Require Import Lia.
-From CoqExt Require Export BasicConfig SetoidListExt HierarchySetoid.
+Require Export BasicConfig SetoidListExt HierarchySetoid.
 
 Open Scope A_scope.
 Open Scope vec_scope.

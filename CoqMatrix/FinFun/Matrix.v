@@ -19,8 +19,7 @@
 (** The library all_algebra contain 'matrix' formalization *)
 From mathcomp Require Import all_ssreflect all_algebra.
 
-From CoqExt Require Export
-  BasicConfig NatExt TupleExt SetoidListListExt HierarchySetoid.
+Require Export BasicConfig NatExt TupleExt SetoidListListExt HierarchySetoid.
 
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.

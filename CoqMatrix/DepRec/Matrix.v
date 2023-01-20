@@ -16,7 +16,7 @@
  *)
 
 Require Export Lia.
-From CoqExt Require Export BasicConfig SetoidListListExt.
+Require Export BasicConfig SetoidListListExt.
 
 (* also contain "A*" which * is number, e.g. A0 A1 ... *)
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.

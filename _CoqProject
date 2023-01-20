@@ -1,0 +1,70 @@
+# ===================================================================
+# Copyright 2022 ZhengPu Shi
+#  This file is part of CoqMatrix. It is distributed under the MIT
+#  "expat license". You should have recieved a LICENSE file with it.
+# ===================================================================
+
+-I .
+-R CoqMatrix CoqMatrix
+
+-arg -w -arg -notation-overridden
+-arg -w -arg -deprecated-hint-without-locality
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -local-declaration
+
+# ===== CoqExt =====
+CoqMatrix/CoqExt/BasicConfig.v
+CoqMatrix/CoqExt/FuncExt.v
+CoqMatrix/CoqExt/TupleExt.v
+CoqMatrix/CoqExt/BoolExt.v
+CoqMatrix/CoqExt/QExt.v
+CoqMatrix/CoqExt/QcExt.v
+CoqMatrix/CoqExt/NatExt.v
+CoqMatrix/CoqExt/ZExt.v
+CoqMatrix/CoqExt/RExt.v
+CoqMatrix/CoqExt/RAST.v
+CoqMatrix/CoqExt/StrExt.v
+CoqMatrix/CoqExt/SetoidListExt.v
+CoqMatrix/CoqExt/SetoidListListExt.v
+#CoqMatrix/CoqExt/SetoidListExt_test.v
+CoqMatrix/CoqExt/HierarchySetoid.v
+
+# ===== CoqMatrix =====
+CoqMatrix/ElementType.v
+CoqMatrix/MatrixTheory.v
+CoqMatrix/VectorTheory.v
+CoqMatrix/DepRec/Matrix.v
+CoqMatrix/DepRec/MatrixTheoryDR.v
+CoqMatrix/DepRec/VectorTheoryDR.v
+CoqMatrix/DepList/Matrix.v
+CoqMatrix/DepList/MatrixTheoryDL.v
+CoqMatrix/DepList/VectorTheoryDL.v
+CoqMatrix/DepPair/Vector.v
+CoqMatrix/DepPair/Matrix.v
+CoqMatrix/DepPair/MatrixTheoryDP.v
+CoqMatrix/DepPair/VectorTheoryDP.v
+CoqMatrix/NatFun/Sequence.v
+CoqMatrix/NatFun/Matrix.v
+CoqMatrix/NatFun/MatrixTheoryNF.v
+CoqMatrix/NatFun/VectorTheoryNF.v
+CoqMatrix/FinFun/Matrix.v
+CoqMatrix/FinFun/MatrixTheoryFF.v
+CoqMatrix/MatrixAll.v
+CoqMatrix/MatrixHomo/HomomorphismThy.v
+CoqMatrix/MatrixHomo/IsomorphismThy.v
+CoqMatrix/MatrixHomo/MatrixHomomorphism.v
+CoqMatrix/MatrixHomo/MatrixIsomorphism.v
+CoqMatrix/VectorAll.v
+#CoqMatrix/NatFun/Inversion.v
+#CoqMatrix/DepRec/VectorR.v
+#CoqMatrix/NatFun/VectorR.v
+#CoqMatrix/OCamlExtractionComparison/matrix.v
+
+# # ===== temporary code =====
+#CoqMatrix/Matrix/Sequence.v
+#CoqMatrix/Matrix/Matrix.v
+#CoqMatrix/Matrix/Inversion.v
+#CoqMatrix/Matrix/Vector.v
+#CoqMatrix/Matrix/RMatrix.v
+#CoqMatrix/Matrix/RVector.v

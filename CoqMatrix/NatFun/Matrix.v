@@ -9,7 +9,7 @@
  *)
 
 
-From CoqExt Require Import TupleExt HierarchySetoid SetoidListListExt.
+Require Import TupleExt HierarchySetoid SetoidListListExt.
 Require Import NatFun.Sequence.
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.

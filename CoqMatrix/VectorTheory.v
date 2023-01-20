@@ -15,7 +15,7 @@
      《高等数学学习手册》徐小湛，p173
  *)
 
-From CoqExt Require Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
+Require Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 Require Export ElementType.
 
 

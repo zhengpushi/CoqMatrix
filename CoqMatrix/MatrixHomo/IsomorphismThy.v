@@ -11,7 +11,7 @@
   1. https://blog.csdn.net/grb819/article/details/111745405
  *)
 
-From CoqExt Require Export BasicConfig HierarchySetoid.
+Require Export BasicConfig HierarchySetoid.
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
 
