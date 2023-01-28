@@ -1,23 +1,24 @@
 (*
-  purpose   : 在 FloatMatrix 上的OCaml程序抽取测试
+  purpose   : Test extracted Ocaml program of Matrix over float.
   author    : ZhengPu Shi
   date      : Nov 1, 2022
 
   remark    :
-  1. Coq中的R类型映射为OCaml中的float
-  2. 矩阵操作有
-     从list生成矩阵，用于结构化输入
-     将矩阵转为list，用于结构化输出
-     从函数生成矩阵，用于动态输入
-     将矩阵转为函数，用于动态输出
-     矩阵加法、乘法
-     获取矩阵元素，读取单个元素
-     修改矩阵元素，修改单个元素
-  3. 对“矩阵的构造、运算、读取、修改等”功能进行测试，
-     从时间和空间复杂度两方面测试矩阵模型的差异。
+  1. R type in Coq ==> float type in Ocaml.
+  2. Matirx operations:
+     l2m: from list to a matrix
+     m2l: from matrix to list.
+     f2m: from function to matrix, for  input dynamically
+     m2f: from matrix to function, for output dynamically
+     madd
+     mmul
+     mget: get element
+     mset: set element
+  3. The test is aimed to "construct, calculate, read and write functions of matrix"
+     consider the time and space cost roughly.
  *)
 
-(** 使用 Matlab 做矩阵运算的例子，用于正确性测试的对照：
+(** This is example from Matlab, as a contrast for correctness.
 >> mat1 = [1,2,3; 4,5,6]
 
 mat1 =
@@ -55,36 +56,43 @@ Require Import ExtrOcamlBasic ExtrOcamlNatInt ExtrOcamlR.
 Require Import Reals MatrixAll.
 Require Import List. Import ListNotations.
 
-(** 实数矩阵的接口 *)
+(** A interface for float matrix *)
 Module Type FloatMatrixSig.
   
-  (** 矩阵类型 *)
+  (** Matrix type *)
   Parameter mat : nat -> nat -> Type.
-  (** 矩阵加法 *)
+  (** Matrix addition *)
   Parameter madd : forall r c, mat r c -> mat r c -> mat r c.
-  (** 矩阵乘法 *)
+  (** Matrix multiplication *)
   Parameter mmul : forall r c s, mat r c -> mat c s -> mat r s.
-  (** 与 list 的转换 *)
+  (** Conversion between list and matrix *)
   Parameter l2m : forall r c, list (list R) -> mat r c.
-  (* nat -> nat -> (forall r c, mat r c). *)
-  Parameter m2l : forall r c, mat r c -> (nat * nat * list (list R)).
-  (** 与 函数 的转换 *)
+  (* Parameter m2l : forall r c, mat r c -> (nat * nat * list (list R)). *)
+  Parameter m2l : forall r c, mat r c -> list (list R).
+  (** Conversion between function and matrix *)
   (* Parameter f2m : forall r c, (nat -> nat -> R) -> mat r c. *)
   (* Parameter m2f : forall r c, mat r c -> (nat * nat * (nat -> nat -> R)). *)
-  (** 取出元素 *)
+  (** Get / Set element *)
   (* Parameter mget : forall r c, mat r c -> nat -> nat -> R. *)
-  (** 修改元素 *)
   (* Parameter mset : forall r c, mat r c -> nat -> nat -> R -> mat r c. *)
 
 End FloatMatrixSig.
 
-(** 实数矩阵的各种实现 *)
 
-Module DL := MatrixR_DL.
-Module DP := MatrixR_DP.
-Module DR := MatrixR_DR.
-Module NF := MatrixR_NF.
-Module FF := MatrixR_FF.
+(** Many implementations *)
+Module EqMatrixAllR := EqDecidableFieldMatrixTheory BaseTypeR
+                         DecidableFieldElementTypeR.
+Module MatrixR_DR := EqMatrixAllR.DR.
+Module MatrixR_DP := EqMatrixAllR.DP.
+Module MatrixR_DL := EqMatrixAllR.DL.
+Module MatrixR_NF := EqMatrixAllR.NF.
+Module MatrixR_FF := EqMatrixAllR.FF.
+
+Module DL <: FloatMatrixSig := MatrixR_DL.
+Module DP <: FloatMatrixSig := MatrixR_DP.
+Module DR <: FloatMatrixSig := MatrixR_DR.
+Module NF <: FloatMatrixSig := MatrixR_NF.
+Module FF <: FloatMatrixSig := MatrixR_FF.
 
 (* Module DL <: FloatMatrixSig. *)
 (*   Import MatrixR_DL. *)

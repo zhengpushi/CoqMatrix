@@ -9,7 +9,7 @@
 
  *)
 
-(** 这些指令在REPL下使用，编译时需要去掉 *)
+(** These indicatos only using in REPL, and need to be removed when compiling *)
 #use "topfind";;
 #require "unix";;
 #use "matrix.ml";;
@@ -23,51 +23,61 @@ let calc_exe_time (f : 'a -> unit) (n:'a) =
   let _ = f n in
   let end_time = Sys.time () in
   let elapsed = end_time -. start_time in
-    printf "Execution of f () takes %6.2f seconds\n" elapsed
+  printf "Execution of f () takes %6.2f seconds\n" elapsed
 
-(** 精度为秒的当前时间的整数 *)
+  
+(** Get the current time in seconds with an integer type *)
 let current_time_get () = Float.to_int (Unix.time ())
 
-(** 更新随机数生成器，使用固定种子，或当前时间为种子 *)
+(** Update random generator, using fixed seed or use current time as seed. *)
 let random_update =
-  (* 固定种子的好处时，每次执行的随机序列都是相同的 *)
+  (* when using fixed seed, the random output every time are same from first start *)
   let seed = 1 in
-  (* 当前时间种子的好处时，随机性更好。*)
+  (* when using current time as seed, there are better randomness *)
   (* let seed = current_time_get () in *)
   Random.init seed
 
-(** 生成 m * n 的列表 *)
+(** Trim a float number to given length precision.
+    E.g. f 123.45678 2 ==> 123.45 *)
+let float_trim (x : float) (n : int) : float =
+  let coef = 10.0 ** (float_of_int n) in
+  let i = int_of_float (x *. coef) in
+  let x' = (float_of_int i) /. coef in
+  x'
+
+(** Generate a list with m*n length *)
 let dl_gen (m:int) (n:int) : float list list =
   let max = Float.of_int (m * n) in
   let half = max /. 2. in
   let get_randomval (i:int) = Random.float max -. half in
+  (* let get_randomval (i:int) = float_trim (Random.float max -. half) 2 in *)
   random_update;
   List.init m (fun _ -> List.init n get_randomval);;
 
-(** 生成数据测试 *)
+(** Create test data *)
 (* dl_gen 5 3;; *)
 
-(** 矩阵模型类别*)
+(** matrix model types*)
 type matmodel =
   | MM_DL | MM_DP | MM_DR | MM_NF | MM_FF
 
-(** 打印嵌套列表到字符串 *)
+(** Print a dlist of any type to string *)
 let dl2str (dl:'a list list) (a2str:'a -> string) : string =
   let l2str l = List.fold_left (fun s i -> s^(a2str i)) "" l in
   List.fold_left (fun s l -> s^(l2str l)^"\n") "" dl;;
 
-(** 打印嵌套实数列表到字符串 *)
+(** Print a dlist of float type to string *)
 let float_dl2str (dl:float list list) : string =
   (* let f2str = Printf.sprintf "%10.2f" in *)
   let f2str = Printf.sprintf "%10.1e" in
   dl2str dl f2str;;
 
-(** 生成数据并打印的测试 *)
+(** Generate random data and print *)
 let gen_then_print_test () =
   let dl : float list list = dl_gen 5 8 in
   print_endline (float_dl2str dl);;
 
-(** list中的某个元素，越界返回默认值 *)
+(** Get n-th element of a list, get def_val when index-out-of-bounds *)
 let nth_def l n def_val  =
   if n < 0 then def_val else
   let rec nth_aux l n =
@@ -76,21 +86,22 @@ let nth_def l n def_val  =
     | a::l -> if n = 0 then a else nth_aux l (n-1)
   in nth_aux l n;;
 
-(** list中的前n项，不足填充默认值 *)
+(** Get top n items of a list, fill def_val when not enough *)
 let list_top_def l n def_val =
   let idx = List.init n (fun i -> i) in
   List.map (fun i -> nth_def l i def_val) idx;;
 
-(** 取出 dl 中的部分内容，比如 4*5的内容，不足填充 0 *)
+(** Get top rows*cols items of a dlist, fill def_val when not enough *)
 let dl_top_def (dl:'a list list) (rows:int) (cols:int) (defval:'a) =
   let dl = list_top_def dl rows [] in
   List.map (fun l -> list_top_def l cols defval) dl;;
 
 (* calc_exe_time (fun _ -> ignore (dl_top_def [[1;2;3];[4;5;6]] 4 5 0)) ();; *)
   
-(** 矩阵乘法实验 *)
+(** Experinemt for matrix multiplication *)
 
-(** 根据不同模型，返回一组函数。因为类型不同，无法用match写出 *)
+(** Get a function by given model. Because type mismatch in all cases, we failed to
+    write out this function. *)
 (* let get_fcns_of_mm (mm:matmodel) = *)
 (*   match mm with *)
 (*   | MM_DL -> (DL.l2m, DL.m2l, DL.mmul) *)
@@ -99,9 +110,9 @@ let dl_top_def (dl:'a list list) (rows:int) (cols:int) (defval:'a) =
 (*   | MM_NF -> (NF.l2m, NF.m2l, NF.mmul) *)
 (*   | MM_FF -> (FF.l2m, FF.m2l, FF.mmul);; *)
 
-(** 第1版，矩阵模型参数未使用，需要手动修改注释来切换模型 *)
+(** Version 1: use fixed parameter of model, we need switch model manually *)
 let mmul_ex ?(mm=MM_DL) (r:int) (c:int) (s:int) (is_print:bool) =
-  (* 这些模型要手动指定 *)
+  (* These functions need to be specify manally *)
   let (l2m,m2l,mmul) = (DL.l2m, DL.m2l, DL.mmul) in
   (* let (l2m,m2l,mmul) = (DP.l2m, DP.m2l, DP.mmul) in *)
   (* let (l2m,m2l,mmul) = (DR.l2m, DR.m2l, DR.mmul) in *)
@@ -124,12 +135,12 @@ let mmul_ex ?(mm=MM_DL) (r:int) (c:int) (s:int) (is_print:bool) =
 
 (* calc_exe_time (mmul_ex 4 5 6) true;; *)
 
-(** 第二版，矩阵模型参数启用 *)
+(** Version 2: the model parameter is available *)
 let mmul_ex ?(mm=MM_DL) (r:int) (c:int) (s:int) (is_print:bool) =
-  (* 生成两个矩阵的数据 *)
+  (* create data for two matrices *)
   let l1 = dl_gen r c in
   let l2 = dl_gen c s in
-  (* 虽然函数类型不同，但计算结果却可以统一 *)
+  (* although matrix type are different, but m2l get unified type *)
   let l3 =
     match mm with
     | MM_DL -> let (l2m,m2l,mmul) = (DL.l2m, DL.m2l, DL.mmul) in
@@ -143,7 +154,7 @@ let mmul_ex ?(mm=MM_DL) (r:int) (c:int) (s:int) (is_print:bool) =
     | MM_FF -> let (l2m,m2l,mmul) = (FF.l2m, FF.m2l, FF.mmul) in
                m2l r c (mmul r c s (l2m r c l1) (l2m c s l2))
   in
-  (* 输出数据 *)
+  (* output the data *)
   let dl_top dl = dl_top_def dl 2 8 0.0 in
   let show_dl dl r c prefix =
     print_endline (Printf.sprintf "%s_%dx%d:"prefix r c);
@@ -206,26 +217,26 @@ let show_hello_msg () =
   let hello_msg = "Program for test matrix." in
   print_endline hello_msg
 
-(** 基准测试，自动对前四个模型测试，并输出运行时间 *)
+(** Benchmark, automatic test first four models, also output running time *)
 let benchmark_run () =
-  (* 模型列表 *)
+  (* list of models *)
   let mm_lst = [MM_DL; MM_DP; MM_DR; MM_NF] in
-  (* 更新模型序号，并同时判断是否模型循环完成 *)
+  (* update model index, and check if finished the model loop *)
   let next_mmidx i : int * bool =
     if (i+1) mod 4 = 0 then (0,true) else (i+1,false) in
-  (* 更新矩阵规模 *)
+  (* update matrix size *)
   let next_size size =
     Float.to_int ((Float.of_int size) *. 1.2) in
-  (* 无限循环 *)
+  (* infinite loop *)
   let rec run mm_idx size : unit =
-    let mm = List.nth mm_lst mm_idx in (* 取出矩阵模型 *)
-    show_matrix_model mm; (* 打印矩阵模型 *)
-    show_matrix_size size; (* 打印矩阵大小 *)
-    calc_exe_time (mmul_ex ~mm size size size) false; (* 矩阵乘法 *)
+    let mm = List.nth mm_lst mm_idx in (* get matrix model *)
+    show_matrix_model mm;  (* print model *)
+    show_matrix_size size; (* print size *)
+    calc_exe_time (mmul_ex ~mm size size size) false; (* matrix multiplication *)
     print_endline "---------------------------------";
-    let (mm_idx,mm_loop_ok) = next_mmidx mm_idx in (* 更新模型序号、循环标志 *)
-    let size = if mm_loop_ok then next_size size else size in (* 更新规模 *)
-    run mm_idx size in (* 再次循环 *)
+    let (mm_idx,mm_loop_ok) = next_mmidx mm_idx in (* update model index, loop flag *)
+    let size = if mm_loop_ok then next_size size else size in (* update matirx size *)
+    run mm_idx size in (* next loop *)
   run 0 50;;
 
 let main () =

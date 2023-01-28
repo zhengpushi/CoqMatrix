@@ -1,0 +1,267 @@
+1. use ocamlc to compile, then run "./matrix --benchmark=true", we got
+[OCamlExtractionComparison]$ ./matrix -benchmark=true
+Program for test matrix.
+matrix model : DL
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.15 seconds
+---------------------------------
+matrix model : DP
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : DR
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : NF
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.22 seconds
+---------------------------------
+matrix model : DL
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.30 seconds
+---------------------------------
+matrix model : DP
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.02 seconds
+---------------------------------
+matrix model : DR
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : NF
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.45 seconds
+---------------------------------
+matrix model : DL
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.61 seconds
+---------------------------------
+matrix model : DP
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.04 seconds
+---------------------------------
+matrix model : DR
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : NF
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.92 seconds
+---------------------------------
+matrix model : DL
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   1.21 seconds
+---------------------------------
+matrix model : DP
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   0.06 seconds
+---------------------------------
+matrix model : DR
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   0.02 seconds
+---------------------------------
+matrix model : NF
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   1.86 seconds
+---------------------------------
+matrix model : DL
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   2.44 seconds
+---------------------------------
+matrix model : DP
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   0.10 seconds
+---------------------------------
+matrix model : DR
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   0.04 seconds
+---------------------------------
+matrix model : NF
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   3.84 seconds
+---------------------------------
+matrix model : DL
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   4.90 seconds
+---------------------------------
+matrix model : DP
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   0.17 seconds
+---------------------------------
+matrix model : DR
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   0.07 seconds
+---------------------------------
+matrix model : NF
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   7.87 seconds
+---------------------------------
+matrix model : DL
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes  10.62 seconds
+---------------------------------
+matrix model : DP
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes   0.32 seconds
+---------------------------------
+matrix model : DR
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes   0.12 seconds
+---------------------------------
+matrix model : NF
+matrix size : 147x147 * 147x147 -> 147x147
+^C
+
+################################################################################
+
+2. use ocamlc.opt to compile, then run "./matrix --benchmark=true", we got
+[OCamlExtractionComparison]$ ./matrix -benchmark=true
+Program for test matrix.
+matrix model : DL
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.05 seconds
+---------------------------------
+matrix model : DP
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.00 seconds
+---------------------------------
+matrix model : DR
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.00 seconds
+---------------------------------
+matrix model : NF
+matrix size : 50x50 * 50x50 -> 50x50
+Execution of f () takes   0.04 seconds
+---------------------------------
+matrix model : DL
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.09 seconds
+---------------------------------
+matrix model : DP
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : DR
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.00 seconds
+---------------------------------
+matrix model : NF
+matrix size : 60x60 * 60x60 -> 60x60
+Execution of f () takes   0.08 seconds
+---------------------------------
+matrix model : DL
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.19 seconds
+---------------------------------
+matrix model : DP
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : DR
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : NF
+matrix size : 72x72 * 72x72 -> 72x72
+Execution of f () takes   0.16 seconds
+---------------------------------
+matrix model : DL
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   0.39 seconds
+---------------------------------
+matrix model : DP
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   0.02 seconds
+---------------------------------
+matrix model : DR
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   0.01 seconds
+---------------------------------
+matrix model : NF
+matrix size : 86x86 * 86x86 -> 86x86
+Execution of f () takes   0.34 seconds
+---------------------------------
+matrix model : DL
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   0.81 seconds
+---------------------------------
+matrix model : DP
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   0.03 seconds
+---------------------------------
+matrix model : DR
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   0.02 seconds
+---------------------------------
+matrix model : NF
+matrix size : 103x103 * 103x103 -> 103x103
+Execution of f () takes   0.71 seconds
+---------------------------------
+matrix model : DL
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   1.81 seconds
+---------------------------------
+matrix model : DP
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   0.06 seconds
+---------------------------------
+matrix model : DR
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   0.04 seconds
+---------------------------------
+matrix model : NF
+matrix size : 123x123 * 123x123 -> 123x123
+Execution of f () takes   1.87 seconds
+---------------------------------
+matrix model : DL
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes   3.67 seconds
+---------------------------------
+matrix model : DP
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes   0.10 seconds
+---------------------------------
+matrix model : DR
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes   0.06 seconds
+---------------------------------
+matrix model : NF
+matrix size : 147x147 * 147x147 -> 147x147
+Execution of f () takes   3.87 seconds
+---------------------------------
+matrix model : DL
+matrix size : 176x176 * 176x176 -> 176x176
+Execution of f () takes   7.51 seconds
+---------------------------------
+matrix model : DP
+matrix size : 176x176 * 176x176 -> 176x176
+Execution of f () takes   0.17 seconds
+---------------------------------
+matrix model : DR
+matrix size : 176x176 * 176x176 -> 176x176
+Execution of f () takes   0.11 seconds
+---------------------------------
+matrix model : NF
+matrix size : 176x176 * 176x176 -> 176x176
+Execution of f () takes   6.33 seconds
+---------------------------------
+matrix model : DL
+matrix size : 211x211 * 211x211 -> 211x211
+Execution of f () takes  16.28 seconds
+---------------------------------
+matrix model : DP
+matrix size : 211x211 * 211x211 -> 211x211
+Execution of f () takes   0.30 seconds
+---------------------------------
+matrix model : DR
+matrix size : 211x211 * 211x211 -> 211x211
+Execution of f () takes   0.19 seconds
+---------------------------------
+matrix model : NF
+matrix size : 211x211 * 211x211 -> 211x211
+Execution of f () takes  13.46 seconds
+---------------------------------
+matrix model : DL
+matrix size : 253x253 * 253x253 -> 253x253
+^C

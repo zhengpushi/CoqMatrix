@@ -3,9 +3,13 @@
 # "expat license". You should have recieved a LICENSE file with it.
 
 
+# matrix : matrix.ml
+# 	@ocamlc -c matrix.mli
+# 	@ocamlfind ocamlc -o $@ -linkpkg matrix.ml -package unix
+
 matrix : matrix.ml
-	@ocamlc -c matrix.mli
-	@ocamlfind ocamlc -o $@ -linkpkg matrix.ml -package unix
+	@ocamlc.opt -c matrix.mli
+	@ocamlfind opt -o $@ -linkpkg matrix.ml -package unix
 
 clean :
 	rm -f matrix *.cmi *.cmo *.o

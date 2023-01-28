@@ -4,42 +4,42 @@
 # This file is part of CoqMatrix. It is distributed under the MIT
 # "expat license". You should have recieved a LICENSE file with it.
 
+# Why need this script? we need to fix something to compile the Ocaml program
+# 1. Issues when extract Ocaml program
+# a. two functions about "coq_R" need to be masked: coqRasbst, coq_Rrepr
+# b. the parameter in definition of "predP" is not match
+# 2. there is a type mismatch for "coq_X" and "float" when compiling, although there
+#    is no problem in REPL. Now, we find that concate matrix.ml and test.ml will solve
+#    the compile problem.
+# 3. remove "#use" indicators in the top of "test.ml" file.
 
-# 为什么需要这个脚本？为了完成OCaml程序的编译，需要解决一些问题
-# 1. 抽取的OCaml程序需要处理的问题
-# a. coq_R 的两个函数替代
-# b. predP 的定义中参数不匹配的处理
-# 2. coq_X 与 float，在REPL中正常，但编译时类型不匹配，所以合并为同一个文件
-# a. 头部 #use 等指示符的去除
-
-# 具体做法
-# 1. 创建新目录 build，并进入该目录
-# 2. 将生成的 matrix.ml 和手写的 test.ml 拷贝到该目录
-# 3. 修正 matrix.ml 的部分代码
-# 4. 删掉 test.ml 头部的部分信息，并追加到 matrix.ml 文件
-# 5. 利用 ocamlfind 编译，因为需要传入 unix 等第三方库。
-# 6. 编译
+# What's done?
+# 1. create new directory "build", then change to this directory.
+# 2. copy matrix.ml and test.ml to this directory.
+# 3. fix some code in matrix.ml.
+# 4. remove some header lines of test.ml, then append it to matrix.ml
+# 5. use ocamlfind to compile, because we need third-party library such as unix.
 
 # welcome
 echo "Compile preparing..."
 
-# 进入脚本所在目录
+# change to directory where this script is located
 cd `dirname $0`
 dir=`pwd`
 
-# 建立构建目录
+# create directory for building
 mkdir -p build
 
-# 进入该目录
+# change to this directory
 cd build
 
-# 拷贝需要的文件
+# copy files needed
 cp ../matrix.mli ./
 cp ../matrix.ml ./
 cp ../test.ml ./
 cp ../Makefile ./
 
-# 修正文件
+# fix these files
 sed -i 's/coq_Rabst : cReal -> coq_R/coq_Rabst : __/' matrix.mli
 sed -i 's/coq_Rrepr : coq_R -> cReal/coq_Rrepr : __/' matrix.mli
 sed -i 's/coq_Rabst : cReal -> coq_R/coq_Rabst : __/' matrix.ml
@@ -47,18 +47,18 @@ sed -i 's/coq_Rrepr : coq_R -> cReal/coq_Rrepr : __/' matrix.ml
 sed -i "s/simplPred (fun _ -> true)/fun (_:'a1) -> true/" matrix.ml
 sed -i 's/^#.*//' test.ml
 
-# 合并文件
+# concate two files
 cat test.ml >> matrix.ml
 
-# 编译
+# compile
 make
 
-# 拷贝输出到父目录
+# copy output to parent directory
 cp matrix ../
 
-# 删除中间目录
+# remove intermediate files and directories
 cd ../
 rm build -r
 
-# 通知
+# notification
 echo 'Compile finished. output file is "matrix"'
