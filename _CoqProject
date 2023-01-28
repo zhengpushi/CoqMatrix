@@ -25,6 +25,7 @@ CoqMatrix/CoqExt/ZExt.v
 CoqMatrix/CoqExt/RExt.v
 CoqMatrix/CoqExt/RAST.v
 CoqMatrix/CoqExt/StrExt.v
+CoqMatrix/CoqExt/ExtrOcamlR.v
 CoqMatrix/CoqExt/SetoidListExt.v
 CoqMatrix/CoqExt/SetoidListListExt.v
 #CoqMatrix/CoqExt/SetoidListExt_test.v
