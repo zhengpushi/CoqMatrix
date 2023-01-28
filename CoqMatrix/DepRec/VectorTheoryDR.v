@@ -218,6 +218,8 @@ Module RingVectorTheoryDR (E : RingElementType) <: BasicVectorTheory E.
 
   Definition vcmul {n} a (v : vec n) : vec n := a c* v.
   Definition vmulc {n} (v : vec n) a : vec n := v *c a.
+  Infix "c*" := vcmul : vec_scope.
+  Infix "*c" := vmulc : vec_scope.
 
   Lemma vmulc_eq_vcmul : forall {n} a (v : vec n), v *c a == a c* v.
   Proof.

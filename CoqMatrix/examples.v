@@ -8,12 +8,12 @@
   date      : 2023.01
 *)
 
-From CoqMatrix Require Import MatrixAll.
+From CoqMatrix Require MatrixAll VectorAll.
 
 (** * Matrix over natural numbers *)
 Module Example4Nat.
   (** import the library needed to use *)
-  Import MatrixNat_DR. (* model: DepRec *)
+  Import MatrixAll MatrixNat_DR. (* model: DepRec *)
 
   (** Then, all functions, theorems, notations are available *)
   Example dl := [[1;2;3];[4;5;6]].
@@ -40,7 +40,7 @@ End Example4Nat.
 Module Example4Q.
 
   (** Import library needed *)
-  Import MatrixQ_DL. (* model: DepList *)
+  Import MatrixAll MatrixQ_DL. (* model: DepList *)
   Open Scope Q.
   Open Scope mat_scope.
 
@@ -67,7 +67,7 @@ End Example4Q.
 Module Example4Cvt.
   
   (** Import library needed to use *)
-  Import MatrixAllZ. (* all models *)
+  Import MatrixAll MatrixAllZ. (* all models *)
   Import MatrixZ_DL. (* notations on DL *)
   Import Coq.Vectors.Vector VectorNotations. (* notations for Coq.Vector *)
   Open Scope Z.
@@ -99,3 +99,46 @@ Module Example4Cvt.
   
 End Example4Cvt.
 
+Module Example4CoordinateSystem.
+  
+  Import MatrixAll MatrixR_DL. (* DP/DR/NF/FF *)
+  Open Scope R.
+  Variable ψ θ φ: R.
+  Let Rx := mk_mat_3_3 1 0 0 0 (cos φ) (sin φ) 0 (-sin φ) (cos φ).
+  Let Ry := mk_mat_3_3 (cos θ) 0 (-sin θ) 0 1 0 (sin θ) 0 (cos θ).
+  Let Rz := mk_mat_3_3 (cos ψ) (sin ψ) 0 (-sin ψ) (cos ψ) 0 0 0 1.
+  Let Rbe := mk_mat_3_3
+    (cos θ * cos ψ) (cos ψ * sin θ * sin φ - sin ψ * cos φ)
+    (cos ψ * sin θ * cos φ + sin φ * sin ψ) (cos θ * sin ψ)
+    (sin ψ * sin θ * sin φ + cos ψ * cos φ)
+    (sin ψ * sin θ * cos φ - cos ψ * sin φ)
+    (-sin θ) (sin φ * cos θ) (cos φ * cos θ).
+  Lemma Rbe_ok : (Rbe == Rz\T * Ry\T * Rx\T)%mat.
+  Proof.
+    cbv. repeat constructor; ring.
+  Qed.
+    
+End Example4CoordinateSystem.
+
+
+Module Example4VectorTheory.
+  (** import library *)
+  Import VectorAll VectorR_DR.
+  Open Scope R.
+  Open Scope vec_scope.
+
+  (** create vector from a list, convert back, get element *)
+  Let l1 := [1;2;3;4;5].
+  Let v1 : vec 5 := l2v l1.
+  Let l2 := v2l v1.
+  Compute vnth v1 1. (* = (R1 + R1)%R : A *)
+
+  (** Next, we can prove equation using theorems in CoqMatrix *)
+  Goal forall (n : nat) (v1 v2 v3 : vec n),
+      (v1 + v2) + (v3 + vec0) == 1 c* v2 + (v1 + v3).
+  Proof.
+    intros. rewrite vadd_0_r, vcmul_1_l, <- vadd_assoc.
+    f_equiv. apply vadd_comm.
+  Qed.
+  
+End Example4VectorTheory.
