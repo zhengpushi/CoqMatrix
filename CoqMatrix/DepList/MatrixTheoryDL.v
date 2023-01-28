@@ -148,6 +148,8 @@ Module BasicMatrixTheoryDL (E : ElementType) <: BasicMatrixTheory E.
     := [[a1];[a2];[a3]].
   Definition mk_mat_3_3 (a11 a12 a13 a21 a22 a23 a31 a32 a33 : A) : mat 3 3 
     := [[a11;a12;a13];[a21;a22;a23];[a31;a32;a33]].
+  Definition mk_mat_2_2 (a11 a12 a21 a22 : A) : mat 2 2
+    := [[a11;a12];[a21;a22]].
 
 
   (* ==================================== *)

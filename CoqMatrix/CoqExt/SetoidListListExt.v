@@ -451,6 +451,48 @@ End map2.
 
 
 (* ======================================================================= *)
+(** ** Convert between dlist and function *)
+Section f2dl_dl2f.
+
+  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Infix "==" := (Aeq) : A_scope.
+  Infix "==" := (eqlistA Aeq).
+  Infix "==" := (eqlistA (eqlistA Aeq)).
+
+  Definition f2dl {r c : nat} (f : nat -> nat -> A) : list (list A) :=
+    map (fun ri => f2l (n:=c) (f ri)) (seq 0 r).
+
+  Definition dl2f {r c : nat} (dl : list (list A)) : nat -> nat -> A :=
+    fun ri ci => nth ci (nth ri dl []) A0.
+
+  Lemma f2dl_length : forall r c f, length (@f2dl r c f) = r.
+  Proof.
+    intros. unfold f2dl. rewrite map_length. apply seq_length.
+  Qed.
+
+  Lemma f2dl_width : forall r c f, width (@f2dl r c f) c.
+  Proof.
+    unfold f2dl,width.
+    induction r; intros; simpl; try constructor.
+    - apply f2l_length.
+    - rewrite <- seq_shift. rewrite List.map_map.
+      apply IHr.
+  Qed.
+
+End f2dl_dl2f.
+
+Section test.
+  (** [[1;2;3];[4;5;6];[7;8;9]] *)
+  Let f := fun ri ci => ri * 3 + ci + 1.
+  Let dl := @f2dl nat 3 3 f.
+  (* Compute dl. *)
+
+  Let g := @dl2f nat 0 3 3 dl.
+  (* Compute (g 0 0, g 0 1, g 0 2, g 1 0, g 1 1, g 1 2, g 2 0, g 2 1, g 2 2). *)
+End test.  
+
+
+(* ======================================================================= *)
 (** ** Convert between row and col. eg, [1;2;3] <-> [[1];[2];[3]] *)
 Section convert_row_and_col.
 

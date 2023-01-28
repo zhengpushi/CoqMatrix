@@ -129,6 +129,21 @@ Section mnth.
   
 End mnth.
 
+(** ** Convert between function and matrix *)
+Section f2m_m2f.
+  
+  Context `{Aeq:relation A} (A0:A).
+  Infix "==" := Aeq : A_scope.
+  Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
+
+  Definition f2m {r c} (f : nat -> nat -> A) : @mat A r c :=
+    mk_mat (@f2dl A r c f) (f2dl_length r c f) (f2dl_width r c f).
+    
+  Definition m2f {r c} (m : mat r c) : (nat -> nat -> A) :=
+    dl2f (r:=r) (c:=c) (A0:=A0) (mdata m).
+
+End f2m_m2f.
+
 
 (** ** matrix with specific size *)
 

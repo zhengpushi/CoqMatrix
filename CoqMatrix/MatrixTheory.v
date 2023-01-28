@@ -85,6 +85,11 @@ Module Type BasicMatrixTheory (E : ElementType).
       (exists m, @m2l r c m == d)%dlist.
   
   (* ==================================== *)
+  (** ** Convert between function and matrix *)
+  (* Parameter f2m : forall {r c} (f : nat -> nat -> A), mat r c. *)
+  (* Parameter m2f : forall {r c}, mat r c -> (nat -> nat -> A). *)
+
+  (* ==================================== *)
   (** ** Specific matrix *)
   Parameter mk_mat_1_1 : forall (a11 : A), mat 1 1.
   Parameter mk_mat_3_1 : forall (a1 a2 a3 : A), mat 3 1.

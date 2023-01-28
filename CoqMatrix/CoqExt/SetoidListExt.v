@@ -819,6 +819,9 @@ Section map2_map_map.
 
 End map2_map_map.
 
+
+(* ======================================================================= *)
+(** ** fold of list *)
 Section fold.
   Context `{M:Monoid}.
 
@@ -832,6 +835,39 @@ Section fold.
   Global Existing Instance fold_right_aeq_mor.
 
 End fold.
+
+
+(* ======================================================================= *)
+(** ** Convert between list and function *)
+Section f2l_l2f.
+
+  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Infix "==" := (Aeq) : A_scope.
+  Infix "==" := (eqlistA Aeq).
+
+  Definition f2l {n : nat} (f : nat -> A) : list A :=
+    map f (seq 0 n).
+
+  Definition l2f {n : nat} (l : list A) : nat -> A :=
+    fun i => nth i l A0.
+
+  Lemma f2l_length : forall n f, length (@f2l n f) = n.
+  Proof.
+    intros. unfold f2l. rewrite map_length. apply seq_length.
+  Qed.
+
+End f2l_l2f.
+
+Section test.
+  (** [1;2;3] *)
+  Let f := fun i => i + 1.
+  Let l := @f2l nat 3 f.
+  (* Compute l. *)
+
+  Let g := @l2f nat 0 3 l.
+  (* Compute (g 0, g 1, g 2). *)
+End test.  
+
 
 (* ======================================================================= *)
 (** ** Addition, Opposition and Subtraction of list *)
@@ -1325,4 +1361,3 @@ End List2FixedlengthList.
 
 (* Arguments list_to_listN. *)
 Arguments list_to_listN_length {A A0 l n}.
-
