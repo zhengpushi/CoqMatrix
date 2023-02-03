@@ -442,7 +442,7 @@ Module DecidableFieldMatrixTheoryNF (E : DecidableFieldElementType)
 
   Export E.
   Include RingMatrixTheoryNF E.
-  Module Export DecMT := DecidableMatrixTheoryNF E.
+  (* Module Export DecMT := DecidableMatrixTheoryNF E. *)
 
   (** meq is decidable *)
   Lemma meq_dec : forall (r c : nat), Decidable (meq (r:=r) (c:=c)).

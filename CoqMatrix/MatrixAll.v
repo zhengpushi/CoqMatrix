@@ -876,7 +876,7 @@ Module Demo_usage_NF.
         [6.500000000000; 7.130000000000; 7.760000000000]]
      : list (list A) *)
 
-  Example ex1 : forall r c (m1 m2 : mat r c), @meq r c (@madd r c m1 m2) (@madd r c m2 m1).
+  Example ex1 : forall r c (m1 m2 : mat r c), (m1 + m2) == (m2 + m1).
   Proof.
     intros. apply madd_comm.
   Qed.
