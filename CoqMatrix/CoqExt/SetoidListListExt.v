@@ -1434,6 +1434,8 @@ End dlsub.
 (* ======================================================================= *)
 (** ** list dot dlist, and dlist dot dlist *)
 Section ldotdl_dldotdl.
+
+  (** Tips: a good example to show that Typeclass can simplify context declaration *)
   
   (* Variable A : Type. *)
   (* Variable A0 A1 : A. *)

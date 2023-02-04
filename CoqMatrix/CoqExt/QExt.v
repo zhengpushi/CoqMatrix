@@ -9,11 +9,20 @@
 *)
 
 
-Require Export BasicConfig.
+Require Import HierarchySetoid.
 
 Require Export QArith Qround.
 Open Scope Q.
 
+
+(* ######################################################################### *)
+(** ** Mathematical structures *)
+
+Global Instance Comm_QAdd : Commutative Qplus Qeq.
+constructor. intros; ring. Qed.
+
+Global Instance Comm_QMul : Commutative Qmult Qeq.
+constructor. intros; ring. Qed.
 
 (* ######################################################################### *)
 (** ** Convertion between Q and other types *)

@@ -18,7 +18,6 @@ Require Import
   FinFun.MatrixTheoryFF
   .
 
-  
 (* ######################################################################### *)
 (** * Collection of all implementations for basic matrix theory *)
 Module BasicMatrixTheory (E : ElementType).
@@ -878,6 +877,7 @@ Module Demo_usage_NF.
 
   Example ex1 : forall r c (m1 m2 : mat r c), (m1 + m2) == (m2 + m1).
   Proof.
+    (* lma. apply commutative. (* this tactic is enough too. *) *)
     intros. apply madd_comm.
   Qed.
 

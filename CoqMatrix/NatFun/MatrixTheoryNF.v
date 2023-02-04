@@ -57,7 +57,7 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
   Proof.
     intros. apply meq_iff_mnth.
   Qed.
-
+  
   (* ==================================== *)
   (** ** Convert between list list and matrix *)
 
@@ -187,6 +187,7 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
                        (m1 m2 : mat r c), 
       mmap2 f m1 m2 == mmap2 f m2 m1.
   Proof.
+    (* lma. (* this tactic is enough too. *) *)
     intros. apply mmap2_comm. auto.
   Qed.
   
@@ -198,6 +199,14 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
     intros. apply mmap2_assoc. auto.
   Qed.
 
+  (** Auto unfold these definitions *)
+  Global Hint Unfold meq mmap mmap2 : mat.
+
+  (** linear matrix arithmetic tactic for equation: split goal to every element *)
+  Global Ltac lma :=
+    autounfold with mat;
+    Matrix.lma.
+
 End BasicMatrixTheoryNF.
 
 
@@ -208,7 +217,9 @@ Module DecidableMatrixTheoryNF (E : DecidableElementType) <: DecidableMatrixTheo
 
   Export E.
   Include BasicMatrixTheoryNF E.
-  
+
+  (** linear matrix arithmetic tactic for equation: split goal to every element *)
+
   (** meq is decidable *)
   Lemma meq_dec : forall {r c}, Decidable (meq (r:=r)(c:=c)).
   Proof.
@@ -430,6 +441,9 @@ Module RingMatrixTheoryNF (E : RingElementType) <: RingMatrixTheory E.
   Proof.
     intros. apply mmul_1_r.
   Qed.
+  
+  (** Auto unfold these definitions *)
+  Global Hint Unfold madd mopp msub mcmul mmul : mat.
 
 End RingMatrixTheoryNF.
 

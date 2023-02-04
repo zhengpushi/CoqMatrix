@@ -323,36 +323,43 @@ End mshift.
 
 (** Useful tactic for solving A = B for concrete A, B *)
 
-(* Ltac solve_end := *)
-(*   match goal with *)
-(*   | H : lt _ O |- _ => apply Nat.nlt_0_r in H; contradict H *)
-(*   end. *)
+Ltac solve_end :=
+  match goal with
+  | H : lt _ O |- _ => apply Nat.nlt_0_r in H; contradict H
+  end.
 
-(* Ltac by_cell :=  *)
-(*   intros; *)
-(*   (* try apply meq_imply_eq; *) *)
-(*   let i := fresh "i" in  *)
-(*   let j := fresh "j" in  *)
-(*   let Hi := fresh "Hi" in  *)
-(*   let Hj := fresh "Hj" in  *)
-(*   intros i j Hi Hj; try solve_end; *)
-(*   repeat (destruct i as [|i]; simpl;  *)
-(*           [|apply lt_S_n in Hi]; try solve_end); clear Hi; *)
-(*   repeat (destruct j as [|j]; simpl;  *)
-(*           [|apply lt_S_n in Hj]; try solve_end); clear Hj. *)
+(** Some modification of this tactic:
+1. about the warning below,
+----
+Warning: Notation lt_S_n is deprecated since 8.16.
+The Arith.Lt file is obsolete. Use the bidirectional version Nat.succ_lt_mono instead.
+[deprecated-syntactic-definition,deprecated]
+----
+  The lemma Nat.succ_lt_mono_left is a bidirectional version, but lt_S_n is only one 
+  direction, these two lemmas are not really same here.
+  For example, we need to use it only when "S ?a < S ?b" in the context.
+  So, we use Arith_prebase.lt_S_n to instead it
+2. about "clear Hi, clear Hj", we shouldn't call it anywhere, because these
+  two conditions are needed in some cases. 
+*)
 
-(* Ltac lma := by_cell; compute; ring. *)
-
-(** Tactic for simplify A == B *)
-Ltac meq_simp :=
+Global Ltac by_cell :=
   intros;
-  (let i := fresh "i" in
-   let j := fresh "j" in
-   let Hi := fresh "Hi" in
-   let Hj := fresh "Hj" in
-   intros i j Hi Hj).
+  (* try apply meq_imply_eq; *)
+  let i := fresh "i" in
+  let j := fresh "j" in
+  let Hi := fresh "Hi" in
+  let Hj := fresh "Hj" in
+  intros i j Hi Hj; try solve_end;
+  repeat (destruct i as [|i]; simpl;
+          [|apply Arith_prebase.lt_S_n in Hi]; try solve_end);
+  (* clear Hi; *)
+  repeat (destruct j as [|j]; simpl;
+          [|apply Arith_prebase.lt_S_n in Hj]; try solve_end)
+  (* clear Hj *)
+  .
 
-Ltac lma := meq_simp.
+Global Ltac lma := by_cell; try (try (compute; ring); try (compute; easy)).
 
 
 (* ==================================== *)
@@ -439,9 +446,7 @@ Section mtrans.
   
   (** Transpose twice keep unchanged. *)
   Lemma mtrans_trans : forall {r c} (m : @mat A r c), m \T \T == m.
-  Proof.
-    lma. unfold mtrans. easy.
-  Qed.
+  Proof. lma. Qed.
 
 End mtrans.
 
@@ -459,9 +464,7 @@ Section mat0_mat1.
 
   (** mat0\T = mat0 *)
   Lemma mtrans_mat0_eq_mat0 : forall {r c : nat}, (mat0 r c)\T == mat0 c r.
-  Proof.
-    lma. unfold mtrans,mat0. easy.
-  Qed.
+  Proof. lma. Qed.
 
   
   (** *** Identity matrix *)
@@ -622,27 +625,19 @@ Section malg.
 
   (** m *c a = a c* m *)
   Lemma mmulc_eq_mcmul : forall {r c} (a : A) (m : mat r c), m *c a == a c* m.
-  Proof.
-    lma. unfold mcmul,mmulc. ring.
-  Qed.
+  Proof. lma. Qed.
 
   (** 0 c* m = mat0 *)
   Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 A0 r c.
-  Proof.
-    lma. unfold mcmul,mat0. ring.
-  Qed.
+  Proof. lma. Qed.
 
   (** a c* mat0 = mat0 *)
   Lemma mcmul_0_r : forall {r c} a, a c* mat0 A0 r c == mat0 A0 r c.
-  Proof.
-    lma. unfold mcmul,mat0. ring.
-  Qed.
+  Proof. lma. Qed.
 
   (** 1 c* m = m *)
   Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
-  Proof.
-    lma. unfold mcmul. ring.
-  Qed.
+  Proof. lma. Qed.
 
   (** a c* mat1 equal to a diagonal matrix which main diagonal elements all are a *)
   Lemma mcmul_1_r : forall {n} a,
@@ -653,29 +648,21 @@ Section malg.
 
   (** a c* (b c* m) = (a * b) c* m *)
   Lemma mcmul_assoc : forall {r c} (a b : A) (m : mat r c), a c* (b c* m) == (a * b) c* m.
-  Proof.
-    lma. unfold mcmul. ring.
-  Qed.
+  Proof. lma. Qed.
 
   (** a c* (b c* m) = b c* (a c* m) *)
   Lemma mcmul_perm : forall {r c} (a b : A) (m : mat r c), a c* (b c* m) == b c* (a c* m).
-  Proof.
-    lma. unfold mcmul. ring.
-  Qed.
+  Proof. lma. Qed.
 
   (** a c* (m1 + m2) = (a c* m1) + (a c* m2) *)
   Lemma mcmul_add_distr_l : forall {r c} (a : A) (m1 m2 : mat r c), 
       a c* (m1 + m2) == (a c* m1) + (a c* m2).
-  Proof.
-    lma. unfold mcmul,madd. ring.
-  Qed.
+  Proof. lma. Qed.
   
   (** (a + b) c* m = (a c* m) + (b c* m) *)
   Lemma mcmul_add_distr_r : forall {r c} (a b : A) (m : mat r c), 
       (a + b)%A c* m == (a c* m) + (b c* m).
-  Proof.
-    lma. unfold mcmul,madd. ring.
-  Qed.
+  Proof. lma. Qed.
 
 
   (** *** Matrix multiplication *)
@@ -707,7 +694,7 @@ Section malg.
   (** (m1 + m2) * m3 = m1 * m3 + m2 * m3 *)
   Lemma mmul_add_distr_r : forall {r c s : nat} (m1 m2 : mat r c) (m3 : mat c s),
       (m1 + m2) * m3 == m1 * m3 + m2 * m3.
-  Proof. 
+  Proof.
     lma. unfold mmul,mnth,madd.
     rewrite <- seqsum_add. apply seqsum_eq; intros. ring.
     apply agroupComm.
@@ -760,6 +747,10 @@ Section malg.
   Qed.
   
 End malg.
+
+Global Hint Unfold
+  madd mopp msub mcmul mmulc mmul
+  : mat.
 
 
 (* ==================================== *)

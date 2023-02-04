@@ -120,6 +120,61 @@ Module Example4CoordinateSystem.
     
 End Example4CoordinateSystem.
 
+(** another version *)
+Module Example4CoordinateSystem_Version2.
+  
+  Import MatrixAll MatrixAllR.
+  Open Scope R. Open Scope mat_scope.
+  Variable ψ θ φ: R.
+  Let dl_Rx : list (list R) := [[1;0;0]; [0;cos φ;sin φ]; [0;-sin φ;cos φ]].
+  Let dl_Ry : list (list R) := [[cos θ;0;-sin θ]; [0;1;0]; [sin θ;0;cos θ]].
+  Let dl_Rz : list (list R) := [[cos ψ;sin ψ;0]; [-sin ψ;cos ψ;0]; [0;0;1]].
+  Let dl_Rbe : list (list R) := [
+      [cos θ * cos ψ; cos ψ * sin θ * sin φ - sin ψ * cos φ;
+       cos ψ * sin θ * cos φ + sin φ * sin ψ];
+      [cos θ * sin ψ; sin ψ * sin θ * sin φ + cos ψ * cos φ;
+       sin ψ * sin θ * cos φ - cos ψ * sin φ];
+      [-sin θ; sin φ * cos θ; cos φ * cos θ]].
+
+  Import MatrixR_DL.
+  Lemma Rbe_ok_DL :
+    let Rx : mat 3 3 := l2m dl_Rx in
+    let Ry : mat 3 3 := l2m dl_Ry in
+    let Rz : mat 3 3 := l2m dl_Rz in
+    let Rbe : mat 3 3 := l2m dl_Rbe in
+    Rbe == Rz\T * Ry\T * Rx\T.
+  Proof. lma. Qed.
+
+  Import MatrixR_DP.
+  Lemma Rbe_ok_DP :
+    let Rx : mat 3 3 := l2m dl_Rx in
+    let Ry : mat 3 3 := l2m dl_Ry in
+    let Rz : mat 3 3 := l2m dl_Rz in
+    let Rbe : mat 3 3 := l2m dl_Rbe in
+    Rbe == Rz\T * Ry\T * Rx\T.
+  Proof. lma. Qed.
+
+  Import MatrixR_DR.
+  Lemma Rbe_ok_DR :
+    let Rx : mat 3 3 := l2m dl_Rx in
+    let Ry : mat 3 3 := l2m dl_Ry in
+    let Rz : mat 3 3 := l2m dl_Rz in
+    let Rbe : mat 3 3 := l2m dl_Rbe in
+    Rbe == Rz\T * Ry\T * Rx\T.
+  Proof. lma. Qed.
+
+  Import MatrixR_NF.
+
+  Lemma Rbe_ok_NF :
+    let Rx : mat 3 3 := @l2m 3 3 dl_Rx in
+    let Ry : mat 3 3 := @l2m 3 3 dl_Ry in
+    let Rz : mat 3 3 := @l2m 3 3 dl_Rz in
+    let Rbe : mat 3 3 := @l2m 3 3 dl_Rbe in
+    Rbe == Rz\T * Ry\T * Rx\T.
+  Proof. lma. Qed.
+    
+End Example4CoordinateSystem_Version2.
+
 
 Module Example4VectorTheory.
   (** import library *)
@@ -142,3 +197,51 @@ Module Example4VectorTheory.
   Qed.
   
 End Example4VectorTheory.
+
+
+(** This example shows that, typeclass could simplify the proof *)
+Module Example4SimplifyProofByTypeclass.
+
+  Import HierarchySetoid.
+  Import SetoidListExt.
+  
+  (** New proof. *)
+  Section NEW_proof.
+    Context `{M : Monoid}.
+    Infix "==" := (eqlistA Aeq) : list_scope.
+    
+    (** 0 + l = l *)
+    Let ladd_zero_l : forall l n,
+        length l = n -> ladd (Aadd:=Aadd) (lzero A0 n) l == l.
+    Proof.
+      induction l; intros.
+      - simpl in H. subst. easy.
+      - simpl in *. destruct n. easy. simpl. rewrite IHl; auto.
+        f_equiv. monoid_simpl.
+    Qed.
+
+  End NEW_proof.
+
+  (** Old proof. *)
+  Section OLD_proof.
+
+    (* first, these declarations are too long *)
+    Variable (A:Type) (A0:A) (Aeq:relation A) (Aadd:A -> A -> A).
+    Variable (Equiv_Aeq:Equivalence Aeq).
+    Variable (add_0_l:forall a:A, Aeq (Aadd A0 a) a).
+    Infix "==" := (eqlistA Aeq) : list_scope.
+    
+    (** 0 + l = l *)
+    Let ladd_zero_l : forall l n,
+        length l = n -> ladd (Aadd:=Aadd) (lzero A0 n) l == l.
+    Proof.
+      induction l; intros.
+      - simpl in H. subst. easy.
+      - simpl in *. destruct n. easy. simpl. rewrite IHl; auto.
+        f_equiv. apply add_0_l. (* second, we cannot use support for monoid *)
+    Qed.
+
+  End OLD_proof.
+
+
+End Example4SimplifyProofByTypeclass.

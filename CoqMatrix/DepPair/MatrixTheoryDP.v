@@ -57,6 +57,11 @@ Module BasicMatrixTheoryDP (E : ElementType) <: BasicMatrixTheory E.
     intros. apply meq_iff_mnth.
   Qed.
 
+  (** linear matrix arithmetic tactic for equation: split goal to every element *)
+  Ltac lma :=
+    cbv; repeat constructor;
+    try ring; try easy.
+  
   (* ==================================== *)
   (** ** Convert between list list and matrix *)
 
