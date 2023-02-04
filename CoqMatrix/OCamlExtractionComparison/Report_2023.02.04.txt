@@ -1,0 +1,81 @@
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=DP
+Program for test matrix.
+1: model:DP, size:50, time:  0.01 seconds
+2: model:DP, size:60, time:  0.01 seconds
+3: model:DP, size:72, time:  0.01 seconds
+4: model:DP, size:86, time:  0.02 seconds
+5: model:DP, size:103, time:  0.03 seconds
+6: model:DP, size:123, time:  0.05 seconds
+7: model:DP, size:147, time:  0.09 seconds
+8: model:DP, size:176, time:  0.16 seconds
+9: model:DP, size:211, time:  0.27 seconds
+10: model:DP, size:253, time:  0.47 seconds
+11: model:DP, size:303, time:  0.84 seconds
+12: model:DP, size:363, time:  1.54 seconds
+13: model:DP, size:435, time:  2.92 seconds
+14: model:DP, size:522, time:  5.44 seconds
+15: model:DP, size:626, time:  9.91 seconds
+16: model:DP, size:751, time: 16.82 seconds
+17: model:DP, size:901, time: 32.41 seconds
+18: model:DP, size:1081, time:118.78 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=DR
+Program for test matrix.
+1: model:DR, size:50, time:  0.01 seconds
+2: model:DR, size:60, time:  0.00 seconds
+3: model:DR, size:72, time:  0.01 seconds
+4: model:DR, size:86, time:  0.01 seconds
+5: model:DR, size:103, time:  0.02 seconds
+6: model:DR, size:123, time:  0.04 seconds
+7: model:DR, size:147, time:  0.06 seconds
+8: model:DR, size:176, time:  0.10 seconds
+9: model:DR, size:211, time:  0.17 seconds
+10: model:DR, size:253, time:  0.30 seconds
+11: model:DR, size:303, time:  0.52 seconds
+12: model:DR, size:363, time:  0.96 seconds
+13: model:DR, size:435, time:  1.77 seconds
+14: model:DR, size:522, time:  3.35 seconds
+15: model:DR, size:626, time:  6.25 seconds
+16: model:DR, size:751, time: 11.02 seconds
+17: model:DR, size:901, time: 19.56 seconds
+18: model:DR, size:1081, time: 33.99 seconds
+19: model:DR, size:1297, time:101.93 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=DL
+Program for test matrix.
+1: model:DL, size:50, time:  0.07 seconds
+2: model:DL, size:60, time:  0.12 seconds
+3: model:DL, size:72, time:  0.26 seconds
+4: model:DL, size:86, time:  0.52 seconds
+5: model:DL, size:103, time:  1.06 seconds
+6: model:DL, size:123, time:  2.62 seconds
+7: model:DL, size:147, time:  5.63 seconds
+8: model:DL, size:176, time: 12.77 seconds
+9: model:DL, size:211, time: 28.51 seconds
+10: model:DL, size:253, time: 64.28 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=NF
+Program for test matrix.
+1: model:NF, size:50, time:  0.07 seconds
+2: model:NF, size:60, time:  0.13 seconds
+3: model:NF, size:72, time:  0.29 seconds
+4: model:NF, size:86, time:  0.59 seconds
+5: model:NF, size:103, time:  1.25 seconds
+6: model:NF, size:123, time:  3.59 seconds
+7: model:NF, size:147, time:  6.47 seconds
+8: model:NF, size:176, time: 10.79 seconds
+9: model:NF, size:211, time: 29.62 seconds
+10: model:NF, size:253, time: 57.65 seconds
+11: model:NF, size:303, time:116.23 seconds
+
+[OCamlExtractionComparison]$ ./matrix -mm=FF -size=30
+Execution of f () takes  12.54 seconds
+[OCamlExtractionComparison]$ ./matrix -mm=FF -size=35
+Execution of f () takes  13.70 seconds
+[OCamlExtractionComparison]$ ./matrix -mm=FF -size=40
+Execution of f () takes  38.38 seconds
+[OCamlExtractionComparison]$ ./matrix -mm=FF -size=45
+Execution of f () takes  78.69 seconds
+[OCamlExtractionComparison]$ ./matrix -mm=FF -size=50
+Execution of f () takes  167.92 seconds

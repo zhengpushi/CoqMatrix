@@ -18,13 +18,17 @@ open Printf
 open Unix
 
 (* calculate the computation time of executing a function. *)
-let calc_exe_time (f : 'a -> unit) (n:'a) =
+let calc_exe_time_core (f : 'a -> unit) (n:'a) : float =
   let start_time = Sys.time () in
   let _ = f n in
   let end_time = Sys.time () in
   let elapsed = end_time -. start_time in
-  printf "Execution of f () takes %6.2f seconds\n" elapsed
+  elapsed
 
+(* calculate the computation time of executing a function, and print time elapsed. *)
+let calc_exe_time (f : 'a -> unit) (n:'a) =
+  let elapsed = calc_exe_time_core f n in
+  printf "Execution of f () takes %6.2f seconds\n" elapsed
   
 (** Get the current time in seconds with an integer type *)
 let current_time_get () = Float.to_int (Unix.time ())
@@ -173,6 +177,7 @@ let cmdopt_matrix_model : matmodel ref = ref MM_DL
 let cmdopt_matrix_size : int ref = ref 10
 let cmdopt_show_matrix : bool ref = ref true
 let cmdopt_benchmark : bool ref = ref false
+let cmdopt_benchmarkall : bool ref = ref false
 
 (* global variable setting functions. *)
 let set_matrix_model (s:string) =
@@ -197,8 +202,23 @@ let show_matrix_size n =
               r c c s r s in
   print_endline msg;;
 
+let show_benchmark_result_once id mm size time =
+  let str_id = sprintf "%d: " id in
+  let str_mm = match mm with
+    | MM_DL -> "DL" | MM_DP -> "DP" | MM_DR -> "DR"
+    | MM_NF -> "NF" | MM_FF -> "FF" in
+  let str_size = sprintf  "%d" size in
+  let str_time = sprintf "%6.2f seconds" time in
+  let str =
+    str_id
+    ^ "model:" ^ str_mm
+    ^ ", size:" ^ str_size
+    ^ ", time:" ^ str_time in
+  print_endline str;;
+
 let set_show_matrix (b:bool)  = cmdopt_show_matrix := b
 let set_benchmark (b:bool)  = cmdopt_benchmark := b
+let set_benchmarkall (b:bool)  = cmdopt_benchmarkall := b
 
 let read_options () : string =
   let speclist =
@@ -206,7 +226,8 @@ let read_options () : string =
       ("-mm", Arg.String set_matrix_model, "Set matrix model (DL/DP/DR/NF/FF)");
       ("-size", Arg.Int set_matrix_size, "Set matrix dimension");
       ("-print", Arg.Bool set_show_matrix, "Show matrix content");
-      ("-benchmark", Arg.Bool set_benchmark, "Benchmark mode, automatic test");
+      ("-benchmark", Arg.Bool set_benchmark, "Benchmark mode, test one model");
+      ("-benchmarkall", Arg.Bool set_benchmarkall, "Benchmark mode, test all models");
     ]
   in
   let usage_msg = "Usage: ./test [option] where options are:" in
@@ -217,8 +238,20 @@ let show_hello_msg () =
   let hello_msg = "Program for test matrix." in
   print_endline hello_msg
 
+(** Benchmark, automatic test one model, also output running time *)
+let benchmark_run_one mm =
+  (* update matrix size *)
+  let next_size size =
+    Float.to_int ((Float.of_int size) *. 1.2) in
+  (* infinite loop *)
+  let rec run id size : unit =
+    let elapsed = calc_exe_time_core (mmul_ex ~mm size size size) false in (* matrix multiplication *)
+    show_benchmark_result_once id mm size elapsed;
+    run (id+1) (next_size size) in (* next loop *)
+  run 1 50;;
+
 (** Benchmark, automatic test first four models, also output running time *)
-let benchmark_run () =
+let benchmark_run_all () =
   (* list of models *)
   let mm_lst = [MM_DL; MM_DP; MM_DR; MM_NF] in
   (* update model index, and check if finished the model loop *)
@@ -228,26 +261,27 @@ let benchmark_run () =
   let next_size size =
     Float.to_int ((Float.of_int size) *. 1.2) in
   (* infinite loop *)
-  let rec run mm_idx size : unit =
+  let rec run id mm_idx size : unit =
     let mm = List.nth mm_lst mm_idx in (* get matrix model *)
-    show_matrix_model mm;  (* print model *)
-    show_matrix_size size; (* print size *)
-    calc_exe_time (mmul_ex ~mm size size size) false; (* matrix multiplication *)
-    print_endline "---------------------------------";
+    let elapsed = calc_exe_time_core (mmul_ex ~mm size size size) false in (* matrix multiplication *)
+    show_benchmark_result_once id mm size elapsed;
     let (mm_idx,mm_loop_ok) = next_mmidx mm_idx in (* update model index, loop flag *)
     let size = if mm_loop_ok then next_size size else size in (* update matirx size *)
-    run mm_idx size in (* next loop *)
-  run 0 50;;
+    run (id+1) mm_idx size in (* next loop *)
+  run 1 0 50;;
 
 let main () =
   let _ = read_options () in
   let mm = !cmdopt_matrix_model in
   let r = !cmdopt_matrix_size in
   let is_print = !cmdopt_show_matrix in
-  let is_benchmak = !cmdopt_benchmark in
+  let is_benchmark = !cmdopt_benchmark in
+  let is_benchmarkall = !cmdopt_benchmarkall in
   show_hello_msg ();
-  if is_benchmak then
-    benchmark_run ()
+  if is_benchmark then
+    benchmark_run_one mm
+  else if is_benchmarkall then
+    benchmark_run_all ()
   else (
     show_matrix_model mm;
     show_matrix_size r;
