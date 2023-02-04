@@ -126,10 +126,10 @@ Module Example4CoordinateSystem_Version2.
   Import MatrixAll MatrixAllR.
   Open Scope R. Open Scope mat_scope.
   Variable ψ θ φ: R.
-  Let dl_Rx : list (list R) := [[1;0;0]; [0;cos φ;sin φ]; [0;-sin φ;cos φ]].
-  Let dl_Ry : list (list R) := [[cos θ;0;-sin θ]; [0;1;0]; [sin θ;0;cos θ]].
-  Let dl_Rz : list (list R) := [[cos ψ;sin ψ;0]; [-sin ψ;cos ψ;0]; [0;0;1]].
-  Let dl_Rbe : list (list R) := [
+  Let rx : list (list R) := [[1;0;0]; [0;cos φ;sin φ]; [0;-sin φ;cos φ]].
+  Let ry : list (list R) := [[cos θ;0;-sin θ]; [0;1;0]; [sin θ;0;cos θ]].
+  Let rz : list (list R) := [[cos ψ;sin ψ;0]; [-sin ψ;cos ψ;0]; [0;0;1]].
+  Let rbe : list (list R) := [
       [cos θ * cos ψ; cos ψ * sin θ * sin φ - sin ψ * cos φ;
        cos ψ * sin θ * cos φ + sin φ * sin ψ];
       [cos θ * sin ψ; sin ψ * sin θ * sin φ + cos ψ * cos φ;
@@ -138,38 +138,37 @@ Module Example4CoordinateSystem_Version2.
 
   Import MatrixR_DL.
   Lemma Rbe_ok_DL :
-    let Rx : mat 3 3 := l2m dl_Rx in
-    let Ry : mat 3 3 := l2m dl_Ry in
-    let Rz : mat 3 3 := l2m dl_Rz in
-    let Rbe : mat 3 3 := l2m dl_Rbe in
+    let Rx : mat 3 3 := l2m rx in
+    let Ry : mat 3 3 := l2m ry in
+    let Rz : mat 3 3 := l2m rz in
+    let Rbe : mat 3 3 := l2m rbe in
     Rbe == Rz\T * Ry\T * Rx\T.
   Proof. lma. Qed.
 
   Import MatrixR_DP.
   Lemma Rbe_ok_DP :
-    let Rx : mat 3 3 := l2m dl_Rx in
-    let Ry : mat 3 3 := l2m dl_Ry in
-    let Rz : mat 3 3 := l2m dl_Rz in
-    let Rbe : mat 3 3 := l2m dl_Rbe in
+    let Rx : mat 3 3 := l2m rx in
+    let Ry : mat 3 3 := l2m ry in
+    let Rz : mat 3 3 := l2m rz in
+    let Rbe : mat 3 3 := l2m rbe in
     Rbe == Rz\T * Ry\T * Rx\T.
   Proof. lma. Qed.
 
   Import MatrixR_DR.
   Lemma Rbe_ok_DR :
-    let Rx : mat 3 3 := l2m dl_Rx in
-    let Ry : mat 3 3 := l2m dl_Ry in
-    let Rz : mat 3 3 := l2m dl_Rz in
-    let Rbe : mat 3 3 := l2m dl_Rbe in
+    let Rx : mat 3 3 := l2m rx in
+    let Ry : mat 3 3 := l2m ry in
+    let Rz : mat 3 3 := l2m rz in
+    let Rbe : mat 3 3 := l2m rbe in
     Rbe == Rz\T * Ry\T * Rx\T.
   Proof. lma. Qed.
 
   Import MatrixR_NF.
-
   Lemma Rbe_ok_NF :
-    let Rx : mat 3 3 := @l2m 3 3 dl_Rx in
-    let Ry : mat 3 3 := @l2m 3 3 dl_Ry in
-    let Rz : mat 3 3 := @l2m 3 3 dl_Rz in
-    let Rbe : mat 3 3 := @l2m 3 3 dl_Rbe in
+    let Rx : mat 3 3 := l2m rx in
+    let Ry : mat 3 3 := l2m ry in
+    let Rz : mat 3 3 := l2m rz in
+    let Rbe : mat 3 3 := l2m rbe in
     Rbe == Rz\T * Ry\T * Rx\T.
   Proof. lma. Qed.
     
