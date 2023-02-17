@@ -30,6 +30,7 @@ CoqMatrix/CoqExt/SetoidListExt.v
 CoqMatrix/CoqExt/SetoidListListExt.v
 #CoqMatrix/CoqExt/SetoidListExt_test.v
 CoqMatrix/CoqExt/HierarchySetoid.v
+CoqMatrix/CoqExt/Sequence.v
 
 # ===== CoqMatrix =====
 CoqMatrix/ElementType.v
@@ -45,10 +46,12 @@ CoqMatrix/DepPair/Vector.v
 CoqMatrix/DepPair/Matrix.v
 CoqMatrix/DepPair/MatrixTheoryDP.v
 CoqMatrix/DepPair/VectorTheoryDP.v
-CoqMatrix/NatFun/Sequence.v
 CoqMatrix/NatFun/Matrix.v
 CoqMatrix/NatFun/MatrixTheoryNF.v
 CoqMatrix/NatFun/VectorTheoryNF.v
+CoqMatrix/SafeNatFun/Matrix.v
+# CoqMatrix/SafeNatFun/MatrixTheorySF.v
+# CoqMatrix/SafeNatFun/VectorTheorySF.v
 CoqMatrix/FinFun/Matrix.v
 CoqMatrix/FinFun/MatrixTheoryFF.v
 CoqMatrix/MatrixAll.v
