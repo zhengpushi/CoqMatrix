@@ -3,24 +3,27 @@
   This file is part of CoqMatrix. It is distributed under the MIT
   "expat license". You should have recieved a LICENSE file with it.
 
-  purpose   : Vector Theory implemented with NatFun
+  purpose   : Vector Theory implemented with SafeNatFun
   author    : ZhengPu Shi
   date      : 2021.12
+  
+  remark    :
+  1. This is safe version of NatFun, which corrected the shape problem
 *)
 
 
 Require Export VectorTheory.
-Require Import NatFun.MatrixTheoryNF.
+Require Import SafeNatFun.MatrixTheorySF.
 
 
 (* ######################################################################### *)
-(** * Basic vector theory implemented with NatFun *)
+(** * Basic vector theory implemented with SafeNatFun *)
 
-Module BasicVectorTheoryNF (E : ElementType).
+Module BasicVectorTheorySF (E : ElementType).
 
   (* ==================================== *)
   (** ** Matrix theory *)
-  Module Import BasicMatrixTheoryNF := BasicMatrixTheoryNF E.
+  Module Import BasicMatrixTheorySF := BasicMatrixTheorySF E.
 
   (* ==================================== *)
   (** ** Vector element type *)
@@ -111,23 +114,23 @@ Module BasicVectorTheoryNF (E : ElementType).
   (** mapping of two matrices *)
   Definition vmap2 {n} (v1 v2 : vec n) f : vec n := mmap2 f v1 v2.
   
-End BasicVectorTheoryNF.
+End BasicVectorTheorySF.
 
 
 (* ######################################################################### *)
-(** * Ring vector theory implemented with NatFun *)
+(** * Ring vector theory implemented with SafeNatFun *)
 
 (** zero vector, vector addition, opposition, substraction, scalar multiplication,
     dot product *)
-Module RingVectorTheoryNF (E : RingElementType) <: BasicVectorTheory E.
+Module RingVectorTheorySF (E : RingElementType) <: BasicVectorTheory E.
 
   (* ==================================== *)
   (** ** Matrix theory *)
   
-  Module Import RingMatrixTheoryNF := RingMatrixTheoryNF E.
+  Module Import RingMatrixTheorySF := RingMatrixTheorySF E.
 
   Export E.
-  Include (BasicVectorTheoryNF E).
+  Include (BasicVectorTheorySF E).
 
   (** ** Zero vector *)
   Definition vec0 {n} : vec n := mat0 n 1.
@@ -259,7 +262,7 @@ Module RingVectorTheoryNF (E : RingElementType) <: BasicVectorTheory E.
   Definition vdot {n : nat} (v1 v2 : vec n) :=
     scalar_of_mat (@mmul 1 n 1 (v1\T) v2)%mat.
   
-End RingVectorTheoryNF.
+End RingVectorTheorySF.
 
 
 
@@ -267,7 +270,7 @@ End RingVectorTheoryNF.
 (** * Test  *)
 Module Test.
 
-  Module Import VectorR := RingVectorTheoryNF RingElementTypeR.
+  Module Import VectorR := RingVectorTheorySF RingElementTypeR.
   Import Reals.
   Open Scope R.
   

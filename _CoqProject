@@ -28,7 +28,6 @@ CoqMatrix/CoqExt/StrExt.v
 CoqMatrix/CoqExt/ExtrOcamlR.v
 CoqMatrix/CoqExt/SetoidListExt.v
 CoqMatrix/CoqExt/SetoidListListExt.v
-#CoqMatrix/CoqExt/SetoidListExt_test.v
 CoqMatrix/CoqExt/HierarchySetoid.v
 CoqMatrix/CoqExt/Sequence.v
 
@@ -50,8 +49,8 @@ CoqMatrix/NatFun/Matrix.v
 CoqMatrix/NatFun/MatrixTheoryNF.v
 CoqMatrix/NatFun/VectorTheoryNF.v
 CoqMatrix/SafeNatFun/Matrix.v
-# CoqMatrix/SafeNatFun/MatrixTheorySF.v
-# CoqMatrix/SafeNatFun/VectorTheorySF.v
+CoqMatrix/SafeNatFun/MatrixTheorySF.v
+CoqMatrix/SafeNatFun/VectorTheorySF.v
 CoqMatrix/FinFun/Matrix.v
 CoqMatrix/FinFun/MatrixTheoryFF.v
 CoqMatrix/MatrixAll.v
@@ -60,15 +59,8 @@ CoqMatrix/MatrixHomo/IsomorphismThy.v
 CoqMatrix/MatrixHomo/MatrixHomomorphism.v
 CoqMatrix/MatrixHomo/MatrixIsomorphism.v
 CoqMatrix/VectorAll.v
+
 #CoqMatrix/NatFun/Inversion.v
 #CoqMatrix/DepRec/VectorR.v
 #CoqMatrix/NatFun/VectorR.v
 #CoqMatrix/OCamlExtractionComparison/matrix.v
-
-# # ===== temporary code =====
-#CoqMatrix/Matrix/Sequence.v
-#CoqMatrix/Matrix/Matrix.v
-#CoqMatrix/Matrix/Inversion.v
-#CoqMatrix/Matrix/Vector.v
-#CoqMatrix/Matrix/RMatrix.v
-#CoqMatrix/Matrix/RVector.v

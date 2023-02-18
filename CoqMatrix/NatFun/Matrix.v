@@ -10,7 +10,7 @@
 
 
 Require Import TupleExt HierarchySetoid SetoidListListExt.
-Require Import NatFun.Sequence.
+Require Import Sequence.
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
 

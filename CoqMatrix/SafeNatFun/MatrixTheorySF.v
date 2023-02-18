@@ -3,19 +3,22 @@
   This file is part of CoqMatrix. It is distributed under the MIT
   "expat license". You should have recieved a LICENSE file with it.
 
-  purpose   : Matrix implemented with Function.
+  purpose   : Matrix implemented with Function (Safe version) (Fixed Shape)
   author    : ZhengPu Shi
   date      : 2021.12
+  
+  remark    :
+  1. This is safe version of NatFun, which corrected the shape problem
  *)
 
 
 Require Export MatrixTheory.
-Require Import Sequence NatFun.Matrix.
+Require Import Sequence SafeNatFun.Matrix.
 
 (* ######################################################################### *)
-(** * Basic matrix theory implemented with NatFun *)
+(** * Basic matrix theory implemented with SafeNatFun *)
 
-Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
+Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
 
   (* ==================================== *)
   (** ** Matrix element type *)
@@ -31,10 +34,10 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
   (* ==================================== *)
   (** ** Matrix type and basic operations *)
   
-  (** We define a _matrix_ as a simple function from two nats
-      (corresponding to a row and a column) to a value. 
-      Note that, r and c are dummy parameters, it is designed to
-      represent shape of matrix. *)
+  (** We define a _matrix_ as record which contains only one field has type of 
+      nat -> nat -> A.
+      Meanwhile, thare are two parameters respresenting rows and columns of 
+      the matrix as parts of type of mat. *)
   Definition mat (r c : nat) := @mat A r c.
 
   (* (** matrix equality *) *)
@@ -49,7 +52,7 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
   Global Existing Instance meq_equiv.
 
   (** Get n-th element of a matrix *)  
-  Definition mnth {r c} (m : mat r c) (ri ci : nat) := @mnth A r c m ri ci.
+  Definition mnth {r c} (m : mat r c) (ri ci : nat) := mnth m ri ci.
 
   (** meq and mnth should satisfy this constraint *)
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
@@ -207,16 +210,16 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
     autounfold with mat;
     Matrix.lma.
 
-End BasicMatrixTheoryNF.
+End BasicMatrixTheorySF.
 
 
 (* ######################################################################### *)
-(** * Decidable matrix theory implemented with NatFun *)
+(** * Decidable matrix theory implemented with SafeNatFun *)
 
-Module DecidableMatrixTheoryNF (E : DecidableElementType) <: DecidableMatrixTheory E.
+Module DecidableMatrixTheorySF (E : DecidableElementType) <: DecidableMatrixTheory E.
 
   Export E.
-  Include BasicMatrixTheoryNF E.
+  Include BasicMatrixTheorySF E.
 
   (** linear matrix arithmetic tactic for equation: split goal to every element *)
 
@@ -226,16 +229,16 @@ Module DecidableMatrixTheoryNF (E : DecidableElementType) <: DecidableMatrixTheo
     intros. apply @meq_dec. apply Dec_Aeq.
   Qed.
 
-End DecidableMatrixTheoryNF.
+End DecidableMatrixTheorySF.
 
 
 (* ######################################################################### *)
-(** * Ring matrix theory implemented with NatFun *)
+(** * Ring matrix theory implemented with SafeNatFun *)
 
-Module RingMatrixTheoryNF (E : RingElementType) <: RingMatrixTheory E.
+Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
 
   Export E.
-  Include BasicMatrixTheoryNF E.
+  Include BasicMatrixTheorySF E.
 
   Add Ring ring_thy_inst : Ring_thy.
 
@@ -247,12 +250,7 @@ Module RingMatrixTheoryNF (E : RingElementType) <: RingMatrixTheory E.
 
   (** *** Addition of matrix *)
 
-  (** Tips, we must write the full signature, especially the explicit parameter {r c} 
-      and the return type {mat r c}, to maintain a type inference relation.
-      Because only {m1 m2 : mat r c} havn't any information of {r} and {c}.
-      Otherwise, the "+" notation will useless.
-   *)
-  Definition madd {r c} (m1 m2 : mat r c) : mat r c := @madd A Aadd r c m1 m2.
+  Definition madd {r c} (m1 m2 : mat r c) : mat r c := madd (Aadd:=Aadd) m1 m2.
   Infix "+" := madd : mat_scope.
   
   (** m1 + m2 = m2 + m1 *)
@@ -445,18 +443,18 @@ Module RingMatrixTheoryNF (E : RingElementType) <: RingMatrixTheory E.
   (** Auto unfold these definitions *)
   Global Hint Unfold madd mopp msub mcmul mmul : mat.
 
-End RingMatrixTheoryNF.
+End RingMatrixTheorySF.
 
 
 (* ######################################################################### *)
-(** * Decidable Field matrix theory implemented with NatFun *)
+(** * Decidable Field matrix theory implemented with SafeNatFun *)
 
-Module DecidableFieldMatrixTheoryNF (E : DecidableFieldElementType)
+Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
 <: DecidableFieldMatrixTheory E.
 
   Export E.
-  Include RingMatrixTheoryNF E.
-  (* Module Export DecMT := DecidableMatrixTheoryNF E. *)
+  Include RingMatrixTheorySF E.
+  (* Module Export DecMT := DecidableMatrixTheorySF E. *)
 
   (** meq is decidable *)
   Lemma meq_dec : forall (r c : nat), Decidable (meq (r:=r) (c:=c)).
@@ -466,13 +464,13 @@ Module DecidableFieldMatrixTheoryNF (E : DecidableFieldElementType)
     
   (** ** matrix theory *)
   
-End DecidableFieldMatrixTheoryNF.
+End DecidableFieldMatrixTheorySF.
 
 
 (** Test *)
 Module Test.
   Export QArith.
-  Module Export MatrixQ := RingMatrixTheoryNF RingElementTypeQ.
+  Module Export MatrixQ := RingMatrixTheorySF RingElementTypeQ.
   Open Scope Q.
   Open Scope mat_scope.
 
