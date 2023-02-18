@@ -40,6 +40,9 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
       the matrix as parts of type of mat. *)
   Definition mat (r c : nat) := @mat A r c.
 
+  (** Make a matrix *)
+  Definition mk_mat {r c : nat} (f : nat -> nat -> A) : mat r c := mk_mat r c f.
+
   (* (** matrix equality *) *)
   Definition meq {r c : nat} (m1 m2 : mat r c) : Prop := @meq A Aeq r c m1 m2.
   Global Infix "==" := meq : mat_scope.

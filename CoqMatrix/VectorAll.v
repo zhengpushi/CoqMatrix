@@ -16,6 +16,7 @@ Require Import
   DepList.VectorTheoryDL
   DepRec.VectorTheoryDR
   NatFun.VectorTheoryNF
+  SafeNatFun.VectorTheorySF
 (* FinFun.VectorTheoryFF *)
 .
 
@@ -30,10 +31,11 @@ Module BasicVectorTheory (E : ElementType).
   
   (* ======================================================================= *)
   (** ** Short name for concrete implementations *)
-  Module DP <: BasicVectorTheory E := BasicVectorTheoryDP E.
   Module DL <: BasicVectorTheory E := BasicVectorTheoryDL E.
+  Module DP <: BasicVectorTheory E := BasicVectorTheoryDP E.
   Module DR <: BasicVectorTheory E := BasicVectorTheoryDR E.
   Module NF <: BasicVectorTheory E := BasicVectorTheoryNF E.
+  Module SF <: BasicVectorTheory E := BasicVectorTheorySF E.
   (* Module FF <: BasicVectorTheory E := BasicVectorTheoryFF E. *)
 
 
@@ -168,18 +170,21 @@ Module RingVectorTheory (E : RingElementType).
   
   (* ======================================================================= *)
   (** ** Short name for concrete implementations *)
-  Module DP
-  (* <: RingVectorTheory E *)
-    := RingVectorTheoryDP E.
   Module DL
   (* <: RingVectorTheory E *)
     := RingVectorTheoryDL E.
+  Module DP
+  (* <: RingVectorTheory E *)
+    := RingVectorTheoryDP E.
   Module DR
   (* <: RingVectorTheory E *)
     := RingVectorTheoryDR E.
   Module NF
   (* <: RingVectorTheory E *)
     := RingVectorTheoryNF E.
+  Module SF
+  (* <: RingVectorTheory E *)
+    := RingVectorTheorySF E.
   (* Module FF <: RingVectorTheory E := RingVectorTheoryFF E. *)
 
   (** Basic vector theory, contain conversion and properties *)
@@ -201,40 +206,45 @@ End RingVectorTheory.
 
 (** Vector based on nat *)
 Module VectorAllNat := BasicVectorTheory ElementTypeNat.
-Module VectorNat_DR := VectorAllNat.DR.
-Module VectorNat_DP := VectorAllNat.DP.
 Module VectorNat_DL := VectorAllNat.DL.
+Module VectorNat_DP := VectorAllNat.DP.
+Module VectorNat_DR := VectorAllNat.DR.
 Module VectorNat_NF := VectorAllNat.NF.
+Module VectorNat_SF := VectorAllNat.SF.
 (* Compute @l2v 3 [1;2;3]. *)
 
 (** Vector based on Z *)
 Module VectorAllZ := RingVectorTheory RingElementTypeZ.
-Module VectorZ_DR := VectorAllZ.DR.
-Module VectorZ_DP := VectorAllZ.DP.
 Module VectorZ_DL := VectorAllZ.DL.
+Module VectorZ_DP := VectorAllZ.DP.
+Module VectorZ_DR := VectorAllZ.DR.
 Module VectorZ_NF := VectorAllZ.NF.
+Module VectorZ_SF := VectorAllZ.SF.
 (* Compute @l2v 3 [1;2;3]. *)
 
 (** Vector based on Q *)
 Module VectorAllQ := RingVectorTheory RingElementTypeQ.
-Module VectorQ_DR := VectorAllQ.DR.
-Module VectorQ_DP := VectorAllQ.DP.
 Module VectorQ_DL := VectorAllQ.DL.
+Module VectorQ_DP := VectorAllQ.DP.
+Module VectorQ_DR := VectorAllQ.DR.
 Module VectorQ_NF := VectorAllQ.NF.
+Module VectorQ_SF := VectorAllQ.SF.
 
 (** Vector based on Qc *)
 Module VectorAllQc := RingVectorTheory RingElementTypeQc.
-Module VectorQc_DR := VectorAllQc.DR.
-Module VectorQc_DP := VectorAllQc.DP.
 Module VectorQc_DL := VectorAllQc.DL.
+Module VectorQc_DP := VectorAllQc.DP.
+Module VectorQc_DR := VectorAllQc.DR.
 Module VectorQc_NF := VectorAllQc.NF.
+Module VectorQc_SF := VectorAllQc.SF.
 
 (** Vector based on R *)
 Module VectorAllR := RingVectorTheory RingElementTypeR.
-Module VectorR_DR := VectorAllR.DR.
-Module VectorR_DP := VectorAllR.DP.
 Module VectorR_DL := VectorAllR.DL.
+Module VectorR_DP := VectorAllR.DP.
+Module VectorR_DR := VectorAllR.DR.
 Module VectorR_NF := VectorAllR.NF.
+Module VectorR_SF := VectorAllR.SF.
 
 
 (* ######################################################################### *)
