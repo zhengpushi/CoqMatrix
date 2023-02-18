@@ -8,45 +8,79 @@
   date      : 2022.08
   
   remark    :
-  1. 行列式(determinant)的三种方法，参考：https://zhuanlan.zhihu.com/p/435900775
-  a. 按行/列展开，用代数余子式的定义来计算。
-    每展开一次，相当于降了一阶。
-    注意：按行/列展开，是拉普拉斯展开定理的特例。
-  b. 利用初等变换。
-  c. 逆序数法求行列式，也就是按定义。
-  
-  2. 利用行列式计算逆矩阵的算法，从Coq到OCaml，测试结果
-  n=8, 1.1s;  n=9, 12s;  n=10, 120s
-  主要问题：
-  a. 看到CPU占用过高，但内存并不高。
-  b. 可能是 nat 结构不合理，最好是 int 类型的下标。可以考虑OCaml直接写一个版本。
-  c. 可能是 det 函数不断的递归导致。
-  所以，用OCaml仿照同样的思路，可以写多个版本来测试，以便排除是否为算法问题导致。
-  a. 版本1，仍然使用 NatFun 风格，但是是 int 下标
-  b. 版本2，使用 array 结构
-  c. 版本3，使用 matrix (bigarray) 结构
-  
-  版本1的测试结果
-  n=8, 0.25s;  n=9, 2.4s;  n=10, 32s
-  这一版还是很慢，可能是函数式风格的原因？？
-  
-  版本2的测试结果
-  n=8, 1s;  n=9,7s; n=10,未测试
-  这一版反而更慢了，array的开销为什么这么大，也许是for循环太多导致
-  
+  1. There are three methods to compute the determinant,
+     ref: https://zhuanlan.zhihu.com/p/435900775
+     a. expand by row or column, then compute it with the algebraic remainder (代数
+        余子式) 。Each expansion corresponds to a drop of one order.
+        Note: expanding by rows/columns is a special case of Laplace's expansion 
+        theorem.
+     b. using primitive transformations (初等变换).
+     c. with the help of inverse ordinal (逆序数) and permutation, i.e., by the 
+        definition.
+  2. Test the performance of inversion algorithm here which is an OCaml program 
+     extracted from Coq.
+
+     Test result:
+          n=8, 1.1s;  n=9, 12s;  n=10, 120s
+
+     Main issue:
+     a. observed that, the CPU usage is too high, but memory usage is low.
+     b. maybe caused by the index of nat type, and I think that int type should 
+        better. So, maybe we need to write an implementation in OCaml directly.
+     c. another reason is that the recursion of det function is too much.
+
+     So, we should write several version in OCaml, to check which one resulting the 
+     bad performane.
+     a. version1, still use NatFun, but with index of int type.
+     b. version2, use array
+     c. version3, use matrix (bigarray)
+
+     New test result:
+     a. version1,
+        n=8, 0.25s;  n=9, 2.4s;  n=10, 32s
+        I think it is still slow, maybe causing by functional style
+     b. version2,
+        n=8, 1s;  n=9,7s; n=10, not tested yet
+        This version is slower than original one, although we have used
+        array structure, why? maybe too much foo loop? I'm not sure.
  *)
 
 
 Require Import StrExt.
 
-Require Export MatrixThySig.
-Require Export NatFun.MatrixThy.
+Require Export MatrixTheoryNF.
+
+Open Scope nat_scope.
+Open Scope A_scope.
+Open Scope mat_scope.
 
 
 (* ######################################################################### *)
-(** * 通用的策略，以后要整理到一个合适的位置 *)
+(** * Properties of list *)
 
-(** 列表相等转换为元素相等 *)
+(** fold_left of list nat and add operation with different initial value *)
+Lemma fold_left_nat_initial : forall (l : list nat) n,
+    fold_left add l n = fold_left add l 0 + n.
+Proof.
+  induction l; intros; auto.
+  simpl. rewrite IHl. rewrite (IHl a). lia.
+Qed.
+
+(** Length of concat operation *)
+Lemma concat_length : forall A (l : list (list A)),
+    length (concat l) = fold_left add (map (@length A) l) 0.
+Proof.
+  intros A l.
+  induction l; simpl; auto.
+  rewrite app_length. rewrite IHl. rewrite (fold_left_nat_initial _ (length a)).
+  lia.
+Qed.
+
+
+(* ######################################################################### *)
+(** * General tactics *)
+
+(** Convert list equality to element equality *)
 Ltac tac_listeq :=
   repeat match goal with
     | |- cons ?x1 ?l1 = cons ?x2 ?l2 => f_equal
@@ -54,214 +88,223 @@ Ltac tac_listeq :=
 
 
 (* ######################################################################### *)
-(** * 全排列（简称排列） *)
+(** * Full permutation (abbreviated as permutation) *)
 
-(** 取出列表中第 k 个元素和剩下的列表 *)
-Fixpoint pick {X} (X0 : X) (l : list X) (k : nat) : X * list X :=
-  match k with
-  | 0 => (hd X0 l, tl l)
-  | S k' =>
-      match l with
-      | [] => (X0, [])
-      | x :: l' =>
-          let (a,l0) := pick X0 l' k' in
-          (a, [x] ++ l0)
-      end
-  end.
+Section perm.
+  Context {A : Type} (A0 : A).
+  
+  (** Get k-th element and remaining elements from a list *)
+  Fixpoint pick (l : list A) (k : nat) : A * list A :=
+    match k with
+    | 0 => (hd A0 l, tl l)
+    | S k' =>
+        match l with
+        | [] => (A0, [])
+        | x :: l' =>
+            let (a,l0) := pick l' k' in
+            (a, [x] ++ l0)
+        end
+    end.
 
-(** 列表全排列的辅助函数 *)
-Fixpoint perm_aux {X} (X0 : X) (n : nat) (l : list X) : list (list X) :=
-  match n with
-  | 0 => [[]]
-  | S n' =>
-      let d1 :=
-        map (fun i => pick X0 l i) (seq 0 n) in
-      let d2 :=
-        map (fun k : X * list X =>
-               let (x, lx) := k in
-               let d3 := perm_aux X0 n' lx in
-               map (fun l1 => [x] ++ l1) d3) d1 in
-      concat d2
-  end.
+  (** Auxiliary function for get permutation of a list *)
+  Fixpoint perm_aux (n : nat) (l : list A) : list (list A) :=
+    match n with
+    | 0 => [[]]
+    | S n' =>
+        let d1 := map (fun i => pick l i) (seq 0 n) in
+        let d2 :=
+          map (fun k : A * list A =>
+                 let (x, lx) := k in
+                 let d3 := perm_aux n' lx in
+                 map (fun l1 => [x] ++ l1) d3) d1 in
+        concat d2
+    end.
 
-(** 列表全排列的辅助函数 *)
-Definition perm {X} (X0 : X) (l : list X) : list (list X) :=
-  perm_aux X0 (length l) l.
+  (** Get permutation of a list *)
+  Definition perm (l : list A) : list (list A) :=
+    perm_aux (length l) l.
 
-(* Compute perm 0 [1;2].
-Compute perm 0 [1;2;3].
-Compute perm 0 [1;2;3;4]. *)
+  (** Length of permutation *)
+  Definition Pn (l : list A) := length (perm l).
 
-(** 全排列的种数 *)
-Definition Pn {X} X0 (l : list X) := length (perm X0 l).
+  (** Pn of cons. 
+      Example: Pn [a;b;c;d] = 4 * Pn [a;b;c] *)
+  Lemma Pn_cons : forall (a : A) (l : list A), Pn (a :: l) = (length (a :: l)) * (Pn l).
+  Proof.
+    intros. simpl. unfold Pn.
+    unfold perm. simpl. rewrite app_length. rewrite map_length. f_equal.
+    rewrite map_map.
+    rewrite concat_length.
+    rewrite map_map.
+    Admitted.
 
-(** 全排列种数等于阶乘 *)
-Lemma Pn_eq : forall {X} X0 l, @Pn X X0 l = fact (length l).
-Proof.
-  intros X X0 l.
-  induction l; simpl; auto.
-Abort.
+  (** Length of permutation equal to the factorial of the length *)
+  Lemma Pn_eq : forall l, Pn l = fact (length l).
+  Proof.
+    induction l; simpl; auto.
+    rewrite Pn_cons. rewrite IHl. simpl. auto.
+  Qed.
+  
+End perm.
+
+(* Compute perm 0 [1;2]. *)
+(* Compute perm 0 [1;2;3]. *)
+(* Compute perm 0 [1;2;3;4]. *)
+
+(* Example l1 := [1;2;3;4]. *)
+(* Compute Pn _ l1. *)
+(* Compute fact (length l1). *)
+
 
 
 (* ######################################################################### *)
 (** * Inversion of square matrix *)
-Module Inversion (F : FieldSig).
-  
-  (** Carrier Type *)
-  Module Export FieldThyInst := FieldThy F.
-  
-  (** Matrix Theory *)
-  Module Export MatrixThyInst := MatrixThy F.
+Module Inversion (E : DecidableFieldElementType).
+  Export E.
+  Module Export M := DecidableFieldMatrixTheoryNF E.
+
+  Add Field field_inst : make_field_theory.
+
+  (** Squaqre matrix *)
+  Definition smat (n : nat) := mat n n.
   
   (* ======================================================================= *)
   (** ** Determinant. *)
-  
+
   (** Get the sub square matrix which remove r-th row and c-th column
     from a square matrix. *)
-  Definition submat {n} (m : Square (S n)) (r c : nat) : Square n :=
-    let g := mdata m in
-    let g' :=
-      (fun i j =>
-         let i' := (if ltb i r then i else S i) in
-         let j' := (if ltb j c then j else S j) in
-         g i' j') in
-    mk_mat n n g'.
+  Definition submat {n} (m : smat (S n)) (r c : nat) : smat n :=
+    fun i j =>
+      let i' := (if ltb i r then i else S i) in
+      let j' := (if ltb j c then j else S j) in
+      m i' j'.
   
   (** Determinant *)
-  (* 原始版本 *)
-  (*   Fixpoint det {n} : Square n -> X :=
-    match n with
-    | 0 => fun _ => X1
-    | S n' => fun m =>
-      let g := mdata m in
-        fold_left Xadd (map (fun i =>
-          let s := if Nat.even i then X1 else (-X1)%X in
-          let a := g 0 i in
-          let d := det (submat m 0 i) in
-            (s * a * d)%X) (seq 0 n)) X0
-    end. *)
+  (* Original verion *)
+  (* Fixpoint det {n} : smat n -> A := *)
+  (*   match n with *)
+  (*   | 0 => fun _ => A1 *)
+  (*   | S n' => *)
+  (*       fun m => *)
+  (*         fold_left Aadd (map (fun i => *)
+  (*                                let s := if Nat.even i then A1 else (-A1)%A in *)
+  (*                                let a := m 0 i in *)
+  (*                                let d := det (submat m 0 i) in *)
+  (*                                (s * a * d)%A) (seq 0 n)) A0 *)
+  (*   end. *)
   
-  (* 优化1，s和a合并 *)
-  Fixpoint det {n} : Square n -> X :=
+  (* Modified version, don't use local variable s *)
+  Fixpoint det {n} : smat n -> A :=
     match n with
-    | 0 => fun _ => X1
+    | 0 => fun _ => A1
     | S n' =>
         fun m =>
-          let g := mdata m in
-          fold_left Xadd
+          fold_left Aadd
             (map (fun i =>
-                    let a := if Nat.even i then (g 0 i)%nat else (-(g 0 i)%nat)%X in
+                    let a := if Nat.even i then (m 0 i)%nat else (-(m 0 i)%nat)%A in
                     let d := det (submat m 0 i) in
-                    (a * d)%X) (seq 0 n)) X0
+                    (a * d)%A) (seq 0 n)) A0
     end.
   
   (** Verify formula for determinant of specify matrix *)
-  Lemma det_1_1 : forall a, det (mk_mat_1_1 a) = a.
+  Lemma det_1_1 : forall a, (det (mk_mat_1_1 a) == a)%A.
   Proof.
     intros. cbv. ring.
   Qed.
   
   Lemma det_2_2 : forall a11 a12 a21 a22, 
-      det (mk_mat_2_2 a11 a12 a21 a22) = (a11 * a22 - a12 * a21)%X.
+      (det (mk_mat_2_2 a11 a12 a21 a22) == (a11 * a22 - a12 * a21))%A.
   Proof.
     intros. cbv. ring.
   Qed.
   
   Lemma det_3_3 : forall a11 a12 a13 a21 a22 a23 a31 a32 a33, 
-      det (mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33) = 
+      (det (mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33) == 
         (a11*a22*a33 - a11*a23*a32 - 
            a12*a21*a33 + a12*a23*a31 + 
-           a13*a21*a32 - a13*a22*a31)%X.
+           a13*a21*a32 - a13*a22*a31))%A.
   Proof.
     intros. cbv. ring.
   Qed.
   
   (* ======================================================================= *)
-  (** ** 克拉默法则. *)
+  (** ** Cramer rule *)
   
-  (** 替换方阵某一列的内容 *)
-  Definition mchgcol {n} (m : Square n) (k : nat) (v : M n 1) : Square n :=
-    let f := mdata m in
-    let g := mdata v in
-    let f' := fun i j => if (Nat.eqb j k) then (g i 0)%nat else f i j in
-    mk_mat _ _ f'.
+  (** Exchange one column of a square matrix *)
+  Definition mchgcol {n} (m : smat n) (k : nat) (v : mat n 1) : smat n :=
+    fun i j => if (Nat.eqb j k) then (v i 0)%nat else m i j.
   
-  (** 克拉默法则将给出X。注意，D不为零时才有解 *)
-  Definition cramerRule {n} (X : Square n) (b : M n 1) : M n 1 :=
-    let f := mdata X in
-    let D := det X in
-    let g := (fun i j =>
-                let Di := det (mchgcol X i b) in
-                (Di / D)%X) in
-    mk_mat _ _ g.
+  (** Cramer rule, which can slving the equation with form of A*x=b.
+      Note, the result is valid on when D is not zero *)
+  Definition cramerRule {n} (A : smat n) (b : mat n 1) : mat n 1 :=
+    let D := det A in
+    (fun i j => let Di := det (mchgcol A i b) in Di / D).
   
   
   (* ======================================================================= *)
-  (** ** 伴随矩阵，简称伴随阵. *)
+  (** ** Adjoint matrix (Adjugate matrix, adj(A), A* ) *)
+  (** That is: adj(A)[i,j] = algebraic remainder of A[j,i]. *)
   
-  (** 有各个元素的代数余子式以转置的样式构成的新矩阵，称为原矩阵的伴随矩阵
-    adjoint matrix, adjugate matrix, 
-    adj(X), X* *)
-  
-  Definition madj {n} : Square n -> Square n := 
+  Definition madj {n} : smat n -> smat n := 
     match n with
     | O => fun m => m 
     | S n' =>
         fun m =>
-          (let f := mdata m in
-           let g :=
-             (fun i j =>
-                let s := if Nat.even (i + j) then X1 else (-X1)%X in
-                let d := det (submat m j i) in 
-                (s * d)%X) in
-           mk_mat _ _ g)
+        fun i j =>
+          let s := if Nat.even (i + j) then A1 else (-A1)%A in
+          let d := det (submat m j i) in 
+          (s * d)%A
     end.
   
   
   (* ======================================================================= *)
-  (** ** 逆矩阵 *)
-  Definition minv {n} (m : Square n) := mcmul (X1/det m) (madj m).
+  (** ** Inversion matrix of a matrix *)
+  Definition minv {n} (m : smat n) := @mcmul n n (A1/det m) (madj m).
   
   (** Verify formula for inversion of specify matrix *)
-  Lemma inv_1_1 : forall a, a <> X0 -> m2l (minv (mk_mat_1_1 a)) = [[X1/a]].
+  Lemma inv_1_1 : forall a, ~(a == A0)%A -> (m2l (minv (mk_mat_1_1 a)) == [[A1/a]])%dlist.
   Proof.
-    intros. cbv. f_equal;f_equal. field. auto.
+    intros. cbv. constructor; auto. constructor; auto.
+    field. auto. 
   Qed.
   
-  Lemma inv_2_2 : forall a11 a12 a21 a22 : X, 
-      let d := (a11 * a22 - a12 * a21)%X in
-      d <> X0 ->
-      m2l (minv (mk_mat_2_2 a11 a12 a21 a22)) =
-        ([[a22/d; -a12/d]; [-a21/d; a11/d]])%X.
+  Lemma inv_2_2 : forall a11 a12 a21 a22 : A, 
+      let d := (a11 * a22 - a12 * a21)%A in
+      ~(d == A0)%A ->
+      (m2l (minv (mk_mat_2_2 a11 a12 a21 a22)) ==
+        ([[a22/d; -a12/d]; [-a21/d; a11/d]])%A)%dlist.
   Proof.
-    intros. cbv. tac_listeq; try field; auto.
+    intros. cbv.
+    repeat constructor; auto; try field; auto.
   Qed.
   
-  (* 注意，以下公式可由matlab来提供，避免手写 *)
+  (* Note, this formula could be provided from matlab, thus avoiding manually *)
   Lemma inv_3_3 : forall a11 a12 a13 a21 a22 a23 a31 a32 a33, 
       let d := (a11*a22*a33 - a11*a23*a32 - a12*a21*a33 + 
-                  a12*a23*a31 + a13*a21*a32 - a13*a22*a31)%X in
-      d <> X0 ->
-      m2l (minv (mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33)) =
+                  a12*a23*a31 + a13*a21*a32 - a13*a22*a31)%A in
+      ~(d == A0)%A ->
+      (m2l (minv (mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33)) ==
         ([[(a22*a33 - a23*a32)/d; -(a12*a33 - a13*a32)/d; (a12*a23 - a13*a22)/d];
           [-(a21*a33 - a23*a31)/d; (a11*a33 - a13*a31)/d; -(a11*a23 - a13*a21)/d];
           [(a21*a32 - a22*a31)/d; -(a11*a32 - a12*a31)/d; (a11*a22 - a12*a21)/d]
-        ])%X.
+        ])%A)%dlist.
   Proof.
-    intros. cbv. tac_listeq; try field; auto.
+    intros. cbv.
+    repeat constructor; auto; try field; auto.
   Qed.
   
-  (** 直接计算出1/2/3阶符号矩阵的逆矩阵 *)
+  (** Direct compute inversion of a symbol matrix of 1/2/3rd order. *)
   Section FindFormula.
-    Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : X.
+    Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : A.
     Let m1 := mk_mat_1_1 a11.
     Let m2 := mk_mat_2_2 a11 a12 a21 a22.
     Let m3 := mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33.
     
-    (* 虽然结果正确，但是太过冗长，以后使用 RAST 来化简 *)
-  (*     Compute (m2l (minv m1)).
-    Compute (m2l (minv m2)).
-    Compute (m2l (minv m3)). *)
+    (* Although this is correct, but the expression is too long.
+       We will simplify it with RAST *)
+    (* Compute (m2l (minv m1)). *)
+    (* Compute (m2l (minv m2)). *)
+    (* Compute (m2l (minv m3)). *)
     
   End FindFormula.
 
@@ -271,52 +314,60 @@ End Inversion.
 (** Test for Inversion *)
 Module Test_for_Inversion.
 
-  (* 用Qc来测试，比较直观 *)
-  Import QArith Qcanon.
-  Module Import InversionQc := Inversion FieldQc.FieldDefQc.
+  Import QArith.
+  Module Import InversionQ := Inversion DecidableFieldElementTypeQ.
   Open Scope Q.
-  Open Scope Qc_scope.
-
-  Coercion Q2Qc : Q >-> Qc.
   
-  (* 符号 *)
-  Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : Qc.
+  (* Symbols *)
+  Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : Q.
+  Variable b1 b2 b3 : Q.
   
-  (* 2x2的数值矩阵、符号矩阵 *)
+  (* Number/Symbol matrix of 2x2 *)
   Definition m20 := mk_mat_2_2 1 2 3 4.
   Definition m21 := mk_mat_2_2 a11 a12 a21 a22.
   
-  (* 3x3的数值矩阵、符号矩阵 *)
-  Definition m30 := mk_mat_3_3 1 2 3 4 5 6 7 8 9.
+  (* Number/Symbol matrix of 3x3 *)
+  Definition m30 := mk_mat_3_3 1 2 3 4 5 6 7 8 10.
+  Definition m30_1 := mk_mat_3_3
+                        1.25 3.47 4.86
+                        8.12 9.85 12.34
+                        21.34 0.73 2.35.
   Definition m31 := mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33.
   
-  (* 余子式 *)
-  (*   Compute (m2l (submat m30 0 1)).
-  Compute (m2l (submat m31 2 1)). *)
+  (* Remainder (余子式) *)
+  (* Compute (m2l (submat m30 0 1)). *)
+  (* Compute (m2l (submat m31 2 1)). *)
   
-  (* 计算行列式 *)
-  (*   Compute det m20.
-  Compute det m30.
-  Eval cbn in det m21.
-  Eval cbn in det m31. *)
+  (* Determinant *)
+  (* Compute det m20. *)
+  (* Compute det m30. *)
+  (* Eval cbn in det m21. *)
+  (* Eval cbn in det m31. *)
   
-  (* 克拉默法则 *)
-  Variable b1 b2 b3 : Qc.
+  (* Cramer rule *)
   Definition v31 := mk_mat_3_1 b1 b2 b3.
-(*   Compute (m2l m30).
-  Compute (m2l (mchgcol m30 2 v31)).
-  Eval cbn in det (mchgcol m30 2 v31).
-  Eval cbn in cramerRule m30 v31. *)
+  (* Compute (m2l m30). *)
+  (* Compute (m2l (mchgcol m30 2 v31)). *)
+  (* Eval cbn in det (mchgcol m30 2 v31). *)
+  (* Eval cbn in cramerRule m30 v31. *)
   
-  (* 伴随矩阵 *)
-(*   Compute (m2l (madj m20)).
-  Compute (m2l (madj m30)). *)
+  (* Adj *)
+  (* Compute (m2l (madj m20)). *)
+  (* Compute (m2l (madj m30)). (* too slow *) *)
   
-  (* 逆矩阵 *)
-(*   Compute (m2l (minv m20)).
+  (* Inverse matrix *)
+  Compute (m2l (minv m20)).
   Compute (m2l (minv m30)).
+  Compute (m2l (minv m30_1)).
+  (* matlab answer of "inv m30" is:
+   -0.1109    0.0361    0.0396
+   -1.9153    0.7902   -0.1885
+    1.6018   -0.5735    0.1244
+    our answer is corect too.
+   *)
+  
   Eval cbn in (m2l (minv m21)).
-  Eval cbn in (m2l (minv m31)). *)
+  Eval cbn in (m2l (minv m31)).
   
 End Test_for_Inversion.
 
@@ -375,53 +426,53 @@ Module Exercise_Ch1_Symbol.
   Declare Module F : FieldSig.
   Module Import InversionInst := Inversion F.
   
-  Notation "2" := (1 + 1)%X.
-  Notation "3" := (1 + 2)%X.
+  Notation "2" := (1 + 1)%A.
+  Notation "3" := (1 + 2)%A.
   
-  (* X上的幂函数 *)
-  Fixpoint Apow (a : X) (n : nat) :=
+  (* A上的幂函数 *)
+  Fixpoint Apow (a : A) (n : nat) :=
     match n with
-    | 0 => X1
-    | S n' => (a * (Apow a n'))%X
+    | 0 => A1
+    | S n' => (a * (Apow a n'))%A
     end.
   Infix "^" := (Apow).
   
-  Example ex6_1 : forall a b : X,
-      let m := (mk_mat_3_3 (a*a) (a*b) (b*b) (2*a) (a+b) (2*b) 1 1 1)%X in
+  Example ex6_1 : forall a b : A,
+      let m := (mk_mat_3_3 (a*a) (a*b) (b*b) (2*a) (a+b) (2*b) 1 1 1)%A in
       det m = (a - b)^3.
   Proof.
     intros. cbv. ring.
   Qed.
   
-  Example ex6_2 : forall a b x y z : X,
+  Example ex6_2 : forall a b x y z : A,
       let m1 := (mk_mat_3_3
                    (a*x+b*y) (a*y+b*z) (a*z+b*x)
                    (a*y+b*z) (a*z+b*x) (a*x+b*y)
-                   (a*z+b*x) (a*x+b*y) (a*y+b*z))%X in
+                   (a*z+b*x) (a*x+b*y) (a*y+b*z))%A in
       let m2 := mk_mat_3_3 x y z y z x z x y in
-      det m1 = ((a^3 + b^3) * det m2)%X.
+      det m1 = ((a^3 + b^3) * det m2)%A.
   Proof.
     intros. cbv. ring.
   Qed.
   
-  Example ex6_3 : forall a b e d : X,
+  Example ex6_3 : forall a b e d : A,
       let m := (mk_mat_4_4
                   (a*a) ((a+1)^2) ((a+2)^2) ((a+3)^2)
                   (b*b) ((b+1)^2) ((b+2)^2) ((b+3)^2)
                   (e*e) ((e+1)^2) ((e+2)^2) ((e+3)^2)
-                  (d*d) ((d+1)^2) ((d+2)^2) ((d+3)^2))%X in
+                  (d*d) ((d+1)^2) ((d+2)^2) ((d+3)^2))%A in
       det m = 0.
   Proof.
     intros. cbv. ring.
   Qed.
   
-  Example ex6_4 : forall a b e d : X,
+  Example ex6_4 : forall a b e d : A,
       let m := (mk_mat_4_4
                   1 1 1 1
                   a b e d
                   (a^2) (b^2) (e^2) (d^2)
-                  (a^4) (b^4) (e^4) (d^4))%X in
-      det m = ((a-b)*(a-e)*(a-d)*(b-e)*(b-d)*(e-d)*(a+b+e+d))%X.
+                  (a^4) (b^4) (e^4) (d^4))%A in
+      det m = ((a-b)*(a-e)*(a-d)*(b-e)*(b-d)*(e-d)*(a+b+e+d))%A.
   Proof.
     intros. cbv. ring.
   Qed.
@@ -438,8 +489,8 @@ Module Simplify_by_RAST.
   
   Notation "0" := T0.
   Notation "1" := T1.
-  Notation "2" := (1 + 1)%X.
-  Notation "3" := (1 + 2)%X.
+  Notation "2" := (1 + 1)%A.
+  Notation "3" := (1 + 2)%A.
   Infix "+" := Tadd.
   Infix "-" := Tsub.
   Infix "*" := Tmul.
@@ -459,7 +510,7 @@ Module Simplify_by_RAST.
   (* 第一版，大概测试一下 *)
   Section TestV1.
     (* 定义多个变量 *)
-    Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : X.
+    Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : A.
     
     (* 构造1/2/3阶矩阵 *)
     Let m1 := mk_mat_1_1 a11.
