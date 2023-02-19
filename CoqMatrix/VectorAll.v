@@ -188,9 +188,31 @@ Module RingVectorTheory (E : RingElementType).
   (* Module FF <: RingVectorTheory E := RingVectorTheoryFF E. *)
 
   (** Basic vector theory, contain conversion and properties *)
-  Module Export All := BasicVectorTheory E.
+  Module Export Basic := BasicVectorTheory E.
 
 End RingVectorTheory.
+
+
+(* ######################################################################### *)
+(** * Collection of all implementations for decidable-field vector theory *)
+Module DecidableFieldVectorTheory (E : DecidableFieldElementType).
+
+  (** export base element, contain: types, definitions, notations, etc.  *)
+  Export E.
+  
+  (* ======================================================================= *)
+  (** ** Short name for concrete implementations *)
+  Module DL := DecidableFieldVectorTheoryDL E.
+  Module DP := DecidableFieldVectorTheoryDP E.
+  Module DR := DecidableFieldVectorTheoryDR E.
+  Module NF := DecidableFieldVectorTheoryNF E.
+  Module SF := DecidableFieldVectorTheorySF E.
+  (* Module FF := DecidableFieldVectorTheoryFF E. *)
+
+  (** Basic vector theory, contain conversion and properties *)
+  Module Export Basic := BasicVectorTheory E.
+
+End DecidableFieldVectorTheory.
 
 
 (* ######################################################################### *)
@@ -223,7 +245,7 @@ Module VectorZ_SF := VectorAllZ.SF.
 (* Compute @l2v 3 [1;2;3]. *)
 
 (** Vector based on Q *)
-Module VectorAllQ := RingVectorTheory RingElementTypeQ.
+Module VectorAllQ := DecidableFieldVectorTheory DecidableFieldElementTypeQ.
 Module VectorQ_DL := VectorAllQ.DL.
 Module VectorQ_DP := VectorAllQ.DP.
 Module VectorQ_DR := VectorAllQ.DR.
@@ -231,7 +253,7 @@ Module VectorQ_NF := VectorAllQ.NF.
 Module VectorQ_SF := VectorAllQ.SF.
 
 (** Vector based on Qc *)
-Module VectorAllQc := RingVectorTheory RingElementTypeQc.
+Module VectorAllQc := DecidableFieldVectorTheory DecidableFieldElementTypeQc.
 Module VectorQc_DL := VectorAllQc.DL.
 Module VectorQc_DP := VectorAllQc.DP.
 Module VectorQc_DR := VectorAllQc.DR.
@@ -239,7 +261,7 @@ Module VectorQc_NF := VectorAllQc.NF.
 Module VectorQc_SF := VectorAllQc.SF.
 
 (** Vector based on R *)
-Module VectorAllR := RingVectorTheory RingElementTypeR.
+Module VectorAllR := DecidableFieldVectorTheory DecidableFieldElementTypeR.
 Module VectorR_DL := VectorAllR.DL.
 Module VectorR_DP := VectorAllR.DP.
 Module VectorR_DR := VectorAllR.DR.

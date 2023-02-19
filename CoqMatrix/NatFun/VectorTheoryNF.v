@@ -119,7 +119,7 @@ End BasicVectorTheoryNF.
 
 (** zero vector, vector addition, opposition, substraction, scalar multiplication,
     dot product *)
-Module RingVectorTheoryNF (E : RingElementType) <: BasicVectorTheory E.
+Module RingVectorTheoryNF (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
   (** ** Matrix theory *)
@@ -261,6 +261,26 @@ Module RingVectorTheoryNF (E : RingElementType) <: BasicVectorTheory E.
   
 End RingVectorTheoryNF.
 
+
+(* ######################################################################### *)
+(** * Decidable-field vector theory implemented with NatFun  *)
+
+Module DecidableFieldVectorTheoryNF (E : DecidableFieldElementType)
+<: DecidableFieldVectorTheory E.
+
+  (* ==================================== *)
+  (** ** Matrix theory *)
+  
+  Module Import DecidableFieldMatrixTheoryNF := DecidableFieldMatrixTheoryNF E.
+
+  Export E.
+  Include (RingVectorTheoryNF E).
+
+  (** veq is decidable *)
+  Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
+  Proof. intros. apply (@meq_dec n 1). Qed.
+
+End DecidableFieldVectorTheoryNF.
 
 
 (* ######################################################################### *)

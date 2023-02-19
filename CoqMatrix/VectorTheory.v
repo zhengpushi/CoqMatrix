@@ -131,7 +131,7 @@ Module Type RingVectorTheory (E : RingElementType) <: BasicVectorTheory E.
   Axiom vcmul_add_distr_l : forall {n} a b (v : vec n),
       (a + b)%A c* v == (a c* v) + (b c* v).
   Axiom vcmul_add_distr_r : forall {n} a (v1 v2 : vec n),
-      a c* (v1 + v2) = (a c* v1) + (a c* v2).
+      a c* (v1 + v2) == (a c* v1) + (a c* v2).
   Axiom vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0 n.
   Axiom vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
 

@@ -136,7 +136,7 @@ End BasicVectorTheoryDP.
 
 (** zero vector, vector addition, opposition, substraction, scalar multiplication,
     dot product *)
-Module RingVectorTheoryDP (E : RingElementType) <: BasicVectorTheory E.
+Module RingVectorTheoryDP (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
   (** ** Matrix theory *)
@@ -276,6 +276,26 @@ Module RingVectorTheoryDP (E : RingElementType) <: BasicVectorTheory E.
   
 End RingVectorTheoryDP.
 
+
+(* ######################################################################### *)
+(** * Decidable-field vector theory implemented with DepPair  *)
+
+Module DecidableFieldVectorTheoryDP (E : DecidableFieldElementType)
+<: DecidableFieldVectorTheory E.
+
+  (* ==================================== *)
+  (** ** Matrix theory *)
+  
+  Module Import DecidableFieldMatrixTheoryDP := DecidableFieldMatrixTheoryDP E.
+
+  Export E.
+  Include (RingVectorTheoryDP E).
+
+  (** veq is decidable *)
+  Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
+  Proof. intros. apply meq_dec. Qed.
+
+End DecidableFieldVectorTheoryDP.
 
 
 (* ######################################################################### *)

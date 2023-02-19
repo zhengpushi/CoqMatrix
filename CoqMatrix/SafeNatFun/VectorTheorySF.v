@@ -122,7 +122,7 @@ End BasicVectorTheorySF.
 
 (** zero vector, vector addition, opposition, substraction, scalar multiplication,
     dot product *)
-Module RingVectorTheorySF (E : RingElementType) <: BasicVectorTheory E.
+Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
   (** ** Matrix theory *)
@@ -267,6 +267,27 @@ End RingVectorTheorySF.
 
 
 (* ######################################################################### *)
+(** * Decidable-field vector theory implemented with SafeNatFun  *)
+
+Module DecidableFieldVectorTheorySF (E : DecidableFieldElementType)
+<: DecidableFieldVectorTheory E.
+
+  (* ==================================== *)
+  (** ** Matrix theory *)
+  
+  Module Import DecidableFieldMatrixTheorySF := DecidableFieldMatrixTheorySF E.
+
+  Export E.
+  Include (RingVectorTheorySF E).
+
+  (** veq is decidable *)
+  Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
+  Proof. intros. apply meq_dec. Qed.
+
+End DecidableFieldVectorTheorySF.
+
+
+(* ######################################################################### *)
 (** * Test  *)
 Module Test.
 
@@ -311,5 +332,5 @@ End Test.
     let '(a0,b0,c0) := v2t_3 v0 in
     let '(a1,b1,c1) := v2t_3 v1 in
       (a0 * a1 + b0 * b1 + c0 * c1)%X.
-
+p
  *)

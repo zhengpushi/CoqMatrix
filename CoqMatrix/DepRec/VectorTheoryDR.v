@@ -139,7 +139,7 @@ End BasicVectorTheoryDR.
 
 (** zero vector, vector addition, opposition, substraction, scalar multiplication,
     dot product *)
-Module RingVectorTheoryDR (E : RingElementType) <: BasicVectorTheory E.
+Module RingVectorTheoryDR (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
   (** ** Matrix theory *)
@@ -264,6 +264,27 @@ Module RingVectorTheoryDR (E : RingElementType) <: BasicVectorTheory E.
   Definition vdot {n : nat} (v1 v2 : vec n) := scalar_of_mat (v1\T * v2)%mat.
   
 End RingVectorTheoryDR.
+
+
+(* ######################################################################### *)
+(** * Decidable-field vector theory implemented with DepRec  *)
+
+Module DecidableFieldVectorTheoryDR (E : DecidableFieldElementType)
+<: DecidableFieldVectorTheory E.
+
+  (* ==================================== *)
+  (** ** Matrix theory *)
+  
+  Module Import DecidableFieldMatrixTheoryDR := DecidableFieldMatrixTheoryDR E.
+
+  Export E.
+  Include (RingVectorTheoryDR E).
+
+  (** veq is decidable *)
+  Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
+  Proof. intros. apply meq_dec. Qed.
+
+End DecidableFieldVectorTheoryDR.
 
 
 (* ######################################################################### *)
