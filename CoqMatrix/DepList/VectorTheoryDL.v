@@ -23,8 +23,8 @@ Import VectorNotations.
 Module BasicVectorTheoryDL (E : ElementType).
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  Module Import BasicMatrixTheoryDL := BasicMatrixTheoryDL E.
+  (** ** Also contain matrix theory *)
+  Module Export BasicMatrixTheoryDL := BasicMatrixTheoryDL E.
 
   (* ==================================== *)
   (** ** Vector element type *)
@@ -147,9 +147,8 @@ End BasicVectorTheoryDL.
 Module RingVectorTheoryDL (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import RingMatrixTheoryDL := RingMatrixTheoryDL E.
+  (** ** Also contain matrix theory *)
+  Module Export RingMatrixTheoryDL := RingMatrixTheoryDL E.
 
   Export E.
   Include (BasicVectorTheoryDL E).
@@ -292,9 +291,8 @@ Module DecidableFieldVectorTheoryDL (E : DecidableFieldElementType)
 <: DecidableFieldVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import DecidableFieldMatrixTheoryDL := DecidableFieldMatrixTheoryDL E.
+  (** ** Also contain matrix theory *)
+  Module Export DecidableFieldMatrixTheoryDL := DecidableFieldMatrixTheoryDL E.
 
   Export E.
   Include (RingVectorTheoryDL E).

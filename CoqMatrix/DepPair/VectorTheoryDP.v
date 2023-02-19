@@ -20,8 +20,8 @@ Require Import DepPair.MatrixTheoryDP.
 Module BasicVectorTheoryDP (E : ElementType).
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  Module Import BasicMatrixTheoryDP := BasicMatrixTheoryDP E.
+  (** ** Also contain matrix theory *)
+  Module Export BasicMatrixTheoryDP := BasicMatrixTheoryDP E.
 
   (* ==================================== *)
   (** ** Vector element type *)
@@ -139,9 +139,8 @@ End BasicVectorTheoryDP.
 Module RingVectorTheoryDP (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import RingMatrixTheoryDP := RingMatrixTheoryDP E.
+  (** ** Also contain matrix theory *)
+  Module Export RingMatrixTheoryDP := RingMatrixTheoryDP E.
 
   Export E.
   Include (BasicVectorTheoryDP E).
@@ -284,9 +283,8 @@ Module DecidableFieldVectorTheoryDP (E : DecidableFieldElementType)
 <: DecidableFieldVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import DecidableFieldMatrixTheoryDP := DecidableFieldMatrixTheoryDP E.
+  (** ** Also contain matrix theory *)
+  Module Export DecidableFieldMatrixTheoryDP := DecidableFieldMatrixTheoryDP E.
 
   Export E.
   Include (RingVectorTheoryDP E).

@@ -19,8 +19,8 @@ Require Import NatFun.MatrixTheoryNF.
 Module BasicVectorTheoryNF (E : ElementType).
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  Module Import BasicMatrixTheoryNF := BasicMatrixTheoryNF E.
+  (** ** Also contain matrix theory *)
+  Module Export BasicMatrixTheoryNF := BasicMatrixTheoryNF E.
 
   (* ==================================== *)
   (** ** Vector element type *)
@@ -122,9 +122,8 @@ End BasicVectorTheoryNF.
 Module RingVectorTheoryNF (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import RingMatrixTheoryNF := RingMatrixTheoryNF E.
+  (** ** Also contain matrix theory *)
+  Module Export RingMatrixTheoryNF := RingMatrixTheoryNF E.
 
   Export E.
   Include (BasicVectorTheoryNF E).
@@ -256,8 +255,9 @@ Module RingVectorTheoryNF (E : RingElementType) <: RingVectorTheory E.
   (** dot production of two vectors.
       Here, we use matrix multiplication to do it, and it is a different way to 
       general situation. *)
-  Definition vdot {n : nat} (v1 v2 : vec n) :=
-    scalar_of_mat (@mmul 1 n 1 (v1\T) v2)%mat.
+
+Definition vdot {n : nat} (v1 v2 : vec n) :=
+    scalar_of_mat (@mmul 1 n 1 (@mtrans n 1 v1) v2)%mat.
   
 End RingVectorTheoryNF.
 
@@ -269,9 +269,8 @@ Module DecidableFieldVectorTheoryNF (E : DecidableFieldElementType)
 <: DecidableFieldVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import DecidableFieldMatrixTheoryNF := DecidableFieldMatrixTheoryNF E.
+  (** ** Also contain matrix theory *)
+  Module Export DecidableFieldMatrixTheoryNF := DecidableFieldMatrixTheoryNF E.
 
   Export E.
   Include (RingVectorTheoryNF E).

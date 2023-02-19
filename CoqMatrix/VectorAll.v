@@ -301,7 +301,7 @@ Module Demo_usage_NF.
   (* Compute v2l v1. *)
   (* Compute vdot v1 v1.   *)
   (** (i) <- i * 0.1 *)
-  Example v2 : vec 50 := fun i j => (nat2Q i) * 0.1.
+  Example v2 : vec 50 := fun i j => ((nat2Q i) * 0.1)%Q.
   (* Compute v2l v2. *)
   (* Compute vdot v2 v2. *)
 End Demo_usage_NF.

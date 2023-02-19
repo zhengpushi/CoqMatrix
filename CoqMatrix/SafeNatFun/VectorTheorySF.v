@@ -22,8 +22,8 @@ Require Import SafeNatFun.MatrixTheorySF.
 Module BasicVectorTheorySF (E : ElementType).
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  Module Import BasicMatrixTheorySF := BasicMatrixTheorySF E.
+  (** ** Also contain matrix theory *)
+  Module Export BasicMatrixTheorySF := BasicMatrixTheorySF E.
 
   (* ==================================== *)
   (** ** Vector element type *)
@@ -125,9 +125,8 @@ End BasicVectorTheorySF.
 Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import RingMatrixTheorySF := RingMatrixTheorySF E.
+  (** ** Also contain matrix theory *)
+  Module Export RingMatrixTheorySF := RingMatrixTheorySF E.
 
   Export E.
   Include (BasicVectorTheorySF E).
@@ -273,9 +272,8 @@ Module DecidableFieldVectorTheorySF (E : DecidableFieldElementType)
 <: DecidableFieldVectorTheory E.
 
   (* ==================================== *)
-  (** ** Matrix theory *)
-  
-  Module Import DecidableFieldMatrixTheorySF := DecidableFieldMatrixTheorySF E.
+  (** ** Also contain matrix theory *)
+  Module Export DecidableFieldMatrixTheorySF := DecidableFieldMatrixTheorySF E.
 
   Export E.
   Include (RingVectorTheorySF E).
