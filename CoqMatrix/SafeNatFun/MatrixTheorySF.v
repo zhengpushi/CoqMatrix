@@ -57,6 +57,8 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
   (** Get n-th element of a matrix *)  
   Definition mnth {r c} (m : mat r c) (ri ci : nat) := mnth m ri ci.
 
+  Global Notation "m @ r # c" := (mnth m r c) : mat_scope.
+
   (** meq and mnth should satisfy this constraint *)
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
       m1 == m2 <-> (forall ri ci, ri < r -> ci < c -> (mnth m1 ri ci == mnth m2 ri ci)%A).

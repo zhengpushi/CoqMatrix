@@ -52,9 +52,8 @@ Reserved Notation "/ a"     (at level 35, right associativity).
 Reserved Notation "a \T"    (at level 34, left associativity).
 
 (* this level is consistent with Mathcomp.ssreflect.ssrnotations.v *)
-Reserved Notation "v .[ i ]"   (at level 2, left associativity, format "v .[ i ]").
 Reserved Notation "m @ i # j"  (at level 20, i at next level).
-Reserved Notation "v @ m"      (at level 20).
+Reserved Notation "v @ i"      (at level 20, i at next level).
 
 
 

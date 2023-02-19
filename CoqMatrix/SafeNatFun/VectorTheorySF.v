@@ -55,8 +55,8 @@ Module BasicVectorTheorySF (E : ElementType).
 
   (** Get element of vector *)
   Definition vnth {n} (v : vec n) i : A := @mnth n 1 v i 0.
-  
-  Notation "v .[ i ]" := (vnth v i) : vec_scope.
+
+  Global Notation "v @ i " := (vnth v i) : vec_scope.
 
   (** veq and mnth should satisfy this constraint *)
   Lemma veq_iff_vnth : forall {n : nat} (v1 v2 : vec n),
@@ -90,9 +90,9 @@ Module BasicVectorTheorySF (E : ElementType).
   Definition t2v_4 (t : @T4 A) : vec 4 :=
     let '(a,b,c,d) := t in l2m [[a];[b];[c];[d]].
 
-  Definition v2t_2 (v : vec 2) : @T2 A := (v.[0], v.[1]).
-  Definition v2t_3 (v : vec 3) : @T3 A := (v.[0], v.[1], v.[2]).
-  Definition v2t_4 (v : vec 4) : @T4 A := (v.[0], v.[1], v.[2], v.[3]).
+  Definition v2t_2 (v : vec 2) : @T2 A := (v@0, v@1).
+  Definition v2t_3 (v : vec 3) : @T3 A := (v@0, v@1, v@2).
+  Definition v2t_4 (v : vec 4) : @T4 A := (v@0, v@1, v@2, v@3).
   
   Lemma v2t_t2v_id_2 : forall (t : A * A), v2t_2 (t2v_2 t) = t.
   Proof.
@@ -116,7 +116,14 @@ Module BasicVectorTheorySF (E : ElementType).
   
 End BasicVectorTheorySF.
 
+(* Module Test_vnth_notation. *)
+(* Module Import M := BasicVectorTheorySF ElementTypeNat. *)
+(* Variable r c n : nat. *)
+(* Definition v : vec 4 := l2v [1;2;3;4]. *)
+  (* Compute v@(v@0). *)
+(* End Test_vnth_notation. *)
 
+  
 (* ######################################################################### *)
 (** * Ring vector theory implemented with SafeNatFun *)
 
