@@ -40,6 +40,9 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
       the matrix as parts of type of mat. *)
   Definition mat (r c : nat) := @mat A r c.
 
+  (** Square matrix *)
+  Definition smat (n : nat) := mat n n.
+
   (** Make a matrix *)
   Definition mk_mat {r c : nat} (f : nat -> nat -> A) : mat r c := mk_mat r c f.
 
@@ -149,6 +152,8 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
   Definition mk_mat_1_1 (a11 : A) : mat 1 1 := mk_mat_1_1 (A0:=A0) a11.
 
   Definition mk_mat_3_1 (a1 a2 a3 : A) : mat 3 1 := mk_mat_3_1 (A0:=A0) a1 a2 a3.
+
+  Definition mk_mat_4_1 (a1 a2 a3 a4 : A) : mat 4 1 := mk_mat_4_1 (A0:=A0) a1 a2 a3 a4.
   
   Definition mk_mat_3_3 (a11 a12 a13 a21 a22 a23 a31 a32 a33 : A) : mat 3 3 
     := mk_mat_3_3 (A0:=A0) a11 a12 a13 a21 a22 a23 a31 a32 a33.

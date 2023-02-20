@@ -38,6 +38,7 @@ Require Export Psatz.
 Require Export Lra.
 
 
+
 (* ######################################################################### *)
 (** * 标准库 Reals 的定制：提示库 R，定义 Opaque，自动求解器 *)
 
@@ -640,10 +641,13 @@ Proof.
 (* ======================================================================= *)
 (** ** r = 0 *)
 
+Lemma Rmult_eq_self_imply_0_or_k1 : forall k x,
+    k * x = x -> x = 0 \/ (x <> 0 /\ k = R1).
+Proof. ra. Qed.
+
 Section TEST_r_eq_0.
   Goal forall r r1 r2 : R, r * r1 = r * r2 -> r1 <> r2 -> r = 0. ra. Qed.
   Goal forall r r1 r2 : R, r1 * r = r2 * r -> r1 <> r2 -> r = 0. ra. Qed.
-  Goal forall k x, k * x = x -> x = 0 \/ (x <> 0 /\ k = R1). ra. Qed.
   Goal forall r, r = 0 -> r² = 0. ra. Qed.
 End TEST_r_eq_0.
 

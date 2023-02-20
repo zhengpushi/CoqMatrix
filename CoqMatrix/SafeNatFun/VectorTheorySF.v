@@ -141,23 +141,17 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   (** ** Zero vector *)
   Definition vec0 {n} : vec n := mat0 n 1.
 
-  (* (** Assert that a vector is an zero vector. *) *)
-  (* Definition vzero {n} (v : vec n) : Prop := v = vec0. *)
+  (** Assert that a vector is an zero vector. *)
+  Definition vzero {n} (v : vec n) : Prop := v == vec0.
 
-  (* (** Assert that a vector is an non-zero vector. *) *)
-  (* Definition vnonzero {n} (v : vec n) : Prop := ~(vzero v). *)
+  (** Assert that a vector is an non-zero vector. *)
+  Definition vnonzero {n} (v : vec n) : Prop := ~(vzero v).
   
-  (* (** vec0 is equal to mat0 with column 1 *) *)
-  (* Lemma vec0_eq_mat0 : forall n, vec0 = mat0 n 1. *)
-  (* Proof. *)
-  (*   intros. easy. *)
-  (* Qed. *)
-
-  (* (** It is decidable that if a vector is zero vector. *) *)
-  (* Lemma vzero_dec : forall {n} (v : vec n), {vzero v} + {vnonzero v}. *)
-  (* Proof. *)
-  (*   intros. apply meq_dec. *)
-  (* Qed. *)
+  (** vec0 is equal to mat0 with column 1 *)
+  Lemma vec0_eq_mat0 : forall n, vec0 = mat0 n 1.
+  Proof.
+    intros. easy.
+  Qed.
   
   
   (** *** Vector addition *)
@@ -289,6 +283,14 @@ Module DecidableFieldVectorTheorySF (E : DecidableFieldElementType)
   Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
   Proof. intros. apply meq_dec. Qed.
 
+  Global Existing Instance veq_dec.
+
+  (** It is decidable that if a vector is zero vector. *)
+  Lemma vzero_dec : forall {n} (v : vec n), {vzero v} + {vnonzero v}.
+  Proof.
+    intros. apply veq_dec.
+  Qed.
+  
 End DecidableFieldVectorTheorySF.
 
 

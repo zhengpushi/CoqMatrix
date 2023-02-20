@@ -19,8 +19,8 @@
          satisfy Decidable relation.
 *)
 
-
 Require Export BasicConfig NatExt ZExt QExt QcExt RExt HierarchySetoid.
+
 
 
 (* ######################################################################### *)
@@ -309,10 +309,10 @@ Module Type RingElementType <: ElementType.
   Parameter Aopp : A -> A.
 
   Notation Asub := (fun x y => Aadd x (Aopp y)).
-  Infix "+" := Aadd : A_scope.
-  Infix "*" := Amul : A_scope.
-  Notation "- a" := (Aopp a) : A_scope.
-  Infix "-" := Asub : A_scope.
+  Global Infix "+" := Aadd : A_scope.
+  Global Infix "*" := Amul : A_scope.
+  Global Notation "- a" := (Aopp a) : A_scope.
+  Global Infix "-" := Asub : A_scope.
 
   (** Use these lemmas, we can replace "Add Morphism ..." with "Existing Morphism" *)
   Axiom Aadd_aeq_mor : Proper (Aeq ==> Aeq ==> Aeq) (Aadd).
@@ -354,6 +354,10 @@ Module RingElementTypeZ
   Definition Amul := Zmult.
 
   Notation Asub := (fun x y => Aadd x (Aopp y)).
+  Global Infix "+" := Aadd : A_scope.
+  Global Infix "*" := Amul : A_scope.
+  Global Notation "- a" := (Aopp a) : A_scope.
+  Global Infix "-" := Asub : A_scope.
 
   Lemma Aadd_aeq_mor : Proper (Aeq ==> Aeq ==> Aeq) (Aadd).
   Proof.
@@ -406,6 +410,10 @@ Module RingElementTypeQ
   Definition Amul := Qmult.
 
   Notation Asub := (fun x y => Aadd x (Aopp y)).
+  Global Infix "+" := Aadd : A_scope.
+  Global Infix "*" := Amul : A_scope.
+  Global Notation "- a" := (Aopp a) : A_scope.
+  Global Infix "-" := Asub : A_scope.
 
   Lemma Aadd_aeq_mor : Proper (Aeq ==> Aeq ==> Aeq) (Aadd).
   Proof.
@@ -458,6 +466,10 @@ Module RingElementTypeQc
   Definition Amul := Qcmult.
   
   Notation Asub := (fun x y => Aadd x (Aopp y)).
+  Global Infix "+" := Aadd : A_scope.
+  Global Infix "*" := Amul : A_scope.
+  Global Notation "- a" := (Aopp a) : A_scope.
+  Global Infix "-" := Asub : A_scope.
 
   Lemma Aadd_aeq_mor : Proper (Aeq  ==> Aeq ==> Aeq) (Aadd).
   Proof.
@@ -510,6 +522,10 @@ Module RingElementTypeR
   Definition Amul := Rmult.
   
   Notation Asub := (fun x y => Aadd x (Aopp y)).
+  Global Infix "+" := Aadd : A_scope.
+  Global Infix "*" := Amul : A_scope.
+  Global Notation "- a" := (Aopp a) : A_scope.
+  Global Infix "-" := Asub : A_scope.
 
   Lemma Aadd_aeq_mor : Proper (Aeq  ==> Aeq ==> Aeq) (Aadd).
   Proof.

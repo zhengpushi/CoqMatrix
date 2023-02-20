@@ -59,6 +59,17 @@ CoqMatrix/MatrixHomo/IsomorphismThy.v
 CoqMatrix/MatrixHomo/MatrixHomomorphism.v
 CoqMatrix/MatrixHomo/MatrixIsomorphism.v
 CoqMatrix/VectorAll.v
+CoqMatrix/MatrixNat.v
+CoqMatrix/MatrixZ.v
+CoqMatrix/MatrixQ.v
+CoqMatrix/MatrixQc.v
+CoqMatrix/MatrixR.v
+CoqMatrix/VectorNat.v
+CoqMatrix/VectorZ.v
+CoqMatrix/VectorQ.v
+CoqMatrix/VectorQc.v
+CoqMatrix/VectorR.v
+
 
 #CoqMatrix/NatFun/Inversion.v
 #CoqMatrix/DepRec/VectorR.v

@@ -666,6 +666,19 @@ Section malg.
     mk_mat _ _ (fun i j => (m @ i # j * a)).
   Infix "*c" := mmulc : mat_scope.
 
+  (** mcmul is a proper morphism *)
+  Lemma mcmul_aeq_mor : forall r c: nat,
+      Proper (Aeq ==>
+                meq (Aeq:=Aeq)(r:=r)(c:=c) ==>
+                meq (Aeq:=Aeq)(r:=r)(c:=c)) mcmul.
+  Proof.
+    lma. lma.
+    rewrite meq_iff_mnth in H. simpl in H.
+    specialize (H i0 j0 Hi0 Hj0). rewrite Hi,H. easy.
+  Qed.
+
+  Global Existing Instance mcmul_aeq_mor.
+
   (** m *c a = a c* m *)
   Lemma mmulc_eq_mcmul : forall {r c} (a : A) (m : mat r c), m *c a == a c* m.
   Proof. lma. Qed.

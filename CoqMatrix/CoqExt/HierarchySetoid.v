@@ -1196,7 +1196,8 @@ Section GroupTheory.
   End th14_4.
 
   
-  (** *** Below, the properties not in textbook *)
+  (** *** Below, these properties are not in textbook *)
+  
   Theorem group_inv_id : - 0 == 0.
   Proof.
     intros.
@@ -1475,6 +1476,7 @@ Section Theory.
   Infix "*" := Amul : A_scope.
   Notation "/ a" := (Ainv a) : A_scope.
   Notation Adiv := (fun a b => a * (/b))%A.
+  Infix "/" := Adiv : A_scope.
 
   Lemma make_field_theory :
     field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
@@ -1489,9 +1491,21 @@ Section Theory.
 
   Add Field field_inst : make_field_theory.
 
+  (** a <> 0 -> /a * a = 1 *)
+  Lemma field_mul_inv_l : forall a : A, ~(a == 0)%A -> (/a * a == 1)%A.
+  Proof. intros. rewrite field_mulInvL; easy. Qed.
+
   (** a <> 0 -> a * /a = 1 *)
-  Lemma field_mulInvR : forall a : A, (a != 0)%A -> (a * /a == 1)%A.
+  Lemma field_mul_inv_r : forall a : A, ~(a == 0)%A -> (a * /a == 1)%A.
   Proof. intros. rewrite commutative. rewrite field_mulInvL; easy. Qed.
+
+  (** a <> 0 -> (1/a) * a = 1 *)
+  Lemma field_mul_inv1_l : forall a : A, ~(a == 0)%A -> ((A1/a) * a == 1)%A.
+  Proof. intros. simpl. group_simpl. apply field_mul_inv_l. auto. Qed.
+  
+  (** a <> 0 -> a * (1/a) = 1 *)
+  Lemma field_mul_inv1_r : forall a : A, ~(a == 0)%A -> (a * (A1/a) == 1)%A.
+  Proof. intros. simpl. group_simpl. apply field_mul_inv_r. auto. Qed.
   
   (** a <> 0 -> a * b = a * c -> b = c *)
   Lemma field_mul_cancel_l : forall a b c : A,
@@ -1513,7 +1527,7 @@ Section Theory.
     assert ((a * c) * /c == (b * c) * /c)%A.
     { rewrite H0. easy. }
     rewrite ?associative in H1.
-    rewrite field_mulInvR in H1; auto.
+    rewrite field_mul_inv_r in H1; auto.
     rewrite ?identityRight in H1. easy.
   Qed.
 
