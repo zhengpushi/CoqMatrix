@@ -46,7 +46,7 @@ Section Def.
   
 End Def.
 
-Arguments mk_mat {A}.
+Arguments mk_mat {A r c}.
 Arguments matf {A r c}.
 
 
@@ -135,7 +135,7 @@ Section mrow.
     match c with
     | O => nil
     | S c' =>
-        m @ ri # c_init :: (@mrowAux r c' ri (S c_init) (mk_mat _ _ (matf m)))
+        m @ ri # c_init :: (@mrowAux r c' ri (S c_init) (mk_mat (matf m)))
     end.
 
   (** Get a row which row index is ri *)
@@ -184,19 +184,19 @@ Section l2m_m2l.
   (** list list to mat.
       Note: we need manually specify the dimension of the matrix. *)
   Definition l2m {r c} (dl : list (list A)) : mat r c := 
-    mk_mat r c (fun x y => nth y (nth x dl []) A0).
+    mk_mat (fun x y => nth y (nth x dl []) A0).
   
   (** list list to mat.
       Note: the row number of the matrix is the length of dl, 
             and the column number of the matrix is the length of first list *)
   Definition l2m_auto (dl : @list (list A)) : mat (length dl) (length (hd [] dl)) :=
-    mk_mat _ _ (fun x y => nth y (nth x dl []) A0).
+    mk_mat (fun x y => nth y (nth x dl []) A0).
 
   (** mat to list list. (Auxiliary function, manually store the row index counter) *)
   Fixpoint m2lAux {r c : nat} (ri : nat) (m : mat r c) : list (list A) := 
     match r with
     | O => nil
-    | S r' => mrow ri m :: (@m2lAux r' c (S ri) (mk_mat _ _ (matf m)))
+    | S r' => mrow ri m :: (@m2lAux r' c (S ri) (mk_mat (matf m)))
     end.
 
   (** mat to list list *)
@@ -247,7 +247,7 @@ Section l2m_m2l.
   
   Lemma m2lAux_nth_nth : forall {r c} (dl : list (list A))
                            (H1 : length dl = r) (H2 : width dl c),
-      (@m2lAux r c 0 (mk_mat _ _ (fun x y : nat => nth y (nth x dl []) A0))
+      (@m2lAux r c 0 (mk_mat (fun x y : nat => nth y (nth x dl []) A0))
       == dl)%dlist.
   Proof.
     intros. gd dl. gd c.
@@ -302,7 +302,7 @@ Section mcol.
   Fixpoint mcolAux (r c : nat) (ci : nat) (r_init : nat) (m : mat r c) : list A :=
     match r with
     | O => nil
-    | S r' => m @ r_init # ci :: (mcolAux r' c ci (S r_init) (mk_mat _ _ (matf m)))
+    | S r' => m @ r_init # ci :: (mcolAux r' c ci (S r_init) (mk_mat (matf m)))
     end.
   
   Definition mcol {r c : nat} (ci : nat) (m : mat r c) := mcolAux r c ci 0 m.
@@ -321,14 +321,14 @@ Section mshift.
   
   (** Right shift columns *)
   Definition mshiftc {r c} (m : @mat A r c) (k : nat) : mat r c :=
-    mk_mat _ _ (fun i j => m @ i # (j + k)).
+    mk_mat (fun i j => m @ i # (j + k)).
   
   (** ∃ m m' k (m = m' /\ mshiftc m k <> mshiftc m' k *)
   Lemma mshiftc_neq : exists r c (m1 m2 : mat r c) (k : nat),
       m1 == m2 /\ ~(mshiftc m1 k == mshiftc m2 k). 
   Proof.
-    set (m1 := mk_mat 2 2 (fun (i j : nat) => if (j <? 2)%nat then A1 else A0)).
-    set (m2 := mk_mat 2 2 (fun (i j : nat) => if (j <? 3)%nat then A1 else A0)).
+    set (m1 := @mk_mat _ 2 2 (fun (i j : nat) => if (j <? 2)%nat then A1 else A0)).
+    set (m2 := @mk_mat _ 2 2 (fun (i j : nat) => if (j <? 3)%nat then A1 else A0)).
     exists 2, 2, m1, m2, (1%nat). split.
     - apply meq_iff_mnth. unfold m1, m2. intros i j Hi Hj. unfold mnth.
       destruct j as [|[|]]; destruct i as [|[|]]; simpl; try easy; lia.
@@ -431,7 +431,7 @@ Section SpecifyDims.
     l2m [[a11;a12;a13;a14]; [a21;a22;a23;a24];[a31;a32;a33;a34]; [a41;a42;a43;a44]].
   
   Definition mk_mat_r_1 r (l : list A) : mat r 1 :=
-    mk_mat _ _ (fun ri ci : nat => if (ci =? 0)%nat then (nth ri l A0) else A0).
+    mk_mat (fun ri ci : nat => if (ci =? 0)%nat then (nth ri l A0) else A0).
   
 End SpecifyDims.
 
@@ -445,10 +445,10 @@ Section Map.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mmap {r c} (f : A -> A) (m : mat r c) : mat r c :=
-    mk_mat _ _ (fun i j => f (m @ i # j)).
+    mk_mat (fun i j => f (m @ i # j)).
   
   Definition mmap2 {r c} (f : A -> A -> A) (m1 m2 : mat r c) : mat r c :=
-    mk_mat _ _ (fun i j => f (m1 @ i # j) (m2 @ i # j)).
+    mk_mat (fun i j => f (m1 @ i # j) (m2 @ i # j)).
   
   Lemma mmap2_comm : forall {r c} (f : A -> A -> A)
                        (f_comm : forall a b : A, (f a b == f b a)%A)
@@ -478,7 +478,7 @@ Section mtrans.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mtrans {r c} (m : @mat A r c): mat c r :=
-    mk_mat _ _ (fun i j => m @ j # i).
+    mk_mat (fun i j => m @ j # i).
   Notation "m \T" := (mtrans m) : mat_scope.
   
   (** Transpose twice keep unchanged. *)
@@ -497,7 +497,7 @@ Section mat0_mat1.
 
   (** *** Zero matrix *)
   Definition mat0 (r c : nat) : mat r c :=
-    mk_mat _ _ (fun _ _ => A0).
+    mk_mat (fun _ _ => A0).
 
   (** mat0\T = mat0 *)
   Lemma mtrans_mat0_eq_mat0 : forall {r c : nat}, (mat0 r c)\T == mat0 c r.
@@ -506,7 +506,7 @@ Section mat0_mat1.
   
   (** *** Identity matrix *)
   Definition mat1 (n : nat) : mat n n :=
-    mk_mat _ _ (fun i j => if (i =? j)%nat then A1 else A0).
+    mk_mat (fun i j => if (i =? j)%nat then A1 else A0).
     
   (** mat1\T = mat1 *)
   Lemma mtrans_mat1_eq_mat1 : forall {n : nat}, (mat1 n)\T == (mat1 n).
@@ -536,7 +536,7 @@ Section malg.
   (** *** Matrix addition *)
   
   Definition madd {r c} (m1 m2 : mat r c) : mat r c :=
-    mk_mat _ _ (fun i j => m1 @ i # j + m2 @ i # j).
+    mk_mat (fun i j => m1 @ i # j + m2 @ i # j).
   Infix "+" := madd : mat_scope.
 
   (** m1 + m2 = m2 + m1 *)
@@ -593,7 +593,7 @@ Section malg.
   (** *** Matrix opposition *)
   
   Definition mopp {r c} (m : mat r c) : mat r c :=
-    mk_mat _ _ (fun i j => - (m @ i # j)).
+    mk_mat (fun i j => - (m @ i # j)).
   Notation "- a" := (mopp a) : mat_scope.
 
   (** - (- m) = m *)
@@ -606,7 +606,7 @@ Section malg.
   (** *** Matrix subtraction *)
   
   Definition msub {r c} (m1 m2 : mat r c) : mat r c :=
-    mk_mat _ _ (fun i j => m1@i#j - m2@i#j).
+    mk_mat (fun i j => m1@i#j - m2@i#j).
   Infix "-" := msub : mat_scope.
 
   (** m1 - m2 = -(m2 - m1) *)
@@ -658,12 +658,12 @@ Section malg.
 
   (** Left scalar multiplication of matrix *)
   Definition mcmul {r c} (a : A) (m : mat r c) : mat r c :=
-    mk_mat _ _ (fun i j => (a * m @ i # j)).
+    mk_mat (fun i j => (a * m @ i # j)).
   Infix "c*" := mcmul : mat_scope.
   
   (** Right scalar multiplication of matrix *)
   Definition mmulc {r c} (m : mat r c) (a : A) : mat r c :=
-    mk_mat _ _ (fun i j => (m @ i # j * a)).
+    mk_mat (fun i j => (m @ i # j * a)).
   Infix "*c" := mmulc : mat_scope.
 
   (** mcmul is a proper morphism *)
@@ -697,7 +697,7 @@ Section malg.
 
   (** a c* mat1 equal to a diagonal matrix which main diagonal elements all are a *)
   Lemma mcmul_1_r : forall {n} a,
-      a c* mat1 A0 A1 n == mk_mat _ _ (fun ri ci => if (ri =? ci)%nat then a else A0).
+      a c* mat1 A0 A1 n == mk_mat (fun ri ci => if (ri =? ci)%nat then a else A0).
   Proof.
     lma. unfold mcmul,mat1. destruct (i =? j); ring.
   Qed.
@@ -723,7 +723,7 @@ Section malg.
 
   (** *** Matrix multiplication *)
   Definition mmul {r c t : nat} (m1 : mat r c) (m2 : mat c t) : mat r t :=
-    mk_mat _ _
+    mk_mat
       (fun x z => seqsum (Aadd:=Aadd)(A0:=A0) (fun y => m1 @ x # y * m2 @ y # z) c).
   Infix "*" := mmul : mat_scope.
 

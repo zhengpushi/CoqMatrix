@@ -42,7 +42,7 @@ Module BasicVectorTheorySF (E : ElementType).
 
   (** matrix equality *)
   Definition veq {n} (v1 v2 : vec n) := @meq n 1 v1 v2.
-  Infix "==" := veq : vec_scope.
+  Global Infix "==" := veq : vec_scope.
 
   (** meq is equivalence relation *)
   Lemma veq_equiv : forall n, Equivalence (veq (n:=n)).
@@ -113,15 +113,65 @@ Module BasicVectorTheorySF (E : ElementType).
   
   (** mapping of two matrices *)
   Definition vmap2 {n} (v1 v2 : vec n) f : vec n := mmap2 f v1 v2.
+
+  (* ======================================================================= *)
+  (** ** Advanced matrix construction by mixing vectors and matrices *)
+  Section AdvancedConstrtuct.
+
+    (* Check A. *)
+    (* Check Equiv_Aeq. *)
+    (* Context `{Equiv_Aeq : Equivalence A Aeq} {A0 A1 : A}. *)
+    (* Infix "==" := (meq (Aeq:=Aeq)) : mat_scope. *)
+
+    (* (** Vector type *) *)
+    (* Definition vecr n := @mat A 1 n. *)
+    (* Definition vecc n := @mat A n 1. *)
+    
+    (** Construct a matrix with a vector and a matrix by row *)
+    Definition mconsr {r c} (v : vec c) (m : mat r c) : mat (S r) c :=
+      mk_mat (fun ri ci => match ri with
+                             | O => v @ ci
+                             | _ => m @ (ri - 1) # ci
+                             end).
+    
+    (** Construct a matrix with a vector and a matrix by column *)
+    Definition mconsc {r c} (v : vec r) (m : mat r c) : mat r (S c) :=
+      mk_mat (fun ri ci => match ci with
+                             | O => v @ ri
+                             | _ => m @ ri # (ci - 1)
+                             end).
+    
+    (* (** Equality of two forms of ConstructByRow *) *)
+    (* Lemma mconsr_eq {r c} (v : vecr c) (m : @mat A r c) : mconsr v m == (v, m). *)
+    (* Proof. unfold mconsr. auto. Qed. *)
+    
+    (* (** Construct a matrix by rows with the matrix which row number is 0 *) *)
+    (* Lemma mconsr_mr0 : forall {n} (v : @vec A n) (m : @mat A 0 n), *)
+    (*   mconsr v m = [v]. *)
+    (* Proof. intros. destruct m. unfold mconsr. auto. Qed. *)
+    
+    (* (** Construct a matrix by rows with the matrix which row column is 0 *) *)
+    (* Lemma mconsr_mc0 : forall {n} (v : @vec A 0) (m : @mat A n 0), *)
+    (*   mconsr v m = (tt, m). *)
+    (* Proof. intros. destruct v. unfold mconsr. auto. Qed. *)
+    
+    (* (** Construct a matrix by columns with the matrix which row number is 0 *) *)
+    (* Lemma mconsc_mr0 : forall {n} (v : @vec A 0) (m : @vec (@vec A n) 0), *)
+    (*   mconsc v m = tt. *)
+    (* Proof. intros. destruct m. unfold mconsc. auto. Qed.   *)
+
+  End AdvancedConstrtuct.
   
 End BasicVectorTheorySF.
 
-(* Module Test_vnth_notation. *)
-(* Module Import M := BasicVectorTheorySF ElementTypeNat. *)
-(* Variable r c n : nat. *)
-(* Definition v : vec 4 := l2v [1;2;3;4]. *)
-  (* Compute v@(v@0). *)
-(* End Test_vnth_notation. *)
+Module Test_BasicVectorTheorySF.
+  Module Import M := BasicVectorTheorySF ElementTypeNat.
+  Definition v1 : vec 3 := l2v [1;2;3].
+  Definition m1 : mat 3 3 := l2m [[10;11;12];[13;14;15];[16;17;18]].
+  Goal v1@(v1@0) = 2. auto. Qed.
+  Goal m2l (mconsr v1 m1) = [[1;2;3];[10;11;12];[13;14;15];[16;17;18]]. auto. Qed.
+  Goal m2l (mconsc v1 m1) = [[1;10;11;12];[2;13;14;15];[3;16;17;18]]. auto. Qed.
+End Test_BasicVectorTheorySF.
 
   
 (* ######################################################################### *)
@@ -131,12 +181,11 @@ End BasicVectorTheorySF.
     dot product *)
 Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
 
-  (* ==================================== *)
-  (** ** Also contain matrix theory *)
-  Module Export RingMatrixTheorySF := RingMatrixTheorySF E.
-
   Export E.
   Include (BasicVectorTheorySF E).
+
+  (** Import ring matrix theory *)
+  Module Export RingMatrixTheorySF := RingMatrixTheorySF E.
 
   (** ** Zero vector *)
   Definition vec0 {n} : vec n := mat0 n 1.
@@ -157,7 +206,7 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   (** *** Vector addition *)
 
   Definition vadd {n} (v1 v2 : vec n) : vec n := @madd n 1 v1 v2.
-  Infix "+" := vadd.
+  Global Infix "+" := vadd : vec_scope.
 
   (** v1 + v2 = v2 + v1 *)
   Lemma vadd_comm : forall {n} (v1 v2 : vec n), (v1 + v2) == (v2 + v1).
@@ -187,7 +236,7 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   (** *** Vector opposite *)
   
   Definition vopp {n} (v : vec n) : vec n := @mopp n 1 v.
-  Notation "- v" := (vopp v).
+  Global Notation "- v" := (vopp v) : vec_scope.
 
   (** v + (- v) = vec0 *)
   Lemma vadd_opp : forall {n} (v : vec n), v + (- v) == vec0.
@@ -199,15 +248,15 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   (** *** Vector subtraction *)
 
   Definition vsub {n} (v1 v2 : vec n) : vec n := v1 + (- v2).
-  Infix "-" := vsub.
+  Global Infix "-" := vsub : vec_scope.
 
 
   (** *** Vector scalar multiplication *)
 
   Definition vcmul {n} a (v : vec n) : vec n := @mcmul n 1 a v.
   Definition vmulc {n} (v : vec n) a : vec n := @mmulc n 1 v a.
-  Infix "c*" := vcmul.
-  Infix "*c" := vmulc.
+  Global Infix "c*" := vcmul : vec_scope.
+  Global Infix "*c" := vmulc : vec_scope.
 
   (** v *c a = a c* v *)
   Lemma vmulc_eq_vcmul : forall {n} a (v : vec n), (v *c a) == (a c* v).
@@ -216,7 +265,7 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   Qed.
 
   (** a c* (b c* v) = (a * b) c* v *)
-  Lemma vcmul_assoc : forall {n} a b (v : vec n), a c* (b c* v) == (a * b) c* v.
+  Lemma vcmul_assoc : forall {n} a b (v : vec n), a c* (b c* v) == (a * b)%A c* v.
   Proof.
     intros. apply (@mcmul_assoc n 1).
   Qed.
@@ -339,5 +388,4 @@ End Test.
     let '(a0,b0,c0) := v2t_3 v0 in
     let '(a1,b1,c1) := v2t_3 v1 in
       (a0 * a1 + b0 * b1 + c0 * c1)%X.
-p
  *)

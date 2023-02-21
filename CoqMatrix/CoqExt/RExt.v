@@ -24,7 +24,41 @@
       finally, and Coq Standard Library prefer 1, so we choose 1 as well.
     (4). x - y and x + (-y) is same, but we prefer x - y.
     (5). x / y and x * (-y), we prefer x / y as well.
-*)
+
+  4. Coq's support for automatic proofs of equalities and inequalities.
+     ref：https://coq.inria.fr/distrib/current/refman/addendum/micromega.html
+(1). Micromega: a solver to solving arithmetic goals by ordered ring structure.
+(2). Psatz: a solver to solvign arithmetic golas on Q,R,Z,nat, and N.
+lia: linear, for integer (including Z,nat, and N)
+nia: non-linear, for integer
+lqa: linear, for rational number Q.
+lra: linear, for real number R and rational number Q.
+nra: non-linear, for real number and rational number.
+psatz D n: non-linear
+  here, D is Z/Q/R, n is an optional integer representing search depth.
+(3). What's the ability of these solvers?
+  It can solve the propositional formulas which its parameters are in the 
+  field D∈{Z,Q,R}. The formulas are belows:
+        p ::= c | x | -p | p+p | p-p | p*p | p^n
+        A ::= p=p | p>p | p<p | p<=p | p>=p
+        F ::= A | P | True | False | F/\F | F\/F | F<->F | F->F | ~F | F=F
+  Here,
+    c is constant in D,
+    x is variable in D,
+    -,+,* is subtract,addition,multiplication seperately,
+    p^n is power of nat n,
+    F are interpreted as Prop or bool.
+    (a) If F is interpreted as bool, the corresponding operaters are:
+           &&,||,eqb,implb,negb.
+        And if D is Z, then the relations are:
+            Z.eqb,Z.gtb,Z.ltb,Z.geb,Z.leb
+        And if D is Q, then the equal realtion is Qeq (==), not eq (=).
+    (b) the range of constant c,
+        for Z and Q, c is all possible value could be get;
+        for R, c is the expression below:
+            c ::= R0 | R1 | IZR z | Q2R q 
+                  | Rmult c c | Rplus c c | Rminus c c| Rdiv c c | Rinv c
+ *)
 
 
 Require Export BasicConfig.
@@ -40,30 +74,30 @@ Require Export Lra.
 
 
 (* ######################################################################### *)
-(** * 标准库 Reals 的定制：提示库 R，定义 Opaque，自动求解器 *)
+(** * Config the usage of Coq-Standard-Library Reals: Hints, Opaque, auto *)
 
-(** autounfold 数据库 *)
+(** Config hint db for autounfold *)
 Global Hint Unfold
   Rminus        (* a - b = a + - b *)
   Rdiv          (* a / b = a * / b *)
   Rsqr          (* r² = r * r *)
   : R.
 
-(** autorewrite 数据库，用于等式变换 *)
+(** Config hint db for autorewrite, for rewriting of equations *)
 Global Hint Rewrite
   (* Abs *)
   Rabs_Ropp           (* Rabs (-x) = Rabs x *)
   Rabs_Rabsolu        (* Rabs (Rabs x) = Rabs x *)
-  (* 加法 *)
+  (* + *)
   Rplus_0_l           (* 0 + r = r *)
   Rplus_0_r           (* r + 0 = r *)
-  (* 加法逆 *)
+  (* -a *)
   Ropp_0              (* - 0 = 0 *)
   Rminus_0_r          (* r - 0 = r *)
   Ropp_involutive     (* - - r = r *)
   Rplus_opp_r         (* r + - r = 0 *)
   Rplus_opp_l         (* - r + r = 0 *)
-  (* 乘法 *)
+  (* x *)
   Rsqr_0              (* 0² = 0 *)
   Rsqr_0              (* 1² = 1 *)
   Rmult_0_l           (* 0 * r = 0 *)
@@ -72,22 +106,22 @@ Global Hint Rewrite
   Rmult_1_r           (* r * 1 = r *)
 (*   Ropp_mult_distr_r_reverse     (* r1 * - r2 = - (r1 * r2) *) *)
 (*   Ropp_mult_distr_l_reverse     (* - r1 * r2 = - (r1 * r2) *) *)
-  (* 整数幂 *)
+  (* pow *)
   pow1                (* 1 ^ n = 1 *)
   pow_O               (* x ^ 0 = 1 *)
   pow_1               (* x ^ 1 = x *)
-  (* 平方和 *)
+  (* sqr *)
   Rsqr_mult           (* (x * y)² = x² * y² *)
-  (* 平方根 *)
+  (* sqrt *)
   sqrt_Rsqr_abs       (* (sqrt x²) = Rabs x *)
   (* Rsqr_sqrt           (* 0 <= x -> (sqrt x)² = x *) *)
   (* sqrt_Rsqr           (* 0 <= x -> sqrt x² = x *) *)
   sqrt_0              (* sqrt 0 = 0 *)
   : R.
 
-(** auto 数据库，用于不等式的解决 *)
+(** Config hint db for auto，for solving equalities or inequalities *)
 Global Hint Resolve
-  (* 等式 *)
+  (* equalities *)
   eq_sym              (* a = b -> b = a *)
   sqrt_0              (* sqrt 0 = 0 *)
   Rsqr_eq_0           (* x² = 0 -> x = 0 *)
@@ -96,7 +130,7 @@ Global Hint Resolve
   sqrt_Rsqr           (* 0 <= x -> sqrt x² = x *)
   sin2_cos2           (* (sin x)² + (cos x)² = 1 *)
 
-  (* 普通不等式 *)
+  (* general inequalities *)
   Rlt_0_1             (* 0 < 1 *)
   PI_RGT_0            (* PI > 0 *)
   Rabs_pos            (* 0 <= Rabs x *)
@@ -106,18 +140,18 @@ Global Hint Resolve
 (*   Rsqr_inj            (* 0 <= x -> 0 <= y -> x² = y² -> x = y *) *)
   Rinv_0_lt_compat    (* 0 < r -> 0 < / r *)
   
-  (* 形如 0 <= r1 + r2 *)
+  (* inequalities such as "0 <= r1 + r2" *)
   Rplus_le_le_0_compat  (* 0 <= r1 -> 0 <= r2 -> 0 <= r1 + r2 *)
   Rplus_lt_le_0_compat  (* 0 < r1 -> 0 <= r2 -> 0 < r1 + r2 *)
   Rplus_le_lt_0_compat  (* 0 <= r1 -> 0 < r2 -> 0 < r1 + r2 *)
   Rplus_lt_0_compat   (* 0 < r1 -> 0 < r2 -> 0 < r1 + r2 *)
 
-  (* 形如 0 <= r1 * r2 *)
+  (* inequalities such as "0 <= r1 * r2" *)
   Rmult_lt_0_compat   (* 0 < r1 -> 0 < r2 -> 0 < r1 * r2 *)
   Rle_0_sqr           (* 0 <= x² *)
   Rsqr_pos_lt         (* x <> 0 -> 0 < x² *)
 
-  (* 形如 r1 <= r2 *)
+  (* inequalities such as "r1 <= r2" *)
   Rlt_gt              (* r1 < r2 -> r2 > r1 *)  (* THIS IS ALWAYS NEED! *)
   Rgt_lt              (* r1 > r2 -> r2 < r1 *)  (* THIS ONE, slow but useful *)
   Rge_le              (* r1 >= r2 -> r2 <= r1 *)
@@ -125,11 +159,11 @@ Global Hint Resolve
   Rlt_le              (* r1 < r2 -> r1 <= r2 *)
   Rsqr_pos_lt         (* x <> 0 -> 0 < x² *)
 
-  (* 形如 r1 <> r2 *)
+  (* inequalities such as "r1 <> r2" *)
   Rgt_not_eq          (* r1 > r2 -> r1 <> r2 *)
   Rlt_not_eq          (* r1 < r2 -> r1 <> r2 *)
 
-  (* 含平方根 *)
+  (* inequalities containing "sqrt" *)
   sqrt_lt_R0          (* 0 < x -> 0 < sqrt x *)
   sqrt_inj            (* 0 <= x -> 0 <= y -> sqrt x = sqrt y -> x = y *)
   : R.
@@ -148,37 +182,6 @@ Global Opaque
   acos
 .
 
-(** Coq对等式和不等式自动证明的支持情况
-参考：https://coq.inria.fr/distrib/current/refman/addendum/micromega.html
-Micromega: 通过有序环(ordered ring)结构上的算术目标的求解器。
-1. Import Psatz 来访问求解在 Q,R,Z,nat,N 上的算术目标的各种策略。
-   若想单独访问，如整数(含Z,nat,N)则用 Lia, 有理数和实数分别用 Lqa, Lra。
-2. 各个策略的介绍
-lia 算术决策过程 (整数)(线性)
-nia 算术决策过程 (整数)(非线性,不完备的)
-lra 算术决策过程 (实数、有理数)(线性)
-nra 算术决策过程 (实数、有理数)(非线性,不完备的)
-psatz D n 算术决策过程(非线性，不完备的)
-  其中，D是Z、Q或R，n是可选的整数，表示搜索深度限制。
-3. 这些策略能解决的问题
-解决参数为“可在域D∈{Z,Q,R}上解释的原子算术表达式”的命题公式，公式的语法为：
-p ::= c | x | -p | p+p | p-p | p*p | p^n
-A ::= p=p | p>p | p<p | p<=p | p>=p
-F ::= A | P | True | False | F/\F | F\/F | F<->F | F->F | ~F | F=F
-其中，
-c是D中的常数
-x是D中的数值变量
--,+,* 分别是 减法、加法和乘法
-p^n 是自然数常数幂
-F 被解释为Prop 或 bool。
-继续解释....
-(1) 当 F 解释为 bool 时，布尔操作符是 &&,||,eqb,implb,negb, A也通过布尔来解释，
-    比如，对于Z，有 Z.eqb,Z.gtb,Z.ltb,Z.geb,Z.leb 等
-(2) 对于Q，使用有理数相等==，而不是Leibniz相等=。
-(3) c的范围：对于Z和Q，是全部可能的取值；对于R，识别如下的表达式作为常数
-c ::= R0 | R1 | Rmult c c | Rplus c c | Rminus c c | IZR z | Q2R q | Rdiv c c
-      | Rinv c
- *)
 Section TEST_psatz.
   Goal forall x y, x ^ 2 + y * y >= x * y.
     intros.
@@ -194,30 +197,31 @@ Ltac ra :=
 
 
 (* ######################################################################### *)
-(** * 补充“实数”有关的性质 *)
-
+(** * Suplymentary properties about "real number R" *)
 
 (* ======================================================================= *)
-(** ** Rsqr、Rpow2与x*x 的自动处理 *)
+(** ** Rsqr, Rpow2, x*x *)
 
-(** 注意，Coq中平方和有多种表示方式：
-    x * x，是 Rmult x x 的 Notation
-    x ^ 2, 是 pow x 2 的 Notation
-    x²   , 是 Rsqr x 的 Notation，定义为 x * x
-    而Coq库中，到底使用哪个定义来表示平方和？引理的丰富程度如何？用Search检索
-        x * x，9个
-        x ^ 2, 14个
-        x², 100多个
-    所以，以x²为主，其余形式转换为这种形式，缺失引理补充。
+(** There are several ways to represent square:
+    x * x，it is a notation for "Rmult x x"
+    x ^ 2, it is a notation for "pow x 2"
+    x²   , it is a notation for "Rsqr x", which defined as x * x.
+    In Coq-std-lib, I should use which one to representing square? What's the 
+    famous way? After the search, I find that:
+        x * x，9
+        x ^ 2, 14
+        x², 100
+    So, we should mainly use x², and other ways should be converted to this way,
+    and the lost lemmas should be given manually.
 
-    不过，另一个问题是，lra 策略在 x * x 和 pow x 2 上工作，而在 x² 上不工作，
-    所以，在 try lra 时，改用 try (unfold Rsqr in *; lra)
-    另外，ring 和 field 也需要展开 Rsqr。
+    Another question, the lra tactic is working well on "x * x" and "pow x 2",
+    but not working on "x²".
+    So, we use "try (unfold Rsqr in *; lra)" insead of "try lra".
+    In addition, using the tactics ring and field also need to unfold Rsqr.
 
-    总结，有两种典型情形：
-    1. 使用ring、field、lra等策略时：unfold Rsqr in *; ring.
-    2. 其他情形：autorewrit with R; auto with R.
-要
+    In conclusion, there are two cases:
+    1. when use "ring,field,lra", write: unfold Rsqr in *; ring.
+    2. other cases, write: autorewrit with R; auto with R.
  *)
 
 (** We always prefer x², an exception is when using ring or field tactic. *)
@@ -280,7 +284,7 @@ End TEST_R1_and_1.
 
 
 (* ======================================================================= *)
-(** ** 减号的消去 *)
+(** ** About "-a" and "a-b" *)
 
 Lemma Rsub_opp r1 r2 : r1 - (- r2) = r1 + r2.
 Proof.
@@ -290,37 +294,36 @@ Global Hint Rewrite Rsub_opp : R.           (* r1 - (- r2) = r1 + r2 *)
 
 
 (* ======================================================================= *)
-(** ** “平方和”的性质 *)
+(** ** About "square" *)
 
 Lemma Rle_0_xx : forall r, 0 <= r * r.
 Proof.
   ra.
 Qed.
 
-(** 两个实数的平方和非负 *)
+(** The sum of squares of two real numbers is non-negative *)
 Lemma Rplus_sqr_ge0 : forall r1 r2 : R, 0 <= r1² + r2².
 Proof.
   ra.
 Qed.
 
-(** 两个实数的平方为正，iff，不全为0 *)
-Lemma Rplus_sqr_gt0 : forall r1 r2 : R, 0 < r1² + r2² <-> 
-  (r1 <> 0 \/ r2 <> 0).
+(** The sum of squares of two real numbers is positive, iff they are not both 0 *)
+Lemma Rplus_sqr_gt0 : forall r1 r2 : R, 0 < r1² + r2² <-> (r1 <> 0 \/ r2 <> 0).
 Proof.
   ra.
 Qed.
 
-(** 平方和为0，则第二个数为0 *)
+(** If the sum of squares of two real numbers is zero, then the second number is 0 *)
 Lemma Rplus_sqr_eq_0_r : forall r1 r2, r1² + r2² = 0 -> r2 = 0.
 Proof.
   ra.
 Qed.
 
-(** 实数不等式：2 * a * b <= a² + b² *)
+(** Real number inequality: 2 * a * b <= a² + b² *)
 Lemma R_neq1 : forall r1 r2 : R, 2 * r1 * r2 <= r1² + r2².
 Proof.
-  (* 利用 (a-b)² = a² + b² - 2ab *)
   intros. apply Rge_le. apply Rminus_ge.
+  (* (a-b)² = a² + b² - 2ab *)
   rewrite <- Rsqr_minus. auto with R.
 Qed.
 
@@ -379,7 +382,7 @@ End test.
 
 
 (* ======================================================================= *)
-(** ** “绝对值”的性质 *)
+(** ** About "absolute value" *)
 
 Lemma Rabs_neg_left : forall r, 0 <= r -> Rabs (-r) = r.
 Proof.
@@ -402,7 +405,7 @@ Global Hint Resolve
 
 
 (* ======================================================================= *)
-(** ** “平方根”的性质 *)
+(** ** About "sqrt" *)
 
 Lemma sqrt_square_abs : forall r, sqrt (r * r) = Rabs r.
 Proof.
@@ -467,7 +470,8 @@ Proof.
   rewrite ?Rsqr_sqrt; auto with R.
 Qed.
 
-(** 两个实数的平方和再开根号为零，iff 这两个实数为零 *)
+(** If the sqrt of the sum of squares of two real numbers equal to 0, iff both of 
+    them are 0. *)
 Lemma Rsqrt_plus_sqr_eq0_iff : forall r1 r2 : R,
   sqrt (r1² + r2²) = 0 <-> r1 = 0 /\ r2 = 0.
 Proof.
@@ -478,13 +482,13 @@ Proof.
   - destruct H; subst. autorewrite with R; auto with R.
 Qed.
 
-(** 两个实数分别开根号后的乘积非负 *)
+(** The multiplication of the square roots of two real numbers is >= 0 *)
 Lemma Rmult_sqrt_sqrt_ge0 : forall r1 r2 : R, 0 <= (sqrt r1) * (sqrt r2).
 Proof.
   intros. apply Rmult_le_pos; auto with R.
 Qed.
 
-(** 两个实数分别开根号后的求和非负 *)
+(** The addition of the square roots of two real numbers is >= 0 *)
 Lemma Rplus_sqrt_sqrt_ge0 : forall r1 r2 : R, 0 <= (sqrt r1) + (sqrt r2).
 Proof.
   intros. apply Rplus_le_le_0_compat; auto with R.
@@ -517,11 +521,21 @@ Proof.
     + replace (Rabs a) with a. field; auto. rewrite Rabs_right; auto.
 Qed.
 
+(** (√ r1 * √ r2) * (√ r1 * √ r2) = r1 * r2 *)
+Lemma sqrt_mult_sqrt : forall (r1 r2 : R), 
+  0 <= r1 -> 0 <= r2 ->
+  ((sqrt r1) * (sqrt r2)) * ((sqrt r1) * (sqrt r2)) = r1 * r2.
+Proof.
+  intros. ring_simplify. repeat rewrite pow2_sqrt; auto.
+Qed.
+
+
 Global Hint Rewrite
   sqrt_square_abs         (* sqrt (r * r) = Rabs r *)
   (* Rsqr_sqrt               (* 0 <= x -> (sqrt x)² = x *) *)
   sqrt_1                  (* sqrt 1 = 1 *)
   Rsqr_sqrt_sqrt          (* ( √ r1 * √ r2)² = r1 * r2 *)
+  sqrt_mult_sqrt          (* (√ r1 * √ r2) * (√ r1 * √ r2) = r1 * r2 *)
   : R.
 
 Global Hint Resolve
@@ -532,12 +546,28 @@ Global Hint Resolve
   sqrt_gt0_imply_ge0      (* 0 < sqrt x -> 0 <= x *)
   sqrt_eq1_imply_eq1      (* sqrt x = 1 -> x = 1 *)
   Rsqr_sqrt_sqrt          (* ( √ r1 * √ r2)² = r1 * r2 *)
+  sqrt_mult_sqrt          (* (√ r1 * √ r2) * (√ r1 * √ r2) = r1 * r2 *)
   Rmult_sqrt_sqrt_ge0     (* 0 <= (sqrt r1) * (sqrt r2) *)
   Rplus_sqrt_sqrt_ge0     (* 0 <= (sqrt r1) + (sqrt r2) *)
   sqrt_square             (* 0 <= x -> sqrt (x * x) = x *)
   Rsqr_plus_sqr_neq0_l    (* r1 <> 0 -> sqrt (r1² + r2²) <> 0 *)
   Rsqr_plus_sqr_neq0_r    (* r2 <> 0 -> sqrt (r1² + r2²) <> 0 *)
   : R.
+
+(** simplify expression has sqrt and pow2 *)
+Ltac simpl_sqrt_pow2 :=
+  repeat (
+  (* (_²) -> x * x *)
+  unfold Rsqr;
+  (* (sqrt r1 * sqrt r2)^2 = r1 * r2 *)
+  try rewrite sqrt_mult_sqrt;
+  (* (sqrt x) ^ 2 = x *)
+  try rewrite pow2_sqrt;
+  (* sqrt (x ^ 2) = x *)
+  try rewrite sqrt_pow2;
+  (* (sqrt x * sqrt x) = x *)
+  try rewrite sqrt_sqrt
+  ).
 
 Section TEST_Rsqrt.
   Goal sqrt R1 = R1. autorewrite with R; auto with R. Qed.
@@ -546,7 +576,7 @@ End TEST_Rsqrt.
 
 
 (* ======================================================================= *)
-(** ** “三角函数”的性质 *)
+(** ** About "trigonometric functions" *)
 
 (*  sin (- (PI/2)) = -1 *)
 Lemma sin_PI2_neg : sin (- (PI/2)) = -1.
@@ -586,7 +616,6 @@ Proof.
   rewrite cos_neg. apply Rtrigo_facts.cos_pi_minus.
 Qed.
 
-(** 余弦平方加上正弦平方等于1 *)
 Lemma cos2_sin2: forall x : R, (cos x)² + (sin x)² = 1.
 Proof.
   intros. rewrite Rplus_comm. apply sin2_cos2.
@@ -615,7 +644,7 @@ End TEST_sin_cos_tan.
 
 
 (* ======================================================================= *)
-(** ** Rpower *)
+(** ** About "Rpower" *)
 
 (**
 Rpower rules:
@@ -636,7 +665,7 @@ Proof.
 
 
 (* ######################################################################### *)
-(** * 实数等式、不等式的自动处理 *)
+(** * Automatic solving equalites or inequalities on real numbers *)
 
 (* ======================================================================= *)
 (** ** r = 0 *)
@@ -720,10 +749,8 @@ Section TEST_zero_lt.
   
 End TEST_zero_lt.
 
-(** 以下性质会用在复数的三角表示转换为直角表示的构造中，虽然 lra 可以解决，
-    但是使用专门的引理会简化定义。*)
-Goal forall a b, a <> b -> a <= b -> a < b. ra. Qed.
-
+(** This property is used in in Complex. Although lra can solve it, but using a 
+    special lemma name combined with the match machanism could speed up the proof. *)
 Lemma Rneq_le_lt : forall a b, a <> b -> a <= b -> a < b.
 Proof. ra. Qed.
 
@@ -809,40 +836,43 @@ Ltac tac_le :=
   
 Section TEST_tac_le.
 
-  (** 以下证明不能自动完成 *)
+  (** This proof cannot be finished in one step *)
   Goal forall h T, 0 < h -> h < 9200 -> -60 < T -> T < 60 -> h / (273.15 + T) < 153.
     ra. Abort.
 
-  (** 简化书写 *)
+  (** Naming the hypothesises *)
   Variable h T : R.
   Hypothesis Hh1 : 0 < h.
   Hypothesis Hh2 : h < 9200.
   Hypothesis HT1 : -60 < T.
   Hypothesis HT2 : T < 60.
-  
+
+  (** a simpler proposition can be proved in one step *)
   Goal h * 0.0065 < 273.15 + T. ra. Qed.
 
-  (** 上面不能自动完成的证明，可手动完成 *)
+  (** We can finish the original proof with manually help *)
   Goal h / (273.15 + T) < 153.
     autounfold with R.
     assert (273.15 + T > 0). ra.
     assert (h < (273.15 + T) * 153). ra. auto with R.
   Qed.
 
-  (** 另一个例子，自动证明无法完成，但使用构造的ltac可以完成 *)
+  (** Another example, also need to manually *)
   Goal h / (273.15 + T) < 1 / 0.0065.
   Proof.
+    ra. (* can not finish it *)
     autounfold with R.
     assert (273.15 + T > 0). ra.
     assert (h < (273.15 + T) * (1/0.0065)). ra. auto with R.
   Qed.
-  
+
+  (* This example shows the usage of tac_le tactic *)
   Goal h / (273.15 + T) < 1 / 0.0065.
   Proof.
     tac_le.
   Qed.
 
-  (** 另一个例子 *)
+  (** This example shows the usage of tac_le and ra together. *)
   Goal  0 < 1 - (0.0065 * (h * / (273.15 + T))).
   Proof.
     (* construct condition manually, then try to automate *)
@@ -862,12 +892,13 @@ End TEST_tac_le.
 (** ** Compare with PI *)
 Section compare_with_PI.
   
-  (** 如何证明有关 PI 的不等式？*)
+  (** How to prove the inequalities about PI *)
   Goal 2 < PI.
   Proof.
   Abort.
 
-  (** 一种方法：公理化的给出PI的上下界，然后利用传递性转化为实际值，再lra求解 *)
+  (** One method: give the upper and lower bound of PI with concrete value by axiom, 
+      then use transitivity to solve it by lra. *)
   Definition PI_ub : R := 3.14159266.
   Definition PI_lb : R := 3.14159265.
   Axiom PI_lt : PI < PI_ub.
@@ -882,7 +913,7 @@ End compare_with_PI.
 
 
 (* ======================================================================= *)
-(** ** 这些是早期的实现，有些转换并不完善，已逐步放弃并整合到其他地方 *)
+(** ** These are old code early, need to be discarded gradually *)
 
 (* (** a + b <> 0 *) *)
 (* Ltac plus_neq0 := *)
@@ -914,21 +945,6 @@ End compare_with_PI.
 (*   | |- R0 < ?a => auto with R fcs; try lra *)
 (*   end. *)
 
-
-(* (** simplify expression has sqrt and pow2 *) *)
-(* Ltac simpl_sqrt_pow2 := *)
-(*   repeat ( *)
-(*   (* (_²) -> x * x *) *)
-(*   unfold Rsqr; *)
-(*   (* (sqrt r1 * sqrt r2)^2 = r1 * r2 *) *)
-(*   try rewrite sqrt_mult_sqrt; *)
-(*   (* (sqrt x) ^ 2 = x *) *)
-(*   try rewrite pow2_sqrt; *)
-(*   (* sqrt (x ^ 2) = x *) *)
-(*   try rewrite sqrt_pow2; *)
-(*   (* (sqrt x * sqrt x) = x *) *)
-(*   try rewrite sqrt_sqrt *)
-(*   ). *)
 
 (* (** 0 <= a *) *)
 (* Ltac zero_le := *)
@@ -1056,22 +1072,28 @@ End compare_with_PI.
 (* ######################################################################### *)
 (** * Conversion between R and other types *)
 
-(** 标准库提供的 up 函数，接近于上取整的行为，但不完全相同。
-    直观的： r∈[2.0,3.0) -> up(r) = 3
-    由如下定理保证：
-    Check archimed. (* IZR (up r) > r /\ IZR (up r) - r <= 1 *)
+(** Remark:
+    
+    We need two functions commonly used in computer: floor (rounding down), and 
+    ceiling (rounding up). Although the function "up" in Coq-std-lib is looks like
+    a rounding up function, but it is a bit different. We need to explicitly 
+    define them. Meanwhile, we tested their behaviors on negative numbers
+    
+    The behavior of "up" is this:
+        r∈[2.0,3.0) -> up(r)=3,
+    and there is a lemma saying this:
+        Check archimed. (* IZR (up r) > r /\ IZR (up r) - r <= 1 *)
 
-    我们需要计算机中常用的两个函数：下取整 floor, 上取整 ceiling。
-    1. 下取整
-    r∈[2.0,3.0), floor(r)=2
-    所以，floor(r) = up(r) - 1
-    2. 上取整
-    r∈(2.0,3.0), ceiling(r)=3
-    r=2.0, ceiling(r)=2
-    所以，ceiling(r)分两种情况，
-    若 IZR(up(r))=r，则 ceiling(r)=up(r)-1，否则 ceiling(r)=up(r)
+    But we need the behavior of floor and ceiling are these below exactly:
+    1. floor
+       r∈[2.0,3.0), floor(r)=2
+       So, floor(r) = up(r) - 1
+    2. ceiling
+       r∈(2.0,3.0), ceiling(r)=3
+       r=2.0, ceiling(r)=2
+       So, if IZR(up(r))=r，then ceiling(r)=up(r)-1，else ceiling(r)=up(r).
 
-    对负数的行为也是一样的，举例说明：
+    When talking about negative numbers, their behaviors are below:
     floor    2.0 = 2
     floor    2.5 = 2
     floor   -2.0 = -2
@@ -1083,9 +1105,9 @@ End compare_with_PI.
     ceiling -2.5 = -2
  *)
 
-(** ** 补充一些 up, IZR 有关的性质 *)
+(** ** Properties about up and IZR *)
 
-(** up_IZR 的消去 *)
+(** Eliminate the up_IZR *)
 Lemma up_IZR : forall z, up (IZR z) = (z + 1)%Z.
 Proof.
   intros.
@@ -1093,7 +1115,7 @@ Proof.
   apply IZR_lt. lia.
 Qed.
 
-(** IZR_up 等式成立，则对应唯一的整数 *)
+(** There is a unique integer if such a IZR_up equation holds. *)
 Lemma IZR_up_unique : forall r, r = IZR (up r - 1) -> exists! z, IZR z = r.
 Proof.
   intros.
@@ -1103,7 +1125,7 @@ Proof.
   apply eq_IZR. auto.
 Qed.
 
-(** r 处于(z,z+1)的开区间，则不可能等于任何整数 *)
+(** There isn't any integer z and real number r such that r ∈(IZR z, IZR (z+1)) *)
 Lemma IZR_in_range_imply_no_integer : forall r z,
     IZR z < r ->
     r < IZR (z + 1) ->
@@ -1115,21 +1137,27 @@ Proof.
 Qed.
 
 
-(** ** R与Z互相转换 *)
+(* ######################################################################### *)
+(** ** Conversion between R and other types *)
 
-(** Z到R *)
+(** *** Conversion between Z and R *)
+
+(** Z to R *)
 Definition Z2R (z : Z) : R := IZR z.
 
-(** 对R下取整，取地板：截断为不大于它的最接近的整数 *)
+(** Rounding R to z, take the floor: truncate to the nearest integer
+    not greater than it *)
 Definition R2Z_floor (r : R) : Z := (up r) - 1.
 
-(** 对R上取整，取顶板：截断为不小于它的最接近的整数 *)
+(** Rounding R to z, take the ceiling: truncate to the nearest integer 
+    not less than it *)
 Definition R2Z_ceiling (r : R) : Z :=
   let z := up r in
   if Req_EM_T r (IZR (z - 1)%Z)
   then z - 1
   else z.
 
+(* Compute R2Z_floor 0.5 *)
 
 (** r∈[z,z+1.0) -> floor(r) = z *)
 Lemma R2Z_floor_spec : forall r z,
@@ -1141,7 +1169,7 @@ Proof.
   rewrite plus_IZR. lra.
 Qed.
 
-(** r=z -> ceiling r = z /\ r∈(z,z+1.0) -> ceiling r = z+1 *)
+(** (r=z -> ceiling r = z) /\ (r∈(z,z+1.0) -> ceiling r = z+1) *)
 Lemma R2Z_ceiling_spec : forall r z,
     (r = IZR z -> R2Z_ceiling r = z) /\
       (IZR z < r < IZR z + 1.0 -> R2Z_ceiling r = (z+1)%Z).
@@ -1159,23 +1187,22 @@ Proof.
       rewrite plus_IZR. ra.
 Qed.
 
-
-(** Z2R (R2Z_floor r) 小于等于 r *)
+(** Z2R (R2Z_floor r) is less than r *)
 Lemma Z2R_R2Z_floor_le : forall r, Z2R (R2Z_floor r) <= r.
 Proof.
   intros. unfold Z2R,R2Z_floor. rewrite minus_IZR.
   destruct (archimed r). ra.
 Qed.
 
-(** Z2R (R2Z_floor r) 小于等于 r *)
+(** r-1 is less than Z2R (R2Z_floor r) *)
 Lemma Z2R_R2Z_floor_gt : forall r, r - 1 < Z2R (R2Z_floor r).
 Proof.
   intros. unfold Z2R,R2Z_floor. rewrite minus_IZR.
   destruct (archimed r). ra.
 Qed.
 
+(** *** Conversion between nat and R *)
 
-(** ** 自然数与实数的转换 *)
 Definition nat2R (n : nat) : R := Z2R (nat2Z n).
 Definition R2nat_floor (r : R) : nat := Z2nat (R2Z_floor r).
 Definition R2nat_ceiling (r : R) : nat := Z2nat (R2Z_ceiling r).
@@ -1245,17 +1272,21 @@ Definition Rapproxb (r1 r2 diff : R) : bool := Rleb (Rabs (r1 - r2)) diff.
 
 
 (* ######################################################################### *)
-(** * 自动证明无法解决的一些例子 *)
+(** * Examples which cannot automatically solved now *)
 
-(** 示例1，在 Complex 关于 Carg 的证明中出现 *)
+(** This example is occurred in the proof about Carg in Complex. *)
 Goal forall a b r, a > 0 -> b <= r / a -> 0 <= r - b *a.
 Proof.
   intros.
-  ra. (* 自动证明不能完成 *)
+  ra. (* No effect *)
   apply Rmult_le_compat_r with (r:=a) in H0; ra.
   unfold Rdiv in H0. rewrite Rmult_assoc in H0.
   rewrite Rinv_l in H0; ra.
 Qed.
+
+
+(* ######################################################################### *)
+(** * Temporarily added lemmas, need to be arranged to proper places *)
 
 Lemma mult_PI_gt0 : forall r, 0 < r -> 0 < r * PI.
 Proof.
