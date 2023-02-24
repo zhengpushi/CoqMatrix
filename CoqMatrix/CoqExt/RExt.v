@@ -193,7 +193,7 @@ End TEST_psatz.
 
 (** arithmetric on reals : lra + nra *)
 Ltac ra :=
-  intros; unfold Rsqr in *; try lra; try nra.
+  intros; unfold Rsqr in *; try lra; try nra; auto with R.
 
 
 (* ######################################################################### *)
@@ -539,6 +539,7 @@ Global Hint Rewrite
   : R.
 
 Global Hint Resolve
+  sqrt_1                  (* sqrt 1 = 1 *)
   sqrt_le0_eq_0           (* r <= 0 -> sqrt r = 0 *)
   sqrt_lt0_eq_0           (* r < 0 -> sqrt r = 0 *)
   le0_imply_sqrt_eq0      (* x < 0 -> sqrt x = 0 *)
@@ -1290,5 +1291,5 @@ Qed.
 
 Lemma mult_PI_gt0 : forall r, 0 < r -> 0 < r * PI.
 Proof.
-  ra. auto with R.
+  ra.
 Qed.  
