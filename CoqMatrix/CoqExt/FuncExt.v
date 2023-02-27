@@ -10,7 +10,7 @@
 *)
 
 
-Require Export List.
+Require Import List.
 Import ListNotations.
 
 Require Export FunctionalExtensionality.
@@ -19,6 +19,33 @@ Require Export FunctionalExtensionality.
 (** A short name of "functional_extensionality" *)
 (* Definition fun_eq {A B} := @functional_extensionality A B. *)
 Ltac fun_eq := apply functional_extensionality.
+
+
+(** Bidirection form of functional extensionality (unary function) *)
+Lemma fun_eq_iff_forall_eq : forall A B (f g : A -> B),
+    (fun i => f i) = (fun i => g i) <-> forall i, f i = g i.
+Proof.
+  intros. split; intros.
+  - (* We can not use functional_extensionality here *)
+    (* Although these proofs are simple, but it is very cumbersome.
+       I hope to get some concise way *)
+    remember (fun (f:A->B) (i:A) => f i) as F eqn:EqF.
+    replace (fun i => f i) with (F f) in H by (rewrite EqF; auto).
+    replace (fun i => g i) with (F g) in H by (rewrite EqF; auto).
+    replace (f i) with (F f i) by (rewrite EqF; auto).
+    replace (g i) with (F g i) by (rewrite EqF; auto).
+    rewrite H. auto.
+  - extensionality i. auto.
+Qed.
+
+(** Another form of functional extensionality (binary function) *)
+Lemma fun_eq_iff_forall_eq2 : forall A B C (f g : A -> B -> C),
+    (fun i j => f i j) = (fun i j => g i j) <-> forall i j, f i j = g i j.
+Proof.
+  intros. split; intros.
+  - rewrite (fun_eq_iff_forall_eq) in H. rewrite H. auto. 
+  - extensionality i. extensionality j. auto.
+Qed.
 
 
 (** execute an unary function multiply times with the initial value. 

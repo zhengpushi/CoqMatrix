@@ -23,13 +23,15 @@
 
  *)
 
-Require Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 Require Export ElementType.
-
+Require BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 
 (* ######################################################################### *)
 (** * Basic matrix theory *)
 Module Type BasicMatrixTheory (E : ElementType).
+
+  (** Basic library *)
+  Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 
   (* ==================================== *)
   (** ** Matrix element type *)
@@ -130,7 +132,6 @@ End BasicMatrixTheory.
 
 Module Type DecidableMatrixTheory (E : DecidableElementType) <: BasicMatrixTheory E.
 
-  Export E.
   Include (BasicMatrixTheory E).
 
   (* (** the equality of matrix element should be decidable *) *)
@@ -150,7 +151,6 @@ End DecidableMatrixTheory.
     multiplication *)
 Module Type RingMatrixTheory (E : RingElementType) <: BasicMatrixTheory E.
 
-  Export E.
   Include (BasicMatrixTheory E).
 
   (* ==================================== *)
@@ -226,7 +226,6 @@ Module Type DecidableFieldMatrixTheory (E : DecidableFieldElementType)
 <: RingMatrixTheory E
 <: DecidableMatrixTheory E.
 
-  Export E.
   Include (RingMatrixTheory E).
 
   (** meq is decidable *)

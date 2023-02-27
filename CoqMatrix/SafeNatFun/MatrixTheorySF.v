@@ -12,13 +12,16 @@
  *)
 
 
-Require Export MatrixTheory.
+Require Import MatrixTheory.
 Require Sequence SafeNatFun.Matrix.
 
 (* ######################################################################### *)
 (** * Basic matrix theory implemented with SafeNatFun *)
 
 Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
+
+  (** Basic library *)
+  Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 
   Export Sequence SafeNatFun.Matrix.
   
@@ -227,7 +230,7 @@ End BasicMatrixTheorySF.
 
 Module DecidableMatrixTheorySF (E : DecidableElementType) <: DecidableMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheorySF E.
 
   (** linear matrix arithmetic tactic for equation: split goal to every element *)
@@ -246,7 +249,7 @@ End DecidableMatrixTheorySF.
 
 Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheorySF E.
 
   Add Ring ring_thy_inst : Ring_thy.
@@ -461,7 +464,7 @@ End RingMatrixTheorySF.
 Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
 <: DecidableFieldMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include RingMatrixTheorySF E.
   (* Module Export DecMT := DecidableMatrixTheorySF E. *)
 

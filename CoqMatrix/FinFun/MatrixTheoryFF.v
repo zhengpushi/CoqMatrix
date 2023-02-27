@@ -3,7 +3,7 @@
   This file is part of CoqMatrix. It is distributed under the MIT
   "expat license". You should have recieved a LICENSE file with it.
 
-  purpose   : Matrix implemented with Fin Function
+  purpose   : Matrix implemented with Finite Function (FinFun, FF)
   author    : ZhengPu Shi
   date      : 2021.12
   

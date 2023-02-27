@@ -9,7 +9,7 @@
 *)
 
 
-Require Export MatrixTheory.
+Require Import MatrixTheory.
 Require Import DepRec.Matrix.
 
 
@@ -17,6 +17,9 @@ Require Import DepRec.Matrix.
 (** * Basic matrix theory implemented with Dependent Record *)
 
 Module BasicMatrixTheoryDR (E : ElementType) <: BasicMatrixTheory E.
+
+  (** Basic library *)
+  Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 
   (* ==================================== *)
   (** ** Matrix element type *)
@@ -252,7 +255,6 @@ End BasicMatrixTheoryDR.
 
 Module DecidableMatrixTheoryDR (E : DecidableElementType) <: DecidableMatrixTheory E.
 
-  Export E.
   Include BasicMatrixTheoryDR E.
 
   (** meq is decidable *)
@@ -269,7 +271,6 @@ End DecidableMatrixTheoryDR.
 
 Module RingMatrixTheoryDR (E : RingElementType) <: RingMatrixTheory E.
 
-  Export E.
   Include BasicMatrixTheoryDR E.
 
   (** ** Declare ring instance to use ring tactic *)

@@ -12,91 +12,105 @@ Require Import VectorAll.
 
 
 (* ######################################################################### *)
-(** * Vector theory on Q *)
+(** * Export vector theory on concrete elements *)
 
-(** ** Export vector theory on concrete elements *)
+Module VectorAllQ.
+  Include DecidableFieldVectorTheory DecidableFieldElementTypeQ.
+  Open Scope Q_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorAllQ.
+  
+Module VectorQ_DL.
+  Include VectorAllQ.DL.
+  Open Scope Q_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorQ_DL.
 
-(** vector theory with all models *)
-Module VectorAllQ := DecidableFieldVectorTheory DecidableFieldElementTypeQ.
-Module VectorQ_DL := VectorAllQ.DL.
-Module VectorQ_DP := VectorAllQ.DP.
-Module VectorQ_DR := VectorAllQ.DR.
-Module VectorQ_NF := VectorAllQ.NF.
-Module VectorQ_SF := VectorAllQ.SF.
+Module VectorQ_DP.
+  Include VectorAllQ.DP.
+  Open Scope Q_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorQ_DP.
 
-(** Extended vector theory *)
-Module VectorQ.
-  Export VectorQ_SF.
+Module VectorQ_DR.
+  Include VectorAllQ.DR.
+  Open Scope Q_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorQ_DR.
 
-End VectorQ.
+Module VectorQ_NF.
+  Include VectorAllQ.NF.
+  Open Scope Q_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorQ_NF.
+
+Module VectorQ_SF.
+  Include VectorAllQ.SF.
+  Open Scope Q_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorQ_SF.
 
 
-(** ** Test *)
+(* ######################################################################### *)
+(** * Extended matrix theory *)
+
+(** Set a default model *)
+Export VectorQ_SF.
+
+
+(** General usage, no need to select low-level model *)
 Section Test.
-  Import VectorQ.
-  Open Scope Q.
   (* Compute v2l (@l2v 3 [1;2;3]). *)
   
 End Test.
 
-(** test FUN *)
-Module Demo_usage_NF.
-  
-  Import QcExt List ListNotations.
+(** Advanced usage, user can select favorite model *)
+
+(* NF *)
+Section Test.
   Import VectorQ_NF.
   
-  Open Scope Q.
-  Open Scope mat_scope.
-  
-  Example v1 := @l2v 5 (map nat2Q (seq 0 5)).
+  Let v1 := @l2v 5 (map nat2Q (seq 0 5)).
   (* Compute v2l v1. *)
-  (* Compute vdot v1 v1.   *)
+  (* Compute vdot v1 v1. *)
   (** (i) <- i * 0.1 *)
-  Example v2 : vec 50 := fun i j => ((nat2Q i) * 0.1)%Q.
+  Let v2 : vec 50 := fun i j => ((nat2Q i) * 0.1)%Q.
   (* Compute v2l v2. *)
   (* Compute vdot v2 v2. *)
-End Demo_usage_NF.
+End Test.
 
-(** test VDL *)
-Module Demo_usage_DL.
-  
-  Import QExt List ListNotations.
+(* DL *)
+Section Test.
   Import VectorQ_DL.
-  
-  Open Scope Q.
-  Open Scope mat_scope.
-  
-  Example v1 := @l2v 5 (map nat2Q (seq 0 5)).
+
+  Let v1 := @l2v 5 (List.map nat2Q (seq 0 5)%nat).
   (* Compute v2l v1. *)
   (* Compute vdot v1 v1. *)
   
-End Demo_usage_DL.
+End Test.
 
-(** test VDP *)
-Module Demo_usage_DP.
-  
-  Import QExt List ListNotations.
+(* DP *)
+Section Test.
   Import VectorQ_DP.
   
-  Open Scope Q.
-  Open Scope mat_scope.
-  
-  Example v1 := @l2v 5 (map nat2Q (seq 0 5)).
+  Let v1 := @l2v 5 (map nat2Q (seq 0 5)).
+  (* Compute v1. *)
   (* Compute v2l v1. *)
   (* Compute vdot v1 v1. *)
   
-End Demo_usage_DP.
+End Test.
 
 
 (** Use different implementations same time, show conversion *)
-Module Demo_usage_Mixed.
-
+Section Test.
   Import VectorAllQ.
   
-  Import Coq.Vectors.Vector VectorNotations List ListNotations.
-  Open Scope Q.
-  
-  (* 这里 list Q 不能自动转换为 list Qc，有没有什么好办法？ *)
   Definition v1 : DR.vec 5 := DR.l2v [1; 2; 3; 4; 5].
   (* Compute dr2nf v1. *)
   (* Compute dr2dp v1. *)
@@ -106,7 +120,7 @@ Module Demo_usage_Mixed.
   (* Compute nf2dr v2. *)
   (* Compute nf2dp v2. *)
   (* Compute nf2dl v2. *)
-  
+
   Definition v3 : DP.vec 5 := nf2dp v2.
   (* Compute dp2dr v3. *)
   (* Compute dp2nf v3. *)
@@ -117,4 +131,4 @@ Module Demo_usage_Mixed.
   (* Compute dl2nf v4. *)
   (* Compute dl2dp v4. *)
   
-End Demo_usage_Mixed.
+End Test.

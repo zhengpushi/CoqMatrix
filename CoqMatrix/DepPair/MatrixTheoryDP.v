@@ -8,7 +8,7 @@
   date      : 2021.12
  *)
 
-Require Export MatrixTheory.
+Require Import MatrixTheory.
 Require Import DepPair.Matrix.
 
 
@@ -16,6 +16,9 @@ Require Import DepPair.Matrix.
 (** * Basic matrix theory implemented with Dependent Pair *)
 
 Module BasicMatrixTheoryDP (E : ElementType) <: BasicMatrixTheory E.
+
+  (** Basic library *)
+  Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 
   (* ==================================== *)
   (** ** Matrix element type *)
@@ -227,7 +230,7 @@ End BasicMatrixTheoryDP.
 
 Module DecidableMatrixTheoryDP (E : DecidableElementType) <: DecidableMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheoryDP E.
   
   (** meq is decidable *)
@@ -244,7 +247,7 @@ End DecidableMatrixTheoryDP.
 
 Module RingMatrixTheoryDP (E : RingElementType) <: RingMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheoryDP E.
 
   Add Ring ring_thy_inst : Ring_thy.
@@ -500,7 +503,7 @@ End RingMatrixTheoryDP.
 Module DecidableFieldMatrixTheoryDP (E : DecidableFieldElementType)
 <: DecidableFieldMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include RingMatrixTheoryDP E.
   Module Export DecMT := DecidableMatrixTheoryDP E.
 

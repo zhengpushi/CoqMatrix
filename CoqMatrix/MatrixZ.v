@@ -12,31 +12,58 @@ Require Import MatrixAll.
 
 
 (* ######################################################################### *)
-(** * Matrix theory on Nat *)
+(** * Export matrix theory on concrete elements *)
 
-(** ** Export matrix theory on concrete elements *)
-
-(** matrix theory with all models *)
-Module MatrixAllZ := RingMatrixTheory RingElementTypeZ.
-Module MatrixZ_DL := MatrixAllZ.DL.
-Module MatrixZ_DP := MatrixAllZ.DP.
-Module MatrixZ_DR := MatrixAllZ.DR.
-Module MatrixZ_NF := MatrixAllZ.NF.
-Module MatrixZ_SF := MatrixAllZ.SF.
-
-(** Extended matrix theory *)
-Module MatrixZ.
-
-  Export MatrixZ_SF.
-
-End MatrixZ.
-
-
-(** ** Test *)
-Section Test.
-  Import MatrixZ ZArith.
-  Open Scope Z.
+Module MatrixAllZ.
+  Include RingMatrixTheory RingElementTypeZ.
+  Open Scope Z_scope.
   Open Scope mat_scope.
+End MatrixAllZ.
+  
+Module MatrixZ_DL.
+  Include MatrixAllZ.DL.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+End MatrixZ_DL.
+
+Module MatrixZ_DP.
+  Include MatrixAllZ.DP.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+End MatrixZ_DP.
+
+Module MatrixZ_DR.
+  Include MatrixAllZ.DR.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+End MatrixZ_DR.
+
+Module MatrixZ_NF.
+  Include MatrixAllZ.NF.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+End MatrixZ_NF.
+
+Module MatrixZ_SF.
+  Include MatrixAllZ.SF.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+End MatrixZ_SF.
+
+
+(* ######################################################################### *)
+(** * Extended matrix theory *)
+
+(** Set a default model *)
+Export MatrixZ_SF.
+
+
+(** General usage, no need to select low-level model *)
+Section Test.
+
+  (* Import MatrixZ ZArith. *)
+  (* Open Scope Z. *)
+  (* Open Scope mat_scope. *)
 
   Let m1 := @l2m 3 3 [[1;2;3];[4;5;6];[7;8;9]].
   (* Compute m2l m1. *)
@@ -75,4 +102,13 @@ Section Test.
   (*      = [[84; 90; 96]; [201; 216; 231]; [318; 342; 366]]
      : list (list A) *)
 
+End Test.
+
+(** Advanced usage, user can select favorite model *)
+Section Test.
+  Import MatrixZ_SF.
+  Let m1 := @l2m 3 3 [[1;2;3];[4;5;6];[7;8;9]].
+  (* Compute m2l m1. *)
+  (* Compute m2l (mmap S m1). *)
+  
 End Test.

@@ -19,9 +19,8 @@
          satisfy Decidable relation.
 *)
 
-Require Export BasicConfig NatExt ZExt QExt QcExt RExt HierarchySetoid.
-
-
+Require NatExt ZExt QExt QcExt RExt.
+Require Export HierarchySetoid.
 
 (* ######################################################################### *)
 (** * Base type *)
@@ -34,31 +33,32 @@ End BaseType.
 (** ** Instances *)
 
 Module BaseTypeNat <: BaseType.
+  Export NatExt.
   Definition A := nat.
 End BaseTypeNat.
 
 Module BaseTypeZ <: BaseType.
-  Import ZArith.
+  Export ZExt.
   Definition A := Z.
 End BaseTypeZ.
 
 Module BaseTypeQ <: BaseType.
-  Import QArith.
+  Export QExt.
   Definition A := Q.
 End BaseTypeQ.
 
 Module BaseTypeQc <: BaseType.
-  Import Qcanon.
+  Export QcExt.
   Definition A := Qc.
 End BaseTypeQc.
 
 Module BaseTypeR <: BaseType.
-  Import Reals.
+  Export RExt.
   Definition A := R.
 End BaseTypeR.
 
 Module BaseTypeFun (A B : BaseType) <: BaseType.
-  Import Reals.
+  (* Import Reals. *)
   Definition A := A.A -> B.A.
 End BaseTypeFun.
 
@@ -89,8 +89,7 @@ Module Type EqElementType (B : BaseType)
 
 (** ** Instances *)
 Module ElementTypeNat <: EqElementType BaseTypeNat.
-  Export Arith.
-  Open Scope nat.
+  Export BaseTypeNat.
 
   Definition A : Type := nat.
   Definition Aeq : relation A := eq.
@@ -105,8 +104,9 @@ Module ElementTypeNat <: EqElementType BaseTypeNat.
 End ElementTypeNat.
 
 Module ElementTypeZ <: EqElementType BaseTypeZ.
-  Export ZArith.
-  Open Scope Z.
+  Export BaseTypeZ.
+  (* Export ZArith. *)
+  (* Open Scope Z. *)
   
   Definition A : Type := Z.
   Definition Aeq : relation A := eq.
@@ -122,8 +122,9 @@ End ElementTypeZ.
 
 (** Tips, this module cannot be a EqElementType *)
 Module ElementTypeQ <: ElementType.
-  Export QArith.
-  Open Scope Q.
+  Export BaseTypeQ.
+  (* Export QArith. *)
+  (* Open Scope Q. *)
   
   Definition A : Type := Q.
   Definition Aeq : relation A := Qeq.
@@ -138,8 +139,9 @@ Module ElementTypeQ <: ElementType.
 End ElementTypeQ.
 
 Module ElementTypeQc <: EqElementType BaseTypeQc.
-  Export Qcanon.
-  Open Scope Qc.
+  Export BaseTypeQc.
+  (* Export Qcanon. *)
+  (* Open Scope Qc. *)
   
   Definition A : Type := Qc.
   Definition Aeq : relation A := eq.
@@ -154,8 +156,9 @@ Module ElementTypeQc <: EqElementType BaseTypeQc.
 End ElementTypeQc.
 
 Module ElementTypeR <: EqElementType BaseTypeR.
-  Export Reals.
-  Open Scope R.
+  Export BaseTypeR.
+  (* Export Reals. *)
+  (* Open Scope R. *)
 
   Definition A : Type := R.
   Definition Aeq : relation A := eq.
@@ -193,17 +196,16 @@ Module ElementTypeFun (I O : ElementType) <: ElementType.
 End ElementTypeFun.
 
 Module ElementType_Test.
-  Import Reals.
-  Import FunctionalExtensionality.
-  Open Scope R.
   
+  Import ElementTypeNat ElementTypeR.
   Module Import ElementTypeFunEx1 := ElementTypeFun ElementTypeNat ElementTypeR.
+
   Definition f : A.
-    refine (exist _ (fun i => match i with 0%nat => 1%R | 1%nat => 2%R | _ => 1%R end) _).
+    refine (exist _ (fun i => match i with 0%nat => 1 | 1%nat => 2 | _ => 1 end) _).
     unfold Proper, respectful. intros. rewrite H. reflexivity.
   Defined.
   Definition g : A.
-    refine (exist _ (fun i => match i with 1%nat => 2%R | _ => 1%R end) _ ).
+    refine (exist _ (fun i => match i with 1%nat => 2 | _ => 1 end) _ ).
     unfold Proper, respectful. intros. rewrite H. reflexivity.
   Defined.
 

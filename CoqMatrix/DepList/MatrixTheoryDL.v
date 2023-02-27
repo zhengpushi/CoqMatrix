@@ -12,13 +12,20 @@
 *)
 
 
-Require Export MatrixTheory.
+Require Import MatrixTheory.
 Require Import DepList.Matrix.
 
 
 (* ######################################################################### *)
 (** * Basic matrix theory implemented with Dependent List *)
 Module BasicMatrixTheoryDL (E : ElementType) <: BasicMatrixTheory E.
+
+  (** Basic library *)
+  Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
+
+  (** Vector and List usually conflicted with same name and same notations *)
+  Export List ListNotations.
+  Export Vector VectorNotations.
 
   (* ==================================== *)
   (** ** Matrix element type *)
@@ -230,7 +237,7 @@ End BasicMatrixTheoryDL.
 
 Module DecidableMatrixTheoryDL (E : DecidableElementType) <: DecidableMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheoryDL E.
 
   (** the equality of two matrices is decidable *)
@@ -247,7 +254,7 @@ End DecidableMatrixTheoryDL.
 
 Module RingMatrixTheoryDL (E : RingElementType) <: RingMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheoryDL E.
 
   Add Ring ring_thy_inst : Ring_thy.
@@ -460,7 +467,7 @@ End RingMatrixTheoryDL.
 Module DecidableFieldMatrixTheoryDL (E : DecidableFieldElementType)
 <: DecidableFieldMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include RingMatrixTheoryDL E.
   Module Export DecMT := DecidableMatrixTheoryDL E.
 
@@ -514,7 +521,7 @@ End DecidableFieldMatrixTheoryDL.
 (** * Extra Properties *)
 Module ExtraMatrixTheoryDL (E : DecidableFieldElementType).
   
-  Export E.
+  (* Export E. *)
   Include (DecidableFieldMatrixTheoryDL E).
 
   (** ** Other OPs and PROPs *)

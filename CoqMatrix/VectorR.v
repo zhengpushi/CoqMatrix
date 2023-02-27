@@ -15,7 +15,7 @@
           point, parallel, colinear.
  *)
 
-Require VectorAll.
+Require Import VectorAll.
 Require MatrixR.
 
 Export HierarchySetoid.
@@ -24,26 +24,62 @@ Export TupleExt.
 
 
 (* ######################################################################### *)
-(** ** Modules of vector theory with all models *)
-Module VectorAllR := VectorAll.DecidableFieldVectorTheory
-                       ElementType.DecidableFieldElementTypeR.
-Module VectorR_DL := VectorAllR.DL.
-Module VectorR_DP := VectorAllR.DP.
-Module VectorR_DR := VectorAllR.DR.
-Module VectorR_NF := VectorAllR.NF.
-Module VectorR_SF := VectorAllR.SF.
+(** * Export vector theory on concrete elements *)
+
+Module VectorAllR.
+  Include DecidableFieldVectorTheory DecidableFieldElementTypeR.
+  Open Scope R_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorAllR.
+  
+Module VectorR_DL.
+  Include VectorAllR.DL.
+  Open Scope R_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorR_DL.
+
+Module VectorR_DP.
+  Include VectorAllR.DP.
+  Open Scope R_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorR_DP.
+
+Module VectorR_DR.
+  Include VectorAllR.DR.
+  Open Scope R_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorR_DR.
+
+Module VectorR_NF.
+  Include VectorAllR.NF.
+  Open Scope R_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorR_NF.
+
+Module VectorR_SF.
+  Include VectorAllR.SF.
+  Open Scope R_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorR_SF.
+
 
 (* ######################################################################### *)
-(** ** Extended vector theory *)
+(** * Extended matrix theory *)
 
-(** Import general matrix theory on R type *)
-Export MatrixR.MatrixR.
+(* Export MatrixR.MatrixR. *)
 
-(** Import general vector theory with model SF on R type *)
+(** Export matrix theory on R type *)
+Export MatrixR.
+(* Check det3. *) (* we can use det3 now *)
+
+(** Set a default model *)
 Export VectorR_SF.
-
-Open Scope R.
-
 
 (* ======================================================================= *)
 (** ** Vector with any dimension *)
@@ -68,7 +104,8 @@ Section DimAny.
   Lemma vcmul_vnonzero_neq0_imply_neq0 : forall {n} (v : vec n) k,
       vnonzero v -> ~(k c* v == vec0) -> k <> A0.
   Proof.
-    intros. intro. subst. rewrite vcmul_0_l in H0. destruct H0. easy.
+    intros. intro. subst.
+    rewrite vcmul_0_l in H0. destruct H0. easy.
   Qed.
 
   (** Two non-zero vectors has k-times relation, then k is not zero *)
@@ -234,8 +271,8 @@ Section DimAny.
         * destruct H0; try contradiction.
         * destruct H0,H1; try contradiction.
           destruct H0,H1; try contradiction.
-          destruct H0,H1. 
-          exists (x*x0). rewrite H0,H1. apply mcmul_assoc.
+          destruct H0,H1. unfold vcmul. 
+          exists (x*x0)%A. rewrite H0,H1. apply mcmul_assoc.
   Qed.
 
   (** If two non-zero vectors are parallel, then there is a unique k such that
@@ -282,16 +319,16 @@ Section Dim3.
   (** skew symmetry matrix *)
   Definition skew_sym_mat_of_v3 (v : vec 3) : smat 3 :=
     let '(x,y,z) := v2t_3 v in 
-    mk_mat_3_3
+    (mk_mat_3_3
       A0    (-z)  y
       z     A0    (-x)
-      (-y)  x     A0.
+      (-y)  x     A0)%A.
 
   (** dot product of two 3-dim vectors *)
   Definition vdot3 (a b : vec 3) : A :=
     let '(a1,a2,a3) := v2t_3 a in 
     let '(b1,b2,b3) := v2t_3 b in
-    a1*b1 + a2*b2 + a3*b3.
+    (a1*b1 + a2*b2 + a3*b3)%A.
 
   (** cross product (vector product) of two 3-dim vectors *)
   Definition vcross3 (v1 v2 : vec 3) : vec 3 := ((skew_sym_mat_of_v3 v1) * v2)%mat.

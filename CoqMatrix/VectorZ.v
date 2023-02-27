@@ -12,29 +12,60 @@ Require Import VectorAll.
 
 
 (* ######################################################################### *)
-(** * Vector theory on Z *)
+(** * Export vector theory on concrete elements *)
 
-(** ** Export vector theory on concrete elements *)
+Module VectorAllZ.
+  Include RingVectorTheory RingElementTypeZ.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorAllZ.
+  
+Module VectorZ_DL.
+  Include VectorAllZ.DL.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorZ_DL.
 
-(** vector theory with all models *)
-Module VectorAllZ := RingVectorTheory RingElementTypeZ.
-Module VectorZ_DL := VectorAllZ.DL.
-Module VectorZ_DP := VectorAllZ.DP.
-Module VectorZ_DR := VectorAllZ.DR.
-Module VectorZ_NF := VectorAllZ.NF.
-Module VectorZ_SF := VectorAllZ.SF.
+Module VectorZ_DP.
+  Include VectorAllZ.DP.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorZ_DP.
 
-(** Extended vector theory *)
-Module VectorZ.
-  Export VectorZ_SF.
+Module VectorZ_DR.
+  Include VectorAllZ.DR.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorZ_DR.
 
-End VectorZ.
+Module VectorZ_NF.
+  Include VectorAllZ.NF.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorZ_NF.
+
+Module VectorZ_SF.
+  Include VectorAllZ.SF.
+  Open Scope Z_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorZ_SF.
 
 
-(** ** Test *)
+(* ######################################################################### *)
+(** * Extended vector theory *)
+
+(** Set a default model *)
+Export VectorZ_SF.
+
+
+(** General usage, no need to select low-level model *)
 Section Test.
-  Import VectorZ.
-  Open Scope Z.
   (* Compute v2l (@l2v 3 [1;2;3]). *)
   
 End Test.

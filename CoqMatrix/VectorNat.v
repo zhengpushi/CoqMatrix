@@ -12,28 +12,60 @@ Require Import VectorAll.
 
 
 (* ######################################################################### *)
-(** * Vector theory on nat *)
+(** * Export vector theory on concrete elements *)
 
-(** ** Export vector theory on concrete elements *)
+Module VectorAllNat.
+  Include BasicVectorTheory ElementTypeNat.
+  Open Scope nat_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorAllNat.
+  
+Module VectorNat_DL.
+  Include VectorAllNat.DL.
+  Open Scope nat_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorNat_DL.
 
-(** vector theory with all models *)
-Module VectorAllNat := BasicVectorTheory ElementTypeNat.
-Module VectorNat_DL := VectorAllNat.DL.
-Module VectorNat_DP := VectorAllNat.DP.
-Module VectorNat_DR := VectorAllNat.DR.
-Module VectorNat_NF := VectorAllNat.NF.
-Module VectorNat_SF := VectorAllNat.SF.
+Module VectorNat_DP.
+  Include VectorAllNat.DP.
+  Open Scope nat_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorNat_DP.
 
-(** Extended vector theory *)
-Module VectorNat.
-  Export VectorNat_SF.
+Module VectorNat_DR.
+  Include VectorAllNat.DR.
+  Open Scope nat_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorNat_DR.
 
-End VectorNat.
+Module VectorNat_NF.
+  Include VectorAllNat.NF.
+  Open Scope nat_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorNat_NF.
+
+Module VectorNat_SF.
+  Include VectorAllNat.SF.
+  Open Scope nat_scope.
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+End VectorNat_SF.
 
 
-(** ** Test *)
+(* ######################################################################### *)
+(** * Extended vector theory *)
+
+(** Set a default model *)
+Export VectorNat_SF.
+
+
+(** General usage, no need to select low-level model *)
 Section Test.
-  Import VectorNat.
   (* Compute v2l (@l2v 3 [1;2;3]). *)
   
 End Test.

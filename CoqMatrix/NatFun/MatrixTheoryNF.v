@@ -9,13 +9,16 @@
  *)
 
 
-Require Export MatrixTheory.
+Require Import MatrixTheory.
 Require Import Sequence NatFun.Matrix.
 
 (* ######################################################################### *)
 (** * Basic matrix theory implemented with NatFun *)
 
 Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
+
+  (** Basic library *)
+  Export BasicConfig TupleExt SetoidListListExt HierarchySetoid.
 
   (* ==================================== *)
   (** ** Matrix element type *)
@@ -215,7 +218,7 @@ End BasicMatrixTheoryNF.
 
 Module DecidableMatrixTheoryNF (E : DecidableElementType) <: DecidableMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheoryNF E.
 
   (** linear matrix arithmetic tactic for equation: split goal to every element *)
@@ -234,7 +237,7 @@ End DecidableMatrixTheoryNF.
 
 Module RingMatrixTheoryNF (E : RingElementType) <: RingMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include BasicMatrixTheoryNF E.
 
   Add Ring ring_thy_inst : Ring_thy.
@@ -454,7 +457,7 @@ End RingMatrixTheoryNF.
 Module DecidableFieldMatrixTheoryNF (E : DecidableFieldElementType)
 <: DecidableFieldMatrixTheory E.
 
-  Export E.
+  (* Export E. *)
   Include RingMatrixTheoryNF E.
   (* Module Export DecMT := DecidableMatrixTheoryNF E. *)
 
@@ -471,7 +474,7 @@ End DecidableFieldMatrixTheoryNF.
 
 (** Test *)
 Module Test.
-  Export QArith.
+  (* Export QArith. *)
   Module Export MatrixQ := RingMatrixTheoryNF RingElementTypeQ.
   Open Scope Q.
   Open Scope mat_scope.

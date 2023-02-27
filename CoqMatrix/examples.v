@@ -9,11 +9,13 @@
 *)
 
 From CoqMatrix Require MatrixAll VectorAll.
+From CoqMatrix Require MatrixNat MatrixZ MatrixQ MatrixQc MatrixR VectorR.
+
 
 (** * Matrix over natural numbers *)
 Module Example4Nat.
-  (** import the library needed to use *)
-  Import MatrixAll MatrixNat_DR. (* model: DepRec *)
+
+  Import MatrixNat.
 
   (** Then, all functions, theorems, notations are available *)
   Example dl := [[1;2;3];[4;5;6]].
@@ -22,7 +24,7 @@ Module Example4Nat.
   Compute (mnth m1 0 1). (* = 2 : A *)
   Compute (m2l (m1\T)). (* = [[1; 4]; [2; 5]; [3; 6]] : list (list A) *)
   Goal mmap S m1 == l2m [[2;3;4];[5;6;7]].
-  Proof. cbv. reflexivity. Qed.
+  Proof. lma. Qed.
 
   (** Check that if A is nat really *)
   Print A. (* A = nat : Type *)
@@ -33,16 +35,16 @@ Module Example4Nat.
   Compute @DP.l2m 2 3 dl.
   Compute @DR.l2m 2 3 dl.
   Compute @NF.l2m 2 3 dl.
+  
 End Example4Nat.
 
 
 (** * Matrix over rational numbers *)
+
 Module Example4Q.
 
-  (** Import library needed *)
-  Import MatrixAll MatrixQ_DL. (* model: DepList *)
-  Open Scope Q.
-  Open Scope mat_scope.
+  Import MatrixQ.
+  Import FuncExt.
 
   (** Q is setoid equal, not leibniz equal *)
   Goal 6/4 <> 1.5. Proof. easy. Qed.
@@ -52,12 +54,19 @@ Module Example4Q.
       type due to its support for setoid equality. *)
   Example m1 : mat 2 3 := l2m [[6/4;10/4;7/2];[4;5;6]].
   Example m2 : mat 2 3 := l2m [[1.5;2.5;3.5];[4;5;6]].
-  Example eq0 : m1 <> m2. Proof. easy. Qed.
-  Example eq1 : m1 == m2. Proof. repeat constructor. Qed.
+  Example eq0 : m1 <> m2.
+  Proof.
+    cbv. intro H. inv H.
+    (* convert "λx.f x = λy.g y" to "∀x.(f x=g x)" *)
+    rewrite fun_eq_iff_forall_eq2 in H1.
+    specialize (H1 0 0)%nat. simpl in H1. easy.
+  Qed.
+  
+  Example eq1 : m1 == m2. Proof. lma. Qed.
 
-  (** Proof by compute or by using properties *)
+  (** Proof by ltac or by using properties *)
   Definition mat1 {n} := mat1 n.
-  Goal m1 * mat1 == m2. Proof. cbn;repeat constructor. Qed.
+  Goal m1 * mat1 == m2. Proof. lma. Qed.
   Goal m1 * mat1 == m2. Proof. rewrite mmul_1_r. apply eq1. Qed.
   
 End Example4Q.
@@ -67,11 +76,11 @@ End Example4Q.
 Module Example4Cvt.
   
   (** Import library needed to use *)
-  Import MatrixAll MatrixAllZ. (* all models *)
-  Import MatrixZ_DL. (* notations on DL *)
-  Import Coq.Vectors.Vector VectorNotations. (* notations for Coq.Vector *)
-  Open Scope Z.
-  Open Scope mat_scope.
+  Import MatrixZ MatrixAllZ.
+  Import Coq.Vectors.Vector VectorNotations.
+  (* Import Coq.Vectors.Vector VectorNotations. (* notations for Coq.Vector *) *)
+  (* Open Scope Z. *)
+  (* Open Scope mat_scope. *)
 
   (** convert from one model to other models *)
   Example m : NF.mat 2 2 := NF.mk_mat_2_2 1 2 3 4.
@@ -81,19 +90,23 @@ Module Example4Cvt.
   (* Compute nf2ff m. *)
   (* The evaluation on FF is crashed! *)
 
-  (** prove that {DL -> DP -> DR -> NF -> DL} return back *)
-  Goal forall r c (m1 : DL.mat r c),
+  (** prove that {SF -> DL -> DP -> DR -> NF -> DL -> SF} return back *)
+  Goal forall r c (m0 : SF.mat r c),
+    let m1 : DL.mat r c := sf2dl m0 in
     let m2 : DP.mat r c := dl2dp m1 in
     let m3 : DR.mat r c := dp2dr m2 in
     let m4 : NF.mat r c := dr2nf m3 in
     let m5 : DL.mat r c := nf2dl m4 in
-    m5 == m1.
+    let m6 : SF.mat r c := dl2sf m5 in
+    m6 == m0.
   Proof.
-    intros. unfold m5,m4,m3,m2,dl2dp,dp2dr,dr2nf,nf2dl.
+    intros. unfold m6,m5,m4,m3,m2,m1,dl2dp,dp2dr,dr2nf,nf2dl,dl2sf,sf2dl.
+    rewrite DR.m2l_l2m_id; auto with mat.
     rewrite NF.m2l_l2m_id; auto with mat.
     rewrite DP.m2l_l2m_id; auto with mat.
-    rewrite DR.m2l_l2m_id; auto with mat.
-    rewrite DL.l2m_m2l_id; auto with mat.
+    rewrite DL.m2l_l2m_id; auto with mat.
+    rewrite DL.m2l_l2m_id; auto with mat.
+    rewrite SF.l2m_m2l_id; auto with mat.
     reflexivity.
   Qed.
   
@@ -101,7 +114,7 @@ End Example4Cvt.
 
 Module Example4CoordinateSystem.
   
-  Import MatrixAll MatrixR_DL. (* DP/DR/NF/FF *)
+  Import MatrixR.
   Open Scope R.
   Variable ψ θ φ: R.
   Let Rx := mk_mat_3_3 1 0 0 0 (cos φ) (sin φ) 0 (-sin φ) (cos φ).
@@ -114,27 +127,25 @@ Module Example4CoordinateSystem.
     (sin ψ * sin θ * cos φ - cos ψ * sin φ)
     (-sin θ) (sin φ * cos θ) (cos φ * cos θ).
   Lemma Rbe_ok : (Rbe == Rz\T * Ry\T * Rx\T)%mat.
-  Proof.
-    cbv. repeat constructor; ring.
-  Qed.
+  Proof. lma. Qed.
     
 End Example4CoordinateSystem.
 
 (** another version *)
 Module Example4CoordinateSystem_Version2.
+  Import MatrixR.
   
-  Import MatrixAll MatrixAllR.
   Open Scope R. Open Scope mat_scope.
   Variable ψ θ φ: R.
-  Let rx : list (list R) := [[1;0;0]; [0;cos φ;sin φ]; [0;-sin φ;cos φ]].
-  Let ry : list (list R) := [[cos θ;0;-sin θ]; [0;1;0]; [sin θ;0;cos θ]].
-  Let rz : list (list R) := [[cos ψ;sin ψ;0]; [-sin ψ;cos ψ;0]; [0;0;1]].
+  Let rx : list (list R) := [[1;0;0]; [0;cos φ;sin φ]; [0;-sin φ;cos φ]]%R.
+  Let ry : list (list R) := [[cos θ;0;-sin θ]; [0;1;0]; [sin θ;0;cos θ]]%R.
+  Let rz : list (list R) := [[cos ψ;sin ψ;0]; [-sin ψ;cos ψ;0]; [0;0;1]]%R.
   Let rbe : list (list R) := [
       [cos θ * cos ψ; cos ψ * sin θ * sin φ - sin ψ * cos φ;
        cos ψ * sin θ * cos φ + sin φ * sin ψ];
       [cos θ * sin ψ; sin ψ * sin θ * sin φ + cos ψ * cos φ;
        sin ψ * sin θ * cos φ - cos ψ * sin φ];
-      [-sin θ; sin φ * cos θ; cos φ * cos θ]].
+      [-sin θ; sin φ * cos θ; cos φ * cos θ]]%R.
 
   Import MatrixR_DL.
   Lemma Rbe_ok_DL :
@@ -171,15 +182,22 @@ Module Example4CoordinateSystem_Version2.
     let Rbe : mat 3 3 := l2m rbe in
     Rbe == Rz\T * Ry\T * Rx\T.
   Proof. lma. Qed.
+
+  Import MatrixR_SF.
+  Lemma Rbe_ok_SF :
+    let Rx : mat 3 3 := l2m rx in
+    let Ry : mat 3 3 := l2m ry in
+    let Rz : mat 3 3 := l2m rz in
+    let Rbe : mat 3 3 := l2m rbe in
+    Rbe == Rz\T * Ry\T * Rx\T.
+  Proof. lma. Qed.
     
 End Example4CoordinateSystem_Version2.
 
 
 Module Example4VectorTheory.
-  (** import library *)
-  Import VectorAll VectorR_DR.
-  Open Scope R.
-  Open Scope vec_scope.
+  
+  Import VectorR.
 
   (** create vector from a list, convert back, get element *)
   Let l1 := [1;2;3;4;5].
@@ -190,10 +208,7 @@ Module Example4VectorTheory.
   (** Next, we can prove equation using theorems in CoqMatrix *)
   Goal forall (n : nat) (v1 v2 v3 : vec n),
       (v1 + v2) + (v3 + vec0) == 1 c* v2 + (v1 + v3).
-  Proof.
-    intros. rewrite vadd_0_r, vcmul_1_l, <- vadd_assoc.
-    f_equiv. apply vadd_comm.
-  Qed.
+  Proof. lma. Qed.
   
 End Example4VectorTheory.
 

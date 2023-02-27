@@ -449,6 +449,8 @@ Class Injective {A B : Type} {Aeq: relation A} {Beq: relation B} (phi: A -> B) :
 Section theory.
 
   Context {A B : Type} {Aeq: relation A} {Beq: relation B}.
+
+  Notation Injective := (Injective (Aeq:=Aeq) (Beq:=Beq)).
   
   (** Second form of injective *)
   Definition injective_form2 (phi: A -> B) :=
@@ -456,7 +458,7 @@ Section theory.
 
   (** These two forms are equal *)
   Lemma injective_eq_injective_form2 (phi: A -> B) :
-    Injective (Aeq:=Aeq) (Beq:=Beq) phi <-> injective_form2 phi.
+    Injective phi <-> injective_form2 phi.
   Proof.
     split; intros.
     - hnf. destruct H as [H]. intros.
@@ -464,6 +466,13 @@ Section theory.
       + apply NNPP in H. auto.
       + easy.
     - hnf in H. constructor. intros. intro. apply H in H1. easy.
+  Qed.
+
+  (** Injective function preserve equal relation *)
+  Lemma inj_pres_eq : forall (f : A -> B),
+      Injective f -> (forall a1 a2 : A, Beq (f a1) (f a2) -> Aeq a1 a2).
+  Proof.
+    intros. apply injective_eq_injective_form2 in H. apply H. auto.
   Qed.
 
 End theory.
@@ -551,6 +560,15 @@ Section theory.
         rewrite <- H0 in b0. apply Hinj in b0. exact b0.
         Unshelve. exact eq.
   Defined.
+
+  (** A bijective function preserve equal relation *)
+  (* Lemma bij_pres_eq_forward : forall (f : A -> B), *)
+  (*     Bijective f -> (forall (a1 a2 : A), Aeq a1 a2 -> Beq (f a1) (f a2)). *)
+  (* Proof. *)
+  (*   intros. destruct H as [H1 H2]. *)
+  (*   (* I can't prove now. *) *)
+  (*   Abort. *)
+    
 
 End theory.
 

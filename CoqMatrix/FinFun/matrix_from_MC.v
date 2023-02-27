@@ -213,7 +213,8 @@ Section finType.
   Print eq_op.    (* 在 eqType 上的bool相等判定函数 *)
   
   (* 整体表示的含义是：给定 可数类型T + 列表e，该列表枚举了所有T类型的元素。
-    因为既然能够用列表来罗列，那么就必要是有限吗？？*)
+    因为既然能够用列表来罗列，那么就必要是有限吗？？
+    有。因为前者可数指的是domain，后者可数指的是codomain *)
   
   Check bool_finType : finType.
   Check set_finType : finType -> finType.
@@ -236,10 +237,13 @@ End finType.
 (* ordinal 类型，序数集，通过计算来构造，而不是手工构造证明 *)
 Section ordinal.
   
-  (* 序数集合，所提供的证明特别巧妙，是一个bool函数，而非Prop命题 *)
+  (* 序数集合，所提供的证明特别巧妙，是一个bool函数，而非Prop命题。
+   *)
   Print ordinal. (* Inductive ordinal (n : nat) : predArgType :=  
     Ordinal : forall m : nat, is_true (m < n) -> 'I_n *)
+  (* 由于 < 被定义为了 leq，它是bool可计算的，并且证明可由 reflexivity 触发计算 *)
   Compute leq 2 3.  (* 2 <= 3 *)
+  Goal 2 < 3. apply erefl. Qed. (* 自动化程度很高 *)
   
   (* 构造小于n的集合，也就是小于n的所有序数。 *)
   
@@ -255,7 +259,58 @@ Section ordinal.
   *)
   
   (* 手动构造，非常简单，Coq在做类型检查时使用规约就完成了，不需要手动构造证明 *)
-  Compute (@Ordinal 3 0 is_true_true).
+  Let ord_0_3 := @Ordinal 3 0 is_true_true.
+  Compute ord_0_3.
+
+  (* 取出序数包装之下的nat *)
+  Compute nat_of_ord ord_0_3.
+
+  (* ================================================ *)
+  (* 研究一下重要的 ord_enum 函数，它生成了序数的集合 *)
+  Print ord_enum. (* ord_enum = fun n : nat => pmap insub (iota 0 n)
+     : forall n : nat, seq 'I_n *)
+
+  (* 这里的 iota 等同于 List.seq，就是构造一个序列 *)
+  Print iota.
+  Print List.seq.
+
+  (* insub 函数测试一个元素 x 是否小于 n，返回 option 类型 *)
+  Print insub.
+  Check insub 0.
+
+  (* pmap 是 (map option) 的意思，它接受类型为 rT->option sT 的函数，
+     丢弃None，并脱掉Some，得到结果。*)
+  Print pmap.
+  Compute pmap insub (iota 0 3).
+
+  (* 也就是说，ord_enum n 将得到一个小于n 的序数组成的list。*)
+  (* Let list_ord3 := Eval cbv in ord_enum 2. *)
+  (* Compute (nat_of_ord (List.hd _ list_ord3)). *)
+
+  (* 问题是这里为什么得不到明文？可能是 idP 的原因 *)
+  Print idP.
+  Print is_true_true.
+  Check erefl true.
+  Print not_false_is_true.
+  Compute idP.
+  (** 类型为 3 == 3 *)
+  Check @eq_refl nat_eqType 3.
+  Check idP (@eq_refl nat_eqType 3).
+
+  (** 类型为 ? *)
+  Check @eq_refl (finfun_finType (ordinal_finType 3) (ordinal_finType 3)).
+
+  (** 接下来，要证明 ord_enum 这样的枚举是完整的，并且没有冗余。
+      page145 in MC book *)
+  Check map val (ord_enum 2) : seq nat. (* 类型很熟悉，但就是算不出来 *)
+  Compute map val (ord_enum 2).
+    
+  Goal forall n, map val (ord_enum n) = iota 0 n.
+  Proof.
+    intros. rewrite pmap_filter.
+    - Unset Printing Notations.
+      apply all_filterP. 
+
 
 End ordinal.
 
@@ -379,7 +434,19 @@ finfun_of (aT : Finite.type) (rT : forall _ : aT, Type)
     unfold in_mem. unfold pred_of_mem.
 (*     refine (finfun_nil _). *)
 (*     refine (finfun_cons _ _). *)
-    Abort.
+  Abort.
+
+  (** 补充，MC书上 p147 补充了 ffun 的解释 *)
+  Fail Check {ffun nat -> nat}. (* nat作为定义域无法构成 ffun *)
+  Check {ffun 'I_3 -> nat}.   (* I_7是ordinal 7，是可以构成 ffun 的 *)
+  Check {ffun 'I_2 -> 'I_3 -> nat}. (* 轻松构成了 2x3 的矩阵 *)
+  Check {ffun 'I_4 -> 'I_2 -> 'I_3 -> nat}. (* 可以一直嵌套下去 *)
+
+  (* 直接写出了这样的函数定义。
+     这里构造了一个函数列表，它作用到定义域的枚举时，得到有限的元素
+   *)
+  Let vec1 := [ffun i : 'I_2 => i + 2] : {ffun 'I_2 -> nat}.
+  
 
 End finfun_of.
 

@@ -489,6 +489,19 @@ Section map_A_B.
     intros f g H l. induction l; intros; try easy.
     simpl. rewrite H,IHl. easy.
   Qed.
+  
+  (** map is equal, imply the list is equal *)
+  Lemma map_eq_imply_eq : forall (f : A -> B) (l1 l2 : list A),
+      map f l1 == map f l2 ->
+      Bijective f (Aeq:=Aeq) (Beq:=Beq) ->
+      eqlistA Aeq l1 l2.
+  Proof.
+    intros f l1. induction l1; intros; destruct l2; simpl in *; try easy.
+    apply cons_eq_iff in H. destruct H.
+    constructor; auto.
+    destruct H0 as [Hinj Hbij].
+    apply inj_pres_eq with (a1:=a)(a2:=a0) in Hinj; auto.
+  Qed.
 
   (** map_ext_in_iff setoid version *)
   Lemma map_ext_in_iff : forall (f g : A -> B) (l : list A),

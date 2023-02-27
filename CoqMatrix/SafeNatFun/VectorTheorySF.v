@@ -33,6 +33,7 @@ Module BasicVectorTheorySF (E : ElementType).
 
   Open Scope nat_scope.
   Open Scope A_scope.
+  Open Scope mat_scope.
   Open Scope vec_scope.
   
   (* ==================================== *)
@@ -187,6 +188,9 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   (** Import ring matrix theory *)
   Module Export RingMatrixTheorySF := RingMatrixTheorySF E.
 
+  Open Scope mat_scope.
+  Open Scope vec_scope.
+
   (** ** Zero vector *)
   Definition vec0 {n} : vec n := mat0 n 1.
 
@@ -327,6 +331,9 @@ Module DecidableFieldVectorTheorySF (E : DecidableFieldElementType)
 
   Export E.
   Include (RingVectorTheorySF E).
+
+  Open Scope mat_scope.
+  Open Scope vec_scope.
 
   (** veq is decidable *)
   Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
