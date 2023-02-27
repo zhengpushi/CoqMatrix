@@ -121,7 +121,12 @@ Section DimAny.
   Proof.
     intros. destruct v as [v].
     unfold vnonzero,vzero,vec0,mat0,vcmul,veq in *.
-    rewrite meq_iff_mnth in *. simpl in *.
+    (* Tips: use "rewrite xx in *" in ocaml_4.07.1 give error "nothing to write",
+       so, I write two command manually *)
+    (* rewrite meq_iff_mnth in *. *)
+    rewrite meq_iff_mnth in H.
+    rewrite meq_iff_mnth in H0.
+    simpl in *.
     (*  ∀ij(k * v i j = 0)  ~∀ij(v i j = 0)   -> k = 0 *)
 
     (* idea: from "~(∀ij(v i j = 0)" to "∃ij(v i j≠0)" *)

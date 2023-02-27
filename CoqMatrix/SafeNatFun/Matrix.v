@@ -385,10 +385,10 @@ Ltac by_cell :=
   intros i j Hi Hj; try solve_end;
   repeat mat_to_fun;
   repeat (destruct i as [|i]; simpl;
-          [|apply Arith_prebase.lt_S_n in Hi]; try solve_end);
+          [|apply Coq.Arith.Lt.lt_S_n in Hi]; try solve_end);
   (* clear Hi; *)
   repeat (destruct j as [|j]; simpl;
-          [|apply Arith_prebase.lt_S_n in Hj]; try solve_end)
+          [|apply Coq.Arith.Lt.lt_S_n in Hj]; try solve_end)
   (* clear Hj *)
   .
 
