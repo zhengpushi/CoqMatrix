@@ -352,10 +352,12 @@ Global Ltac by_cell :=
   let Hj := fresh "Hj" in
   intros i j Hi Hj; try solve_end;
   repeat (destruct i as [|i]; simpl;
-          [|apply Coq.Arith.Lt.lt_S_n in Hi]; try solve_end);
-  (* clear Hi; *)
+          (* [|apply Coq.Arith.Lt.lt_S_n in Hi]; try solve_end); *)
+          [|apply Arith_prebase.lt_S_n in Hi]; try solve_end);
+    (* clear Hi; *)
   repeat (destruct j as [|j]; simpl;
-          [|apply Coq.Arith.Lt.lt_S_n in Hj]; try solve_end)
+          (* [|apply Coq.Arith.Lt.lt_S_n in Hj]; try solve_end) *)
+          [|apply Arith_prebase.lt_S_n in Hj]; try solve_end)
   (* clear Hj *)
   .
 
