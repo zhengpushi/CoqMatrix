@@ -84,7 +84,7 @@ Global Hint Unfold
   : R.
 
 (** Config hint db for autorewrite, for rewriting of equations *)
-Global Hint Rewrite
+#[export] Hint Rewrite
   (* Abs *)
   Rabs_Ropp           (* Rabs (-x) = Rabs x *)
   Rabs_Rabsolu        (* Rabs (Rabs x) = Rabs x *)
@@ -229,14 +229,14 @@ Lemma xx_Rsqr x : x * x = x².
 Proof.
   auto.
 Qed.
-Global Hint Rewrite xx_Rsqr : R.
+#[export] Hint Rewrite xx_Rsqr : R.
 
 (** r ^ 2 = r² *)
 Lemma Rpow2_Rsqr r : r ^ 2 = r².
 Proof.
   ra.
 Qed.
-Global Hint Rewrite Rpow2_Rsqr : R.
+#[export] Hint Rewrite Rpow2_Rsqr : R.
 
 
 (* ======================================================================= *)
@@ -247,17 +247,17 @@ Lemma R1_eq_1 : R1 = 1.
 Proof.
   auto.
 Qed.
-Global Hint Rewrite R1_eq_1 : R.
+#[export] Hint Rewrite R1_eq_1 : R.
 
 Lemma Rsqr_1 : 1² = 1.
 Proof.
   ra.
 Qed.
-Global Hint Rewrite Rsqr_1 : R.
+#[export] Hint Rewrite Rsqr_1 : R.
 Global Hint Resolve Rsqr_1 : R.
 
 (** /1 = 1 *)
-Global Hint Rewrite Rinv_1 : R.
+#[export] Hint Rewrite Rinv_1 : R.
 Global Hint Resolve Rinv_1 : R.
 
 Lemma zero_le_1 : 0 <= 1.
@@ -290,7 +290,7 @@ Lemma Rsub_opp r1 r2 : r1 - (- r2) = r1 + r2.
 Proof.
   ring.
 Qed.
-Global Hint Rewrite Rsub_opp : R.           (* r1 - (- r2) = r1 + r2 *)
+#[export] Hint Rewrite Rsub_opp : R.           (* r1 - (- r2) = r1 + r2 *)
 
 
 (* ======================================================================= *)
@@ -530,7 +530,7 @@ Proof.
 Qed.
 
 
-Global Hint Rewrite
+#[export] Hint Rewrite
   sqrt_square_abs         (* sqrt (r * r) = Rabs r *)
   (* Rsqr_sqrt               (* 0 <= x -> (sqrt x)² = x *) *)
   sqrt_1                  (* sqrt 1 = 1 *)
@@ -622,7 +622,7 @@ Proof.
   intros. rewrite Rplus_comm. apply sin2_cos2.
 Qed.
 
-Global Hint Rewrite
+#[export] Hint Rewrite
   sin_PI2       (* sin (PI / 2) = 1 *)
   cos_PI2       (* cos (PI / 2) = 0 *)
   sin_PI2_neg   (* sin (- (PI/2)) = -1 *)

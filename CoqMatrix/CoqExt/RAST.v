@@ -42,7 +42,7 @@ Inductive A :=
 | Afunc (f : string) (args : list A).
 
 (** Simplify expression with R type *)
-Global Hint Rewrite
+#[export] Hint Rewrite
   Rplus_0_l  (* 0 + r = r *)
   Rplus_0_r  (* r + 0 = r *)
   Rmult_0_l  (* 0 * r = 0 *)
