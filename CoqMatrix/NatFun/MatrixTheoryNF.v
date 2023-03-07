@@ -9,8 +9,9 @@
  *)
 
 
-Require Import MatrixTheory.
+Require Export MatrixTheory.
 Require Import Sequence NatFun.Matrix.
+
 
 (* ######################################################################### *)
 (** * Basic matrix theory implemented with NatFun *)

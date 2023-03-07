@@ -8,7 +8,7 @@
   date      : 2021.12
  *)
 
-Require Import MatrixTheory.
+Require Export MatrixTheory.
 Require Import DepPair.Matrix.
 
 

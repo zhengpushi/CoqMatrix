@@ -12,7 +12,7 @@
 *)
 
 
-Require Import MatrixTheory.
+Require Export MatrixTheory.
 Require Import DepList.Matrix.
 
 

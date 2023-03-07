@@ -9,7 +9,7 @@
 *)
 
 
-Require Import MatrixTheory.
+Require Export MatrixTheory.
 Require Import DepRec.Matrix.
 
 

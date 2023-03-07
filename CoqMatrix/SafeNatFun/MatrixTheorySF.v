@@ -12,8 +12,9 @@
  *)
 
 
-Require Import MatrixTheory.
+Require Export MatrixTheory.
 Require Sequence SafeNatFun.Matrix.
+
 
 (* ######################################################################### *)
 (** * Basic matrix theory implemented with SafeNatFun *)
