@@ -107,10 +107,11 @@ Section mnth.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mnth {r c} (m : mat r c) (ri ci : nat) : A := matf m ri ci.
+  Notation "m ! i ! j " := (mnth m i j) : mat_scope.
   
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
       m1 == m2 <-> 
-        (forall ri ci, ri < r -> ci < c -> (mnth m1 ri ci == mnth m2 ri ci)%A).
+        (forall ri ci, ri < r -> ci < c -> (m1!ri!ci == m2!ri!ci)%A).
   Proof.
     intros. split; intros; auto.
   Qed.
@@ -118,7 +119,7 @@ Section mnth.
 End mnth.
 
 Global Hint Unfold mnth : core.
-Notation "m @ i # j " := (mnth m i j) : mat_scope.
+Notation "m ! i ! j " := (mnth m i j) : mat_scope.
 
 
 (* ==================================== *)
@@ -135,7 +136,7 @@ Section mrow.
     match c with
     | O => nil
     | S c' =>
-        m @ ri # c_init :: (@mrowAux r c' ri (S c_init) (mk_mat (matf m)))
+        m!ri!c_init :: (@mrowAux r c' ri (S c_init) (mk_mat (matf m)))
     end.
 
   (** Get a row which row index is ri *)
@@ -155,7 +156,7 @@ Section mrow.
   (** (mrowAux m i c_init)[j] = m[i][j + c_init] *)
   Lemma nth_mrowAux : forall {r c} ri ci c_init (m : mat r c) a,
       ri < r -> ci < c ->
-      (nth ci (mrowAux ri c_init m) a == m @ ri # (ci + c_init))%A.
+      (nth ci (mrowAux ri c_init m) a == m!ri!(ci + c_init))%A.
   Proof.
     intros r c. induction c; intros; simpl. easy.
     destruct ci; auto. f_equiv. rewrite IHc; try lia.
@@ -164,7 +165,7 @@ Section mrow.
 
   (** (mrow m i)[j] = m[i][j] *)
   Lemma nth_mrow : forall {r c} ri ci (m : mat r c) a,
-      ri < r -> ci < c -> (nth ci (mrow ri m) a == m @ ri # ci)%A.
+      ri < r -> ci < c -> (nth ci (mrow ri m) a == m ! ri ! ci)%A.
   Proof.
     intros. unfold mrow. rewrite nth_mrowAux; auto. f_equiv. auto.
   Qed.
@@ -225,7 +226,7 @@ Section l2m_m2l.
   
   Lemma nth_nth_m2lAux : forall {r c} (m : mat r c) (ri ci r_init : nat),
       (ri < r) -> (ci < c) -> (ri + r_init < r) ->
-      (nth ci (nth ri (m2lAux r_init m) []) A0 == m @ (ri + r_init)%nat # ci)%A.
+      (nth ci (nth ri (m2lAux r_init m) []) A0 == m ! (ri + r_init)%nat ! ci)%A.
   Proof.
     induction r; intros. lia.
     destruct ri; simpl. apply nth_mrow; auto.
@@ -302,7 +303,7 @@ Section mcol.
   Fixpoint mcolAux (r c : nat) (ci : nat) (r_init : nat) (m : mat r c) : list A :=
     match r with
     | O => nil
-    | S r' => m @ r_init # ci :: (mcolAux r' c ci (S r_init) (mk_mat (matf m)))
+    | S r' => m ! r_init ! ci :: (mcolAux r' c ci (S r_init) (mk_mat (matf m)))
     end.
   
   Definition mcol {r c : nat} (ci : nat) (m : mat r c) := mcolAux r c ci 0 m.
@@ -321,7 +322,7 @@ Section mshift.
   
   (** Right shift columns *)
   Definition mshiftc {r c} (m : @mat A r c) (k : nat) : mat r c :=
-    mk_mat (fun i j => m @ i # (j + k)).
+    mk_mat (fun i j => m ! i ! (j + k)).
   
   (** ∃ m m' k (m = m' /\ mshiftc m k <> mshiftc m' k *)
   Lemma mshiftc_neq : exists r c (m1 m2 : mat r c) (k : nat),
@@ -385,10 +386,12 @@ Ltac by_cell :=
   intros i j Hi Hj; try solve_end;
   repeat mat_to_fun;
   repeat (destruct i as [|i]; simpl;
-          [|apply Coq.Arith.Lt.lt_S_n in Hi]; try solve_end);
+          (* [|apply Coq.Arith.Lt.lt_S_n in Hi]; try solve_end); *)
+          [|apply Arith_prebase.lt_S_n in Hi]; try solve_end);
   (* clear Hi; *)
   repeat (destruct j as [|j]; simpl;
-          [|apply Coq.Arith.Lt.lt_S_n in Hj]; try solve_end)
+          (* [|apply Coq.Arith.Lt.lt_S_n in Hj]; try solve_end) *)
+          [|apply Arith_prebase.lt_S_n in Hj]; try solve_end)
   (* clear Hj *)
   .
 
@@ -445,10 +448,10 @@ Section Map.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mmap {r c} (f : A -> A) (m : mat r c) : mat r c :=
-    mk_mat (fun i j => f (m @ i # j)).
+    mk_mat (fun i j => f (m ! i ! j)).
   
   Definition mmap2 {r c} (f : A -> A -> A) (m1 m2 : mat r c) : mat r c :=
-    mk_mat (fun i j => f (m1 @ i # j) (m2 @ i # j)).
+    mk_mat (fun i j => f (m1 ! i ! j) (m2 ! i ! j)).
   
   Lemma mmap2_comm : forall {r c} (f : A -> A -> A)
                        (f_comm : forall a b : A, (f a b == f b a)%A)
@@ -478,7 +481,7 @@ Section mtrans.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mtrans {r c} (m : @mat A r c): mat c r :=
-    mk_mat (fun i j => m @ j # i).
+    mk_mat (fun i j => m ! j ! i).
   Notation "m \T" := (mtrans m) : mat_scope.
   
   (** Transpose twice keep unchanged. *)
@@ -536,7 +539,7 @@ Section malg.
   (** *** Matrix addition *)
   
   Definition madd {r c} (m1 m2 : mat r c) : mat r c :=
-    mk_mat (fun i j => m1 @ i # j + m2 @ i # j).
+    mk_mat (fun i j => m1!i!j + m2!i!j).
   Infix "+" := madd : mat_scope.
 
   (** m1 + m2 = m2 + m1 *)
@@ -566,7 +569,7 @@ Section malg.
   (** Get element of addition with two matrics equal to additon of 
       corresponded elements. *)
   Lemma madd_nth : forall {r c} (m1 m2 : mat r c) ri ci,
-      ((m1 + m2)%mat @ ri # ci == (m1 @ ri # ci) + (m2 @ ri # ci))%A.
+      ((m1 + m2)%mat ! ri ! ci == (m1!ri!ci) + (m2!ri!ci))%A.
   Proof.
     intros.
     unfold madd, mnth. easy.
@@ -593,7 +596,7 @@ Section malg.
   (** *** Matrix opposition *)
   
   Definition mopp {r c} (m : mat r c) : mat r c :=
-    mk_mat (fun i j => - (m @ i # j)).
+    mk_mat (fun i j => - (m!i!j)).
   Notation "- a" := (mopp a) : mat_scope.
 
   (** - (- m) = m *)
@@ -606,7 +609,7 @@ Section malg.
   (** *** Matrix subtraction *)
   
   Definition msub {r c} (m1 m2 : mat r c) : mat r c :=
-    mk_mat (fun i j => m1@i#j - m2@i#j).
+    mk_mat (fun i j => m1!i!j - m2!i!j).
   Infix "-" := msub : mat_scope.
 
   (** m1 - m2 = -(m2 - m1) *)
@@ -658,12 +661,12 @@ Section malg.
 
   (** Left scalar multiplication of matrix *)
   Definition mcmul {r c} (a : A) (m : mat r c) : mat r c :=
-    mk_mat (fun i j => (a * m @ i # j)).
+    mk_mat (fun i j => (a * m!i!j)).
   Infix "c*" := mcmul : mat_scope.
   
   (** Right scalar multiplication of matrix *)
   Definition mmulc {r c} (m : mat r c) (a : A) : mat r c :=
-    mk_mat (fun i j => (m @ i # j * a)).
+    mk_mat (fun i j => (m!i!j * a)).
   Infix "*c" := mmulc : mat_scope.
 
   (** mcmul is a proper morphism *)
@@ -724,7 +727,7 @@ Section malg.
   (** *** Matrix multiplication *)
   Definition mmul {r c t : nat} (m1 : mat r c) (m2 : mat c t) : mat r t :=
     mk_mat
-      (fun x z => seqsum (Aadd:=Aadd)(A0:=A0) (fun y => m1 @ x # y * m2 @ y # z) c).
+      (fun x z => seqsum (Aadd:=Aadd)(A0:=A0) (fun y => m1!x!y * m2!y!z) c).
   Infix "*" := mmul : mat_scope.
 
   (** (m1 * m2) * m3 = m1 * (m2 * m3) *)
@@ -829,10 +832,12 @@ Section t2m_m2t.
 
   (** mat_3x3 -> tuple 3x3. That is: ((a11,a12,a13),(a21,a22,a23),(a31,a32,a33)) *)
   Definition m2t_3x3 (m : mat 3 3) : @T_3x3 A :=
-    ((m@0#0, m@0#1, m@0#2), (m@1#0, m@1#1, m@1#2), (m@2#0, m@2#1, m@2#2)).
+    ((m!0!0, m!0!1, m!0!2),
+      (m!1!0, m!1!1, m!1!2),
+      (m!2!0, m!2!1, m!2!2)).
 
   (** m[0,0]: mat_1x1 -> A *)
-  Definition scalar_of_mat (m : @mat A 1 1) := mnth m 0 0.
+  Definition scalar_of_mat (m : @mat A 1 1) := m!0!0.
 
 End t2m_m2t.
 
@@ -847,7 +852,7 @@ Section smat.
 
   (** Trace *)
   Definition trace {n : nat} (m : smat n) := 
-    seqsum (Aadd:=Aadd)(A0:=A0) (fun i => m @ i # i) n.
+    seqsum (Aadd:=Aadd)(A0:=A0) (fun i => m!i!i) n.
 
 End smat.
 

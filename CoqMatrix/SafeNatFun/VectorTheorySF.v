@@ -55,13 +55,12 @@ Module BasicVectorTheorySF (E : ElementType).
   Admitted.
 
   (** Get element of vector *)
-  Definition vnth {n} (v : vec n) i : A := @mnth n 1 v i 0.
-
-  Global Notation "v @ i " := (vnth v i) : vec_scope.
+  Definition vnth {n} (v : vec n) i : A := v!i!0.
+  Global Notation "v ! i " := (vnth v i) : vec_scope.
 
   (** veq and mnth should satisfy this constraint *)
   Lemma veq_iff_vnth : forall {n : nat} (v1 v2 : vec n),
-      (v1 == v2) <-> (forall i, i < n -> (vnth v1 i == vnth v2 i)%A).
+      (v1 == v2) <-> (forall i, i < n -> (v1!i == v2!i)%A).
   Proof.
     intros.
   Admitted.
@@ -91,9 +90,9 @@ Module BasicVectorTheorySF (E : ElementType).
   Definition t2v_4 (t : @T4 A) : vec 4 :=
     let '(a,b,c,d) := t in l2m [[a];[b];[c];[d]].
 
-  Definition v2t_2 (v : vec 2) : @T2 A := (v@0, v@1).
-  Definition v2t_3 (v : vec 3) : @T3 A := (v@0, v@1, v@2).
-  Definition v2t_4 (v : vec 4) : @T4 A := (v@0, v@1, v@2, v@3).
+  Definition v2t_2 (v : vec 2) : @T2 A := (v!0, v!1).
+  Definition v2t_3 (v : vec 3) : @T3 A := (v!0, v!1, v!2).
+  Definition v2t_4 (v : vec 4) : @T4 A := (v!0, v!1, v!2, v!3).
   
   Lemma v2t_t2v_id_2 : forall (t : A * A), v2t_2 (t2v_2 t) = t.
   Proof.
@@ -131,15 +130,15 @@ Module BasicVectorTheorySF (E : ElementType).
     (** Construct a matrix with a vector and a matrix by row *)
     Definition mconsr {r c} (v : vec c) (m : mat r c) : mat (S r) c :=
       mk_mat (fun ri ci => match ri with
-                             | O => v @ ci
-                             | _ => m @ (ri - 1) # ci
+                             | O => v ! ci
+                             | _ => m ! (ri - 1) ! ci
                              end).
     
     (** Construct a matrix with a vector and a matrix by column *)
     Definition mconsc {r c} (v : vec r) (m : mat r c) : mat r (S c) :=
       mk_mat (fun ri ci => match ci with
-                             | O => v @ ri
-                             | _ => m @ ri # (ci - 1)
+                             | O => v ! ri
+                             | _ => m ! ri ! (ci - 1)
                              end).
     
     (* (** Equality of two forms of ConstructByRow *) *)
@@ -169,7 +168,7 @@ Module Test_BasicVectorTheorySF.
   Module Import M := BasicVectorTheorySF ElementTypeNat.
   Definition v1 : vec 3 := l2v [1;2;3].
   Definition m1 : mat 3 3 := l2m [[10;11;12];[13;14;15];[16;17;18]].
-  Goal v1@(v1@0) = 2. auto. Qed.
+  Goal v1!(v1!0) = 2. auto. Qed.
   Goal m2l (mconsr v1 m1) = [[1;2;3];[10;11;12];[13;14;15];[16;17;18]]. auto. Qed.
   Goal m2l (mconsc v1 m1) = [[1;10;11;12];[2;13;14;15];[3;16;17;18]]. auto. Qed.
 End Test_BasicVectorTheorySF.

@@ -59,11 +59,11 @@ Module BasicMatrixTheoryDL (E : ElementType) <: BasicMatrixTheory E.
   (** Get n-th element of a matrix *)  
   Definition mnth {r c} (m : mat r c) (ri ci : nat) :=
     mnthNat m ri ci (A0:=A0).
-  Notation "m @ i # j" := (mnth m i j).
+  Notation "m ! i ! j" := (mnth m i j).
 
   (** meq and mnth should satisfy this constraint *)
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
-    m1 == m2 <-> (forall ri ci, ri < r -> ci < c -> (m1@ri#ci == m2@ri#ci)%A).
+    m1 == m2 <-> (forall ri ci, ri < r -> ci < c -> (m1!ri!ci == m2!ri!ci)%A).
   Proof.
     intros. apply meq_iff_mnthNat.
   Qed.

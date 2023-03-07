@@ -50,10 +50,11 @@ Reserved Infix    "\o"      (at level 50, no associativity).
 Reserved Notation "- a"     (at level 35, right associativity).
 Reserved Notation "/ a"     (at level 35, right associativity).
 Reserved Notation "a \T"    (at level 34, left associativity).
+Reserved Notation "m1 @ m2" (at level 30, no associativity).
 
 (* this level is consistent with Mathcomp.ssreflect.ssrnotations.v *)
-Reserved Notation "m @ i # j"  (at level 20, i at next level).
-Reserved Notation "v @ i"      (at level 20, i at next level).
+Reserved Notation "m ! i ! j"  (at level 20, i at next level).
+Reserved Notation "v ! i"      (at level 20, i at next level).
 
 
 

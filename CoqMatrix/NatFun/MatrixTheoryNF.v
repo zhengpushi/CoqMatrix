@@ -54,10 +54,11 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
 
   (** Get n-th element of a matrix *)  
   Definition mnth {r c} (m : mat r c) (ri ci : nat) := @mnth A r c m ri ci.
+  Notation "m ! i ! j" := (mnth m i j).
 
   (** meq and mnth should satisfy this constraint *)
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
-      m1 == m2 <-> (forall ri ci, ri < r -> ci < c -> (mnth m1 ri ci == mnth m2 ri ci)%A).
+      m1 == m2 <-> (forall ri ci, ri < r -> ci < c -> (m1!ri!ci == m2!ri!ci)%A).
   Proof.
     intros. apply meq_iff_mnth.
   Qed.
@@ -162,7 +163,7 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
   Definition m2t_3x3 (m : mat 3 3) : @T_3x3 A := m2t_3x3 m.
   
   (** m[0,0] : mat_1x1 -> A *)
-  Definition scalar_of_mat (m : mat 1 1) := mnth m 0 0.
+  Definition scalar_of_mat (m : mat 1 1) := m!0!0.
 
   (* ==================================== *)
   (** ** Matrix transposition *)
