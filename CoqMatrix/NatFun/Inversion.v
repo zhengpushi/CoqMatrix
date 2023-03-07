@@ -47,11 +47,12 @@
 
 
 Require Import StrExt.
-
-Require Export MatrixTheoryNF.
+Require Import Arith Lia List.
+Require Import MatrixTheoryNF.
 
 Open Scope nat_scope.
 Open Scope A_scope.
+Open Scope list_scope.
 Open Scope mat_scope.
 
 
@@ -163,10 +164,27 @@ Module Inversion (E : DecidableFieldElementType).
   Export E.
   Module Export M := DecidableFieldMatrixTheoryNF E.
 
+
   Add Field field_inst : make_field_theory.
 
   (** Squaqre matrix *)
-  Definition smat (n : nat) := mat n n.
+  
+  (* Note that, we use Notation instead of Definition,  because the weak type 
+     issue of NatFun.
+
+     For example, there are different type inference ability when the function 
+     mnth is applied to an object of type mat or smat. *)
+  Section smat_notation_or_definition_issue.
+    Local Definition smat (n : nat) := mat n n.
+    Variable m : smat 1.
+    Check mnth (m : smat 1).  (* coq cannot infer the r and c *)
+    Check mnth (m : mat 1 1). (* with the explicit annotation, it's ok *)
+    Check m!0!0.          (* the mnth notation fails to infer the type *)
+    Fail Goal m!0!0 = A0. (* so, this notation become unusable *)
+  End smat_notation_or_definition_issue.
+
+  (* Definition smat (n : nat) := mat n n. *)
+  Notation "'smat' n" := (mat n n) (at level 20).
   
   (* ======================================================================= *)
   (** ** Determinant. *)
@@ -179,21 +197,8 @@ Module Inversion (E : DecidableFieldElementType).
       let j' := (if ltb j c then j else S j) in
       m i' j'.
   
-  (** Determinant *)
-  (* Original verion *)
-  (* Fixpoint det {n} : smat n -> A := *)
-  (*   match n with *)
-  (*   | 0 => fun _ => A1 *)
-  (*   | S n' => *)
-  (*       fun m => *)
-  (*         fold_left Aadd (map (fun i => *)
-  (*                                let s := if Nat.even i then A1 else (-A1)%A in *)
-  (*                                let a := m 0 i in *)
-  (*                                let d := det (submat m 0 i) in *)
-  (*                                (s * a * d)%A) (seq 0 n)) A0 *)
-  (*   end. *)
-  
-  (* Modified version, don't use local variable s *)
+  (** Determinant of a square matrix.
+      The idea: by expanding the first row *)
   Fixpoint det {n} : smat n -> A :=
     match n with
     | 0 => fun _ => A1
@@ -206,19 +211,27 @@ Module Inversion (E : DecidableFieldElementType).
                     (a * d)%A) (seq 0 n)) A0
     end.
   
-  (** Verify formula for determinant of specify matrix *)
-  Lemma det_1_1 : forall a, (det (mk_mat_1_1 a) == a)%A.
+  (** Determinant of a matrix with specific dimension *)
+  
+  Definition det_1_1 (m : smat 1) := m!0!0.
+  Lemma det_1_1_correctness : forall m, (det_1_1 m == det m)%A.
   Proof.
     intros. cbv. ring.
   Qed.
   
-  Lemma det_2_2 : forall a11 a12 a21 a22, 
-      (det (mk_mat_2_2 a11 a12 a21 a22) == (a11 * a22 - a12 * a21))%A.
+  Definition det_2_2 (m : smat 2) := (m!0!0 * m!1!1 - m!0!1 * m!1!0)%A.
+  Lemma det_2_2_correctness : forall m, (det_2_2 m == det m)%A.
   Proof.
     intros. cbv. ring.
   Qed.
+
+  Notation "! m # i # j" := (mnth m i j) (at level 30).
   
-  Lemma det_3_3 : forall a11 a12 a13 a21 a22 a23 a31 a32 a33, 
+  Definition det_3_3 (m : smat 3) :=
+    (!m#0#0 * m!1!1 * m!2!2 - m!0!0 * m!1!2 * m!2!1 - 
+       m!0!1 * m!1!0 * m!2!2 + m!0!1 * m!1!2 * m!2!0 + 
+       m!0!2 * m!1!0 * m!2!1 - m!0!2 * m!1!1 * m!2!0)%A.
+  Lemma det_3_3_ok : forall a11 a12 a13 a21 a22 a23 a31 a32 a33, 
       (det (mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33) == 
         (a11*a22*a33 - a11*a23*a32 - 
            a12*a21*a33 + a12*a23*a31 + 

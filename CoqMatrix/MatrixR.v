@@ -74,7 +74,7 @@ Export MatrixR_SF.
 
 (** Trace of a square matrix *)
 Definition trace {n : nat} (m : smat n) :=
-  seqsum (A0:=R0) (Aadd:=Rplus) (fun i => m @ i # i) n.
+  seqsum (A0:=R0) (Aadd:=Rplus) (fun i => m!i!i) n.
 
 (** Determinant of 3x3 matrix *)
 Definition det3 (m : smat 3) : A :=
@@ -101,4 +101,3 @@ Section test.
   Proof. intros. apply madd_comm. Qed.
 
 End test.
-
