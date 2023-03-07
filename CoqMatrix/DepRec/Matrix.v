@@ -565,14 +565,14 @@ Section madd_opp_sub.
     intros. destruct m1,m2.
     unfold meq,msub,mopp,matmap2,matmap2dl; simpl.
     unfold matmapdl; simpl. subst.
-    rewrite dlsub_comm with (c:=c); easy.
+    rewrite (dlsub_comm _ _ c); easy.
   Qed.
 
   Lemma msub_assoc : forall {r c} (m1 m2 m3 : mat r c),
       (m1 - m2) - m3 == m1 - (m2 + m3).
   Proof.
     intros. unfold meq,msub,mopp,madd,matmap2,matmap2dl. simpl.
-    apply dlsub_assoc with (c:=c); try apply mwidth;
+    apply (dlsub_assoc _ _ _ c); try apply mwidth;
       repeat rewrite mheight; auto.
   Qed.
   
@@ -644,7 +644,7 @@ Section mcmul_mmulc_mmul.
     - destruct m1 as [dl1 H1 W1], m2 as [dl2 H2 W2]; simpl.
       apply dldotdl_length; auto.
     - destruct m1 as [dl1 H1 W1], m2 as [dl2 H2 W2]; simpl.
-      apply dldotdl_width with (c:=c);
+      apply (dldotdl_width _ _ _ c);
         auto using dltrans_length, dltrans_width.
   Defined.
   Infix "*" := mmul : mat_scope.
@@ -657,7 +657,7 @@ Section mcmul_mmulc_mmul.
     intros. destruct m1,m2,m3.
     unfold meq; simpl. unfold matmap2dl; simpl.
     rewrite dltrans_dmap2; auto.
-    rewrite dldotdl_dmap2_distr_r with (c:=c);
+    rewrite (dldotdl_dmap2_distr_r _ _ _ mwidth0);
       auto using dltrans_length, dltrans_width. easy. lia.
   Qed.
   
@@ -668,7 +668,7 @@ Section mcmul_mmulc_mmul.
   Proof.
     intros. destruct m1,m2,m3.
     unfold meq; simpl. unfold matmap2dl; simpl.
-    rewrite dldotdl_dmap2_distr_l with (c:=c);
+    rewrite (dldotdl_dmap2_distr_l _ _ _ mwidth0);
       auto using dltrans_length, dltrans_width. easy.
   Qed.
 

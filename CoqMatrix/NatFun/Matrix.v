@@ -9,7 +9,7 @@
  *)
 
 
-Require Import TupleExt HierarchySetoid SetoidListListExt.
+Require Import NatExt TupleExt HierarchySetoid SetoidListListExt.
 Require Import Sequence.
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
@@ -329,18 +329,10 @@ Ltac solve_end :=
   end.
 
 (** Some modification of this tactic:
-1. about the warning below,
-----
-Warning: Notation lt_S_n is deprecated since 8.16.
-The Arith.Lt file is obsolete. Use the bidirectional version Nat.succ_lt_mono instead.
-[deprecated-syntactic-definition,deprecated]
-----
-  The lemma Nat.succ_lt_mono_left is a bidirectional version, but lt_S_n is only one 
-  direction, these two lemmas are not really same here.
-  For example, we need to use it only when "S ?a < S ?b" in the context.
-  So, we use Arith_prebase.lt_S_n to instead it
-2. about "clear Hi, clear Hj", we shouldn't call it anywhere, because these
-  two conditions are needed in some cases. 
+1. use a alternate lemma NatExt.lt_S_n instead of lt_S_n,
+   because Coq report it is deprecated since 8.16
+2. disable "clear Hi, clear Hj", because these two conditions are needed in 
+   some cases. 
 *)
 
 Global Ltac by_cell :=
@@ -352,14 +344,12 @@ Global Ltac by_cell :=
   let Hj := fresh "Hj" in
   intros i j Hi Hj; try solve_end;
   repeat (destruct i as [|i]; simpl;
-          (* [|apply Coq.Arith.Lt.lt_S_n in Hi]; try solve_end); *)
-          [|apply Arith_prebase.lt_S_n in Hi]; try solve_end);
-    (* clear Hi; *)
+          [|apply NatExt.lt_S_n in Hi]; try solve_end);
+  (* clear Hi; *)
   repeat (destruct j as [|j]; simpl;
-          (* [|apply Coq.Arith.Lt.lt_S_n in Hj]; try solve_end) *)
-          [|apply Arith_prebase.lt_S_n in Hj]; try solve_end)
-  (* clear Hj *)
-  .
+          [|apply NatExt.lt_S_n in Hj]; try solve_end)
+(* clear Hj *)
+.
 
 Global Ltac lma := by_cell; try (try (compute; ring); try (compute; easy)).
 
@@ -718,7 +708,7 @@ Section malg.
   Lemma mmul_1_l : forall {r c : nat} (m : mat r c), mat1 A0 A1 r * m == m.
   Proof.
     lma. unfold mmul,mat1.
-    apply seqsum_unique with (i:=i); auto.
+    apply (seqsum_unique _ _ _ i); auto.
     - rewrite Nat.eqb_refl. ring.
     - intros. bdestruct (i =? j0). lia. ring.
   Qed.
@@ -727,7 +717,7 @@ Section malg.
   Lemma mmul_1_r : forall {r c : nat} (m : mat r c), m * mat1 A0 A1 c == m.
   Proof.
     lma. unfold mmul,mat1.
-    apply seqsum_unique with (i:=j); auto.
+    apply (seqsum_unique _ _ _ j); auto.
     - rewrite Nat.eqb_refl. ring.
     - intros. bdestruct (j0 =? j). lia. ring.
   Qed.

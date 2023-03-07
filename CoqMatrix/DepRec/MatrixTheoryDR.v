@@ -567,7 +567,7 @@ Module DecidableFieldMatrixTheoryDR (E : DecidableFieldElementType)
       let m0 := mat0 r c in
       ~(m == m0) -> k c* m == m0 -> (k == A0)%A.
   Proof.
-    intros. apply mcmul_mnonzero_eq0_imply_k0 with (m:=m); auto.
+    intros. apply (mcmul_mnonzero_eq0_imply_k0 m); auto.
   Qed.
 
   (** k * m = m -> k = 1 \/ m = 0 *)

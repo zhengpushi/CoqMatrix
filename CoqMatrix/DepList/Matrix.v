@@ -1150,7 +1150,7 @@ Section varith.
   Lemma vfold_Aadd : forall n a b (v : @vec A n),
     (vfold Aadd (a + b) v == a + (vfold Aadd b v))%A.
   Proof.
-    apply vfoldl_Aadd with (A0:=A0). apply groupMonoid.
+    apply (vfoldl_Aadd _ A0). apply groupMonoid.
   Qed.
   
   (** vfold (a + b) v = b + (fold a v) *)
@@ -2478,7 +2478,7 @@ Section v2l_l2v.
     - destruct l1,l2; try easy.
       inv H. inv H0. simpl in *.
       apply vcons_eq_iff in H1 as [].
-      apply IHn with (l1 := l1) in H2; auto.
+      apply (IHn l1) in H2; auto.
   Qed.
 
   (** if v2l equal, then vector equal *)

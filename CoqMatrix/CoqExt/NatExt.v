@@ -160,3 +160,17 @@ Proof.
   lia.
 Qed.
 
+
+(* ######################################################################### *)
+(** * Lost or deprecated lemmas in some Coq version *)
+
+(** Coq.Arith.Lt.lt_S_n is deprecated since Coq 8.16.
+    1. although coqc suggest us to use Nat.succ_lt_mono,
+       but that is a  a bidirectional version, not exactly same as lt_S_n.
+    2. from Coq 8.16, there is a same lemma Arith_prebase.lt_S_n,
+       but it not exist in Coq 8.13,8.14.
+*)
+Definition lt_S_n: forall n m : nat, S n < S m -> n < m.
+Proof.
+  intros. apply Nat.succ_lt_mono. auto.
+Qed.

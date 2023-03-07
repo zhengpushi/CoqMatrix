@@ -8,6 +8,7 @@
 -R CoqMatrix CoqMatrix
 
 -arg -w -arg -notation-overridden
+-arg -w -arg -notation-incompatible-format
 -arg -w -arg -deprecated-hint-without-locality
 -arg -w -arg -redundant-canonical-projection
 -arg -w -arg -ambiguous-paths

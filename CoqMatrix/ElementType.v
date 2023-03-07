@@ -81,10 +81,22 @@ End ElementType.
 
 (** Type of element which specify the Aeq is eq, used in lots of cases *)
 Module Type EqElementType (B : BaseType)
-<: BaseType
-  := ElementType
-     with Definition A := B.A
-     with Definition Aeq := @eq B.A.
+<: ElementType
+   with Definition A := B.A
+   with Definition Aeq := @eq B.A.
+  Definition A := B.A.
+  Definition Aeq := @eq B.A.
+  Parameter A0 : A.
+  Parameter Equiv_Aeq : Equivalence Aeq.
+End EqElementType.  
+
+(* Note, these code only works in Coq-8.16, but failed at Coq-8.13,8.14,
+   I'm not sure why? *)
+(* Module Type EqElementType (B : BaseType) *)
+(* <: BaseType *)
+(*   := ElementType *)
+(*      with Definition A := B.A *)
+(*      with Definition Aeq := @eq B.A. *)
 
 
 (** ** Instances *)
