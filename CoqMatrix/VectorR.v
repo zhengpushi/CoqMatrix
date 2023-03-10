@@ -17,10 +17,10 @@
 
 Require Import VectorAll.
 Require MatrixR.
-
 Export HierarchySetoid.
 Export ListNotations.
 Export TupleExt.
+
 
 
 (* ######################################################################### *)
@@ -212,11 +212,7 @@ Section DimAny.
       + destruct (decidable v1 vec0); auto.
         destruct (decidable v2 (vec0)); auto.
         right. right. exists (A1/x)%A. rewrite H.
-        lma. field_simplify.
-        assert (Amul (A1 / x) x == A1)%A.
-        { cbv. field.
-          apply vec_eq_vcmul_imply_coef_neq0 in H; auto. }
-        rewrite H0. group_simpl.
+        lma. apply vec_eq_vcmul_imply_coef_neq0 in H; auto.
     - destruct H as [H1 | [H2 | H3]].
       + exists A0. left. rewrite H1. rewrite vcmul_0_l. easy.
       + exists A0. right. rewrite H2. rewrite vcmul_0_l. easy.
@@ -251,10 +247,7 @@ Section DimAny.
       + left; auto.
       + destruct H; auto. destruct H; auto. destruct H.
         right; right. exists (A1/x)%A. rewrite H.
-        lma. ring_simplify.
-        assert (Amul (A1 / x) x == A1)%A.
-        { cbv. field. apply (vec_eq_vcmul_imply_coef_neq0 v0 v1); auto. }
-        rewrite H0. group_simpl.
+        lma. apply vec_eq_vcmul_imply_coef_neq0 in H; auto.
   Qed.
 
   (* Additionally, v1 need to be a non-zero vector.

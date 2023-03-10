@@ -19,6 +19,9 @@
 (** The library all_algebra contain 'matrix' formalization *)
 From mathcomp Require Import all_ssreflect all_algebra.
 
+Require CoqSetting. (* to reset the default coq behavior of bullet *)
+
+
 Require Export BasicConfig NatExt TupleExt SetoidListListExt HierarchySetoid.
 
 

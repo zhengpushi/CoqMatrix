@@ -388,7 +388,10 @@ Ltac by_cell :=
 
 Global Ltac lma :=
   by_cell;
-  try (try (compute; ring); try (compute; easy));
+  try (
+      try (compute; ring);
+      try (compute; field);
+      try (compute; easy));
   simpl.
 
 

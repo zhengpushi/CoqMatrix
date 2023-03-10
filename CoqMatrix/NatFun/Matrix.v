@@ -351,7 +351,12 @@ Global Ltac by_cell :=
 (* clear Hj *)
 .
 
-Global Ltac lma := by_cell; try (try (compute; ring); try (compute; easy)).
+Global Ltac lma :=
+  by_cell;
+  try (
+      try (compute; ring);
+      try (compute; field);
+      try (compute; easy)).
 
 
 (* ==================================== *)

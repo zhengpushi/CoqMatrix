@@ -146,10 +146,19 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
   Definition mk_mat_1_1 (a11 : A) : mat 1 1 := mk_mat_1_1 (A0:=A0) a11.
 
   Definition mk_mat_3_1 (a1 a2 a3 : A) : mat 3 1 := mk_mat_3_1 (A0:=A0) a1 a2 a3.
-  
+
+  Definition mk_mat_4_1 (a1 a2 a3 a4 : A) : mat 4 1 :=
+    mk_mat_4_1 (A0:=A0) a1 a2 a3 a4.
+
   Definition mk_mat_3_3 (a11 a12 a13 a21 a22 a23 a31 a32 a33 : A) : mat 3 3 
     := mk_mat_3_3 (A0:=A0) a11 a12 a13 a21 a22 a23 a31 a32 a33.
 
+  Definition mk_mat_4_4 (a11 a12 a13 a14 a21 a22 a23 a24
+                           a31 a32 a33 a34 a41 a42 a43 a44 : A) : mat 4 4 
+    := mk_mat_4_4 (A0:=A0)
+         a11 a12 a13 a14 a21 a22 a23 a24
+         a31 a32 a33 a34 a41 a42 a43 a44.
+  
   Definition mk_mat_2_2 (a11 a12 a21 a22 : A) : mat 2 2
     := mk_mat_2_2 (A0:=A0) a11 a12 a21 a22.
 

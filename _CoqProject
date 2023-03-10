@@ -15,6 +15,7 @@
 -arg -w -arg -local-declaration
 
 # ===== CoqExt =====
+CoqMatrix/CoqExt/CoqSetting.v
 CoqMatrix/CoqExt/BasicConfig.v
 CoqMatrix/CoqExt/FuncExt.v
 CoqMatrix/CoqExt/TupleExt.v

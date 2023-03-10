@@ -70,25 +70,6 @@ End MatrixR_FF.
 (** Set a default model *)
 Export MatrixR_SF.
 
-(* Import Sequence. *)
-
-(** Trace of a square matrix *)
-Definition trace {n : nat} (m : smat n) :=
-  seqsum (A0:=R0) (Aadd:=Rplus) (fun i => m!i!i) n.
-
-(** Determinant of 3x3 matrix *)
-Definition det3 (m : smat 3) : A :=
-  (let '((a11,a12,a13),(a21,a22,a23),(a31,a32,a33)) := m2t_3x3 m in
-   let b1 := (a11 * a22 * a33) in
-   let b2 := (a12 * a23 * a31) in
-   let b3 := (a13 * a21 * a32) in
-   let c1 := (a11 * a23 * a32) in
-   let c2 := (a12 * a21 * a33) in
-   let c3 := (a13 * a22 * a31) in
-   let b := (b1 + b2 + b3) in
-   let c := (c1 + c2 + c3) in
-   (b - c))%A.
-
 
 (** General usage, no need to select low-level model *)
 Section test.  
@@ -101,3 +82,64 @@ Section test.
   Proof. intros. apply madd_comm. Qed.
 
 End test.
+
+
+(** Symbol matrix *)
+Module Exercise_Ch1_Symbol.
+
+  Notation "0" := (A0)%A.
+  Notation "1" := (A1)%A.
+  Notation "2" := (A1 + A1)%A.
+  Notation "3" := (A1 + 2)%A.
+  
+  (** Power function on A *)
+  Fixpoint Apow (a : A) (n : nat) :=
+    match n with
+    | 0 => A1
+    | S n' => (a * (Apow a n'))%A
+    end.
+  Infix "^" := (Apow).
+
+  Example ex6_1 : forall a b : A,
+      let m := (mk_mat_3_3 (a*a) (a*b) (b*b) (2*a) (a+b) (2*b) 1 1 1)%A in
+      (det m == (a - b)^3)%A.
+  Proof.
+    intros. cbv. ring.
+  Qed.
+  
+  Example ex6_2 : forall a b x y z : A,
+      let m1 := (mk_mat_3_3
+                   (a*x+b*y) (a*y+b*z) (a*z+b*x)
+                   (a*y+b*z) (a*z+b*x) (a*x+b*y)
+                   (a*z+b*x) (a*x+b*y) (a*y+b*z))%A in
+      let m2 := mk_mat_3_3 x y z y z x z x y in
+      (det m1 == (a^3 + b^3) * det m2)%A.
+  Proof.
+    intros. cbv. ring.
+  Qed.
+  
+  Example ex6_3 : forall a b e d : A,
+      let m := (mk_mat_4_4
+                  (a*a) ((a+1)^2) ((a+2)^2) ((a+3)^2)
+                  (b*b) ((b+1)^2) ((b+2)^2) ((b+3)^2)
+                  (e*e) ((e+1)^2) ((e+2)^2) ((e+3)^2)
+                  (d*d) ((d+1)^2) ((d+2)^2) ((d+3)^2))%A in
+      (det m == 0)%A.
+  Proof.
+    intros. cbv. ring.
+  Qed.
+  
+  Example ex6_4 : forall a b e d : A,
+      let m := (mk_mat_4_4
+                  1 1 1 1
+                  a b e d
+                  (a^2) (b^2) (e^2) (d^2)
+                  (a^4) (b^4) (e^4) (d^4))%A in
+      (det m == (a-b)*(a-e)*(a-d)*(b-e)*(b-d)*(e-d)*(a+b+e+d))%A.
+  Proof.
+    intros. cbv. ring.
+  Qed.
+  
+  (** 6.(5), it is an infinite structure, need more work, later... *)
+
+End Exercise_Ch1_Symbol.
