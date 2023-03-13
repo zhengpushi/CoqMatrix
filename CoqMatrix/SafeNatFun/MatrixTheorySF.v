@@ -51,6 +51,7 @@
 
 Require Export MatrixTheory.
 Require Sequence SafeNatFun.Matrix.
+Require PermutationExt.
 
 
 (* ######################################################################### *)
@@ -531,6 +532,8 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
 
   Add Field field_inst : make_field_theory.
 
+  Import PermutationExt.
+
   (** meq is decidable *)
   Lemma meq_dec : forall (r c : nat), Decidable (meq (r:=r) (c:=c)).
   Proof.
@@ -551,7 +554,48 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
            let i' := (if ltb i r then i else S i) in
            let j' := (if ltb j c then j else S j) in
            m!i'!j').
+
+    (** Determinant of a square matrix (original definition) *)
+    (* Variable a b c : A. *)
+    (* Compute perm 0 (seq 0 3). *)
+    (* Let dl := perm 0 (seq 0 3). *)
+    (* Let l := [1;2;3]. *)
+    (* Compute nth 1 l 0. *)
+    (* Compute map (fun i => (i, nth i l 0)) (seq 0 3). *)
+    (* Compute map (fun l => map (fun i => (i, nth i l 0)) (seq 0 3)) dl. *)
+    (* Let dl1 := map (fun l => map (fun i => (i, nth i l 0)) (seq 0 3)) dl. *)
+    (* Variable a00 a01 a02 a10 a11 a12 a20 a21 a22 : A. *)
+    (* Definition m : smat 3 := mk_mat_3_3 a00 a01 a02 a10 a11 a12 a20 a21 a22. *)
+    (* Compute map (fun l => map (fun (ij:nat * nat) => let (i,j) := ij in m!i!j) l) dl1. *)
+
+    (* (** all items in a determinant *) *)
+    (* Let dl2 := map (fun l => map (fun (ij:nat * nat) => let (i,j) := ij in m!i!j) l) dl1. *)
+    (* Compute dl2. *)
+
+    (* Definition n := 3. *)
+    (* Compute perm 0 (seq 0 n). (* *)
+    (*  = [[0; 1; 2]; [0; 2; 1]; [1; 0; 2]; [1; 2; 0]; [2; 0; 1]; [2; 1; 0]] *)
+    (*  : list (list nat) *) *)
+
+    (* Definition item_of_det {n : nat} (m : smat n) (l : list nat) : A := *)
+    (*   fold_left Amul (map (fun i => m!i!(nth i l 0)) l) A1. *)
+
+    (* (** Definition of determinant *) *)
+    (* Definition det_def {n : nat} (m : smat n) : A := *)
+    (*   fold_left Aadd (map (fun l => item_of_det m l) (perm 0 (seq 0 n))) A0. *)
+
+    (* Compute det_orig m. *)
     
+    (* Compute fold_left Amul [a00;a01;a02]. *)
+    (* Compute fold_left Aadd. *)
+
+    (* Check perm. ? *)
+    (* Fixpoint det_orig {n} : smat n -> A := *)
+    (*   match n with *)
+    (*   | 0 => fun _ => A1 *)
+    (*   | S n' => *)
+    (*       fun m => *)
+      
     (** Determinant of a square matrix.
         The idea: by expanding the first row *)
     Fixpoint det {n} : smat n -> A :=
@@ -666,8 +710,18 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
     (* ======================================================================= *)
     (** ** Inversion matrix of a matrix *)
     Definition minv {n} (m : smat n) := (A1/det m) c* (madj m).
+
+    Lemma minv_correct_r : forall n (m : smat n), m * (minv m) == mat1 n.
+    Proof.
+      induction n; intros.
+      - lma.
+      (* - unfold minv in *. *)
+        Abort.
+
     
-    (** Inversion matrix of dimension-1 *)
+    
+    (* ======================================================================= *)
+    (** ** Inversion matrix of dimension-1 *)
     Definition inv_1_1 (m : smat 1) : smat 1 := l2m [[A1/(m!0!0)]].
 
     (** det m <> 0 -> inv_1_1 m = inv m *)
@@ -690,7 +744,8 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
       lma. det_neq0_imply_neq0.
     Qed.
 
-    (** Inversion matrix of dimension-2 *)
+    (* ======================================================================= *)
+    (** ** Inversion matrix of dimension-2 *)
     Definition inv_2_2 (m : smat 2) : smat 2 :=
       let a00 := m!0!0 in
       let a01 := m!0!1 in
@@ -719,7 +774,8 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
       lma; det_neq0_imply_neq0.
     Qed.
     
-    (** Inversion matrix of dimension-2 *)
+    (* ======================================================================= *)
+    (** ** Inversion matrix of dimension-3 *)
     (* Note, this formula could be provided from matlab, thus avoiding manual work *)
     Definition inv_3_3 (m : smat 3) : smat 3 :=
       let a00 := m!0!0 in
@@ -757,7 +813,8 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
       lma; det_neq0_imply_neq0.
     Qed.
     
-    (** Direct compute inversion of a symbol matrix of 1/2/3rd order. *)
+    (* ======================================================================= *)
+    (** ** Direct compute inversion of a symbol matrix of 1/2/3rd order. *)
     Section FindFormula.
       Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : A.
       Let m1 := mk_mat_1_1 a11.

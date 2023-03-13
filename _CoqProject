@@ -33,6 +33,9 @@ CoqMatrix/CoqExt/SetoidListListExt.v
 CoqMatrix/CoqExt/HierarchySetoid.v
 CoqMatrix/CoqExt/Sequence.v
 
+# ===== LinearAlgebra (part 1) =====
+CoqMatrix/LinearAlgebra/PermutationExt.v
+
 # ===== CoqMatrix =====
 CoqMatrix/ElementType.v
 CoqMatrix/MatrixTheory.v
@@ -77,3 +80,5 @@ CoqMatrix/VectorR.v
 #CoqMatrix/DepRec/VectorR.v
 #CoqMatrix/NatFun/VectorR.v
 #CoqMatrix/OCamlExtractionComparison/matrix.v
+
+# ===== LinearAlgebra (part 2) =====

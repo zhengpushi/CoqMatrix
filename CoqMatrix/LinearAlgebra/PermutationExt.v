@@ -91,6 +91,10 @@ Section perm.
     induction l; simpl; auto.
     rewrite Pn_cons. rewrite IHl. simpl. auto.
   Qed.
+
+  (** The inverse number of a permutation *)
+  (* Definition inv_no             (*  *) *)
+
   
 End perm.
 
