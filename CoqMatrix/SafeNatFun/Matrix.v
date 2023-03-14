@@ -40,9 +40,10 @@ Section Def.
       and that is a function of "nat -> nat -> A" type.
       Meanwhile, we give two arguments r and c as the parts of mat type to represent 
       the rows and columns of a matrix. *)
-  Record mat {A} (r c : nat) := mk_mat {
-      matf : nat -> nat -> A
-    }.
+  Record mat {A} (r c : nat) :=
+    mk_mat {
+        matf : nat -> nat -> A
+      }.
   
 End Def.
 
@@ -130,44 +131,22 @@ Section mrow.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
 
-  (** Get one row of a matrix to list, which row index is ri and column index start 
-      from c_init. That is: (mrowAux m i c_init)[j] = m[i][j + c_init] *)
-  Fixpoint mrowAux {r c : nat} (ri : nat) (c_init : nat) (m : mat r c) : list A :=
-    match c with
-    | O => nil
-    | S c' =>
-        m!ri!c_init :: (@mrowAux r c' ri (S c_init) (mk_mat (matf m)))
-    end.
-
   (** Get a row which row index is ri *)
-  Definition mrow {r c : nat} (ri : nat) (m : mat r c) := @mrowAux r c ri 0 m.
-  
-  Lemma mrowAux_length : forall {r c} ri c_init (m : mat r c), 
-      length (mrowAux ri c_init m) = c.
-  Proof.
-    intros r c. induction c; intros; simpl; auto.
-  Qed.
+  Definition mrow {r c : nat} (ri : nat) (m : mat r c) : list A :=
+    map (fun i => m!ri!i) (seq 0 c).
 
   Lemma mrow_length : forall {r c} ri (m : mat r c), length (mrow ri m) = c.
   Proof.
-    intros. unfold mrow. apply mrowAux_length.
-  Qed.
-
-  (** (mrowAux m i c_init)[j] = m[i][j + c_init] *)
-  Lemma nth_mrowAux : forall {r c} ri ci c_init (m : mat r c) a,
-      ri < r -> ci < c ->
-      (nth ci (mrowAux ri c_init m) a == m!ri!(ci + c_init))%A.
-  Proof.
-    intros r c. induction c; intros; simpl. easy.
-    destruct ci; auto. f_equiv. rewrite IHc; try lia.
-    f_equiv. lia.
+    intros. unfold mrow. rewrite map_length. apply seq_length.
   Qed.
 
   (** (mrow m i)[j] = m[i][j] *)
   Lemma nth_mrow : forall {r c} ri ci (m : mat r c) a,
       ri < r -> ci < c -> (nth ci (mrow ri m) a == m ! ri ! ci)%A.
   Proof.
-    intros. unfold mrow. rewrite nth_mrowAux; auto. f_equiv. auto.
+    intros. unfold mrow.
+    rewrite nth_map_seq; auto.
+    rewrite plus_0_r. easy.
   Qed.
   
 End mrow.
@@ -184,110 +163,89 @@ Section l2m_m2l.
   
   (** list list to mat.
       Note: we need manually specify the dimension of the matrix. *)
-  Definition l2m {r c} (dl : list (list A)) : mat r c := 
-    mk_mat (fun x y => nth y (nth x dl []) A0).
+  Definition l2m {r c} (dl : list (list A)) : mat r c :=
+    mk_mat (fun ri ci =>
+              if (Nat.ltb ri r) && (Nat.ltb ci c) then
+                nth ci (nth ri dl []) A0
+              else A0).
   
-  (** list list to mat.
-      Note: the row number of the matrix is the length of dl, 
-            and the column number of the matrix is the length of first list *)
-  Definition l2m_auto (dl : @list (list A)) : mat (length dl) (length (hd [] dl)) :=
-    mk_mat (fun x y => nth y (nth x dl []) A0).
-
-  (** mat to list list. (Auxiliary function, manually store the row index counter) *)
-  Fixpoint m2lAux {r c : nat} (ri : nat) (m : mat r c) : list (list A) := 
-    match r with
-    | O => nil
-    | S r' => mrow ri m :: (@m2lAux r' c (S ri) (mk_mat (matf m)))
-    end.
-
   (** mat to list list *)
-  Definition m2l {r c} (m : mat r c) := m2lAux 0 m.
-  
-  Lemma m2lAux_length : forall {r c} cnt (m : mat r c), length (m2lAux cnt m) = r.
-  Proof.
-    induction r; auto. intros. simpl. destruct r; auto.
-  Qed.
-  
-  Lemma m2lAux_width : forall {r c} cnt {m : mat r c}, width (m2lAux cnt m) c.
-  Proof.
-    induction r; intros; simpl; auto. constructor.
-    constructor. apply mrow_length. apply IHr.
-  Qed.
+  Definition m2l {r c} (m : mat r c) : list (list A) :=
+    map (fun i => (map (fun j => m!i!j) (seq 0 c))) (seq 0 r).
 
   Lemma m2l_length : forall {r c} (m : mat r c), length (m2l m) = r.
   Proof.
-    unfold m2l. intros. apply m2lAux_length.
+    intros. unfold m2l. rewrite map_length. rewrite seq_length. auto.
   Qed.
   
   Lemma m2l_width : forall {r c} (m : mat r c), width (m2l m) c.
   Proof.
-    intros. apply m2lAux_width.
+    intros. unfold width,m2l.
+    apply Forall_map.
+    apply Forall_nth. intros. rewrite map_length. apply seq_length.
   Qed.
-  
-  Lemma nth_nth_m2lAux : forall {r c} (m : mat r c) (ri ci r_init : nat),
-      (ri < r) -> (ci < c) -> (ri + r_init < r) ->
-      (nth ci (nth ri (m2lAux r_init m) []) A0 == m ! (ri + r_init)%nat ! ci)%A.
+
+  Lemma l2m_m2l_id : forall {r c} (m : mat r c), (@l2m r c (m2l m)) == m.
   Proof.
-    induction r; intros. lia.
-    destruct ri; simpl. apply nth_mrow; auto.
-    rewrite IHr; try lia.
-    - simpl. f_equiv. lia.
-    - 
-      (* assert (S ri + r_init <> r). *)
-      (* { intro.  *)
-      (* admit. lia. *)
-  Admitted.
-  
-  Lemma l2m_m2l_id : forall {r c} (m : mat r c),
-      seq2eq (Aeq:=Aeq) r c (matf (@l2m r c (m2l m))) (matf m).
-  Proof.
-    intros. apply meq_iff_mnth. unfold m2l,l2m. unfold meq; intros.
-    unfold mnth. simpl.
-    rewrite nth_nth_m2lAux; try lia. f_equiv. lia.
+    intros. destruct m as [m].
+    unfold l2m,m2l. simpl. intros i j Hi Hj. simpl.
+    assert (r >? i). { apply Nat.ltb_lt; auto. }
+    assert (c >? j). { apply Nat.ltb_lt; auto. }
+    rewrite H,H0; simpl.
+    rewrite ?nth_map_seq; auto. rewrite ?Nat.add_0_r. easy.
   Qed.
-  
-  Lemma m2lAux_nth_nth : forall {r c} (dl : list (list A))
-                           (H1 : length dl = r) (H2 : width dl c),
-      (@m2lAux r c 0 (mk_mat (fun x y : nat => nth y (nth x dl []) A0))
-      == dl)%dlist.
-  Proof.
-    intros. gd dl. gd c.
-    induction r; intros.
-    - apply length_zero_iff_nil in H1. subst. simpl. auto.
-    - simpl. destruct dl.
-      + simpl in H1. lia.
-      + f_equiv.
-  Admitted.
-  
+
   Lemma m2l_l2m_id : forall {r c} (dl : list (list A)),
       (length dl = r) -> (width dl c) -> (m2l (@l2m r c dl) == dl)%dlist.
   Proof.
-    unfold m2l,l2m.
-    destruct r.
-    - intros. apply length_zero_iff_nil in H. subst. simpl. auto.
-    - intros. rewrite m2lAux_nth_nth; auto. easy.
+    intros. unfold l2m,m2l. simpl.
+    rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)); auto.
+    - intros. rewrite ?nth_map_seq; auto.
+      rewrite ?Nat.add_0_r. apply Nat.ltb_lt in H1,H2. rewrite H1,H2; simpl. easy.
+    - rewrite map_length. apply seq_length.
+    - apply width_map. intros. rewrite map_length. apply seq_length.
   Qed.
-  
+
   Lemma l2m_inj : forall {r c} (d1 d2 : list (list A)),
-      length d1 = r -> width d1 c -> length d2 = r -> width d2 c -> 
+      length d1 = r -> width d1 c -> length d2 = r -> width d2 c ->
       ~(d1 == d2)%dlist -> ~(@l2m r c d1 == l2m d2).
   Proof.
-  Admitted.
+    intros.
+    unfold l2m. intro. unfold meq in *. simpl in *. destruct H3.
+    rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)); auto.
+    intros. specialize (H4 ri ci H3 H5).
+    apply Nat.ltb_lt in H3,H5. rewrite H3,H5 in H4. simpl in H4. auto.
+  Qed.
   
   Lemma l2m_surj : forall {r c} (m : mat r c), (exists d, l2m d == m).
   Proof.
-  Admitted.
+    intros. exists (@m2l r c m). apply l2m_m2l_id.
+  Qed.
   
   Lemma m2l_inj : forall {r c} (m1 m2 : mat r c), ~(m1 == m2) -> ~(m2l m1 == m2l m2)%dlist.
   Proof.
-  Admitted.
+    intros. destruct m1 as [m1], m2 as [m2]. unfold meq in *; simpl in *.
+    unfold m2l. simpl. intro.
+    destruct H. intros.
+    rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)) in H0.
+    - specialize (H0 i j H H1).
+      rewrite ?nth_map_seq in H0; auto. rewrite ?Nat.add_0_r in H0. auto.
+    - rewrite map_length. apply seq_length.
+    - rewrite map_length. apply seq_length.
+    - apply width_map. intros. rewrite map_length. apply seq_length.
+    - apply width_map. intros. rewrite map_length. apply seq_length.
+  Qed.
   
-  Lemma m2l_surj : forall {r c} (d : list (list A)), 
+  Lemma m2l_surj : forall {r c} (d : list (list A)),
       length d = r -> width d c -> (exists m, (@m2l r c m == d)%dlist).
   Proof.
-  Admitted.
-  
+    intros. exists (@l2m r c d). apply m2l_l2m_id; auto.
+  Qed.
+
 End l2m_m2l.
+
+(* Definition m := @l2m _ 0 2 2 [[1;2;3;4];[10;11;12;13]]. *)
+(* Compute m2l m. *)
 
 (* Global Hint Resolve m2l_length : mat. *)
 (* Global Hint Resolve m2l_width : mat. *)
@@ -367,7 +325,7 @@ Ltac mat_to_fun :=
 2. disable "clear Hi, clear Hj", because these two conditions are needed in 
    some cases. 
 3. call "mat_to_fun" first, to unpack the mat structure to a function
-*)
+ *)
 
 Ltac by_cell :=
   intros;
@@ -448,8 +406,8 @@ Section Map.
     mk_mat (fun i j => f (m1 ! i ! j) (m2 ! i ! j)).
   
   Lemma mmap2_comm : forall {r c} (f : A -> A -> A)
-                       (f_comm : forall a b : A, (f a b == f b a)%A)
-                       (m1 m2 : mat r c), 
+                            (f_comm : forall a b : A, (f a b == f b a)%A)
+                            (m1 m2 : mat r c), 
       mmap2 f m1 m2 == mmap2 f m2 m1.
   Proof.
     intros r c f H1. intros m1 m2.
@@ -504,7 +462,7 @@ Section mat0_mat1.
   (** *** Identity matrix *)
   Definition mat1 (n : nat) : mat n n :=
     mk_mat (fun i j => if (i =? j)%nat then A1 else A0).
-    
+  
   (** mat1\T = mat1 *)
   Lemma mtrans_mat1_eq_mat1 : forall {n : nat}, (mat1 n)\T == (mat1 n).
   Proof.
@@ -569,22 +527,21 @@ Section malg.
     unfold madd, mnth. easy.
   Qed.
 
-  (** (m1 + m2)[ri] = m1[ri] + m2[ri]. (Auxiliary function) *)
-  Lemma mrowAux_madd : forall {r c} ri c_init (m1 m2 : mat r c),
-      (ri < r) ->
-      (mrowAux ri c_init (m1 + m2)%mat ==
-         (mrowAux ri c_init m1) + (mrowAux ri c_init m2))%list.
-  Proof.
-    intros r c. revert r. induction c; intros; simpl. easy. f_equiv.
-    rewrite <- IHc; auto. easy.
-  Qed.
-
   (** (m1 + m2)[ri] = m1[ri] + m2[ri] *)
   Lemma mrow_madd : forall {r c} ri (m1 m2 : mat r c),
       (ri < r) -> (mrow ri (m1 + m2)%mat == (mrow ri m1) + (mrow ri m2))%list.
   Proof.
-    intros. apply mrowAux_madd. auto.
-  Qed.
+    intros. unfold mrow.
+    rewrite (list_eq_iff_nth A0 c).
+    - intros.
+      replace (
+          (map (fun i0 : nat => m1 ! ri ! i0) (seq 0 c) +
+             map (fun i0 : nat => m2 ! ri ! i0) (seq 0 c)))%list
+        with ((map (fun i0 : nat => m1 ! ri ! i0 + m2 ! ri ! i0) (seq 0 c))%A).
+      + rewrite ?nth_map_seq; auto. rewrite Nat.add_0_r. easy.
+      + admit.
+    - rewrite map_length. apply seq_length.
+      Admitted.
 
   
   (** *** Matrix opposition *)
