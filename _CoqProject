@@ -33,6 +33,9 @@ CoqMatrix/CoqExt/SetoidListListExt.v
 CoqMatrix/CoqExt/HierarchySetoid.v
 CoqMatrix/CoqExt/Sequence.v
 
+# ===== Complex =====
+CoqMatrix/Complex/Complex.v
+
 # ===== LinearAlgebra (part 1) =====
 CoqMatrix/LinearAlgebra/PermutationExt.v
 
@@ -69,11 +72,13 @@ CoqMatrix/MatrixZ.v
 CoqMatrix/MatrixQ.v
 CoqMatrix/MatrixQc.v
 CoqMatrix/MatrixR.v
+CoqMatrix/MatrixC.v
 CoqMatrix/VectorNat.v
 CoqMatrix/VectorZ.v
 CoqMatrix/VectorQ.v
 CoqMatrix/VectorQc.v
 CoqMatrix/VectorR.v
+CoqMatrix/VectorC.v
 
 
 #CoqMatrix/NatFun/Inversion.v

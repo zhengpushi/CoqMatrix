@@ -9,8 +9,8 @@
   
   remark    :
   1. compute permutation of a list, such as 
-     perm [a;b;c] =>
-     [[a;b;c]; [a;c;b]; [b;a;c]; [b;c;a]; [c;a;b]; [c;b;a]]
+     perm [a;b;c] => [[a;b;c]; [a;c;b]; [b;a;c]; [b;c;a]; [c;a;b]; [c;b;a]]
+     perm [1;2;3] => [[1;2;3]; [1;3;2]; [2;1;3]; [2;3;1]; [3;1;2]; [3;2;1]]
 *)
 
 Require Import SetoidListExt.
@@ -20,7 +20,7 @@ Require Import SetoidListExt.
 (** * Computable permutation *)
 
 Section perm.
-  Context {A : Type} (A0 : A).
+  Context {A : Type} {A0 : A}.
   
   (** Get k-th element and remaining elements from a list *)
   Fixpoint pick (l : list A) (k : nat) : A * list A :=
@@ -71,6 +71,12 @@ Section perm.
   (** Get permutation of a list *)
   Definition perm (l : list A) : list (list A) := perm_aux (length l) l.
 
+  Section test.
+    Variable a b c : A.
+    (* Compute perm [a;b;c]. *)
+    (* = [[a; b; c]; [a; c; b]; [b; a; c]; [b; c; a]; [c; a; b]; [c; b; a]] *)
+  End test.
+
   (** Length of permutation *)
   Definition Pn (l : list A) := length (perm l).
 
@@ -95,15 +101,16 @@ Section perm.
   (** The inverse number of a permutation *)
   (* Definition inv_no             (*  *) *)
 
-  
 End perm.
 
-(* Compute perm 0 [1;2]. *)
-(* Compute perm 0 [1;2;3]. *)
-(* Compute perm 0 [1;2;3;4]. *)
-(* Compute Pn _ [1;2;3]. *)
-(* Compute Pn _ [1;2;3;4]. *)
-(* Compute fact 4. *)
+(* Compute perm [1;2]. *)
+(* Compute perm [1;2;3]. *)
+(* Compute perm [1;2;3;4]. *)
+
+
+
+(* ######################################################################### *)
+(** * Determinant *)
 
 
 

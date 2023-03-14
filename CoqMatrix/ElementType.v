@@ -19,7 +19,7 @@
          satisfy Decidable relation.
 *)
 
-Require NatExt ZExt QExt QcExt RExt RAST.
+Require NatExt ZExt QExt QcExt RExt RAST Complex.
 Require Export HierarchySetoid.
 
 (* ######################################################################### *)
@@ -61,6 +61,11 @@ Module BaseTypeA <: BaseType.
   Export RAST.
   Definition A := A.
 End BaseTypeA.
+
+Module BaseTypeC <: BaseType.
+  Export Complex.
+  Definition A := C.
+End BaseTypeC.
 
 Module BaseTypeFun (A B : BaseType) <: BaseType.
   (* Import Reals. *)
@@ -182,13 +187,11 @@ Module ElementTypeR <: EqElementType BaseTypeR.
 End ElementTypeR.
 
 Module ElementTypeA <: EqElementType BaseTypeA.
-  (* Include BaseTypeA. *)
   Export BaseTypeA.
 
   Definition A : Type := A.
-  Definition A0 : A := A0.
-
   Definition Aeq : relation A := eq.
+  Definition A0 : A := A0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -196,8 +199,23 @@ Module ElementTypeA <: EqElementType BaseTypeA.
   Proof.
     apply eq_equivalence.
   Qed.
-
 End ElementTypeA.
+
+Module ElementTypeC <: EqElementType BaseTypeC.
+  Export BaseTypeC.
+
+  Definition A : Type := C.
+  Definition Aeq : relation A := eq.
+  Definition A0 : A := 0.
+
+  Infix "==" := Aeq : A_scope.
+
+  Lemma Equiv_Aeq : Equivalence Aeq.
+  Proof.
+    apply eq_equivalence.
+  Qed.
+End ElementTypeC.
+
 
 Module ElementTypeFun (I O : ElementType) <: ElementType.
   Definition A : Type := {f : I.A -> O.A | Proper (I.Aeq ==> O.Aeq) f}.
@@ -320,6 +338,14 @@ Module DecidableElementTypeA
     constructor. apply Aeqdec.
   Qed.
 End DecidableElementTypeA.
+
+Module DecidableElementTypeC
+<: DecidableElementType.
+  Include ElementTypeC.
+
+  Lemma Dec_Aeq : Decidable Aeq.
+  Proof. apply Decidable_Ceq. Qed.
+End DecidableElementTypeC.
 
 Module DecidableElementTypeFun (I O : DecidableElementType)
 <: DecidableElementType.
@@ -614,7 +640,7 @@ Module RingElementTypeA
   Definition A1 : A := A1.
 
   (** Note that, this explicit annotation is must, 
-      otherwise, the ring has no effect. *)
+      otherwise, the ring has no effect. (because RAST.A and A are different) *)
   Definition Aadd : A -> A -> A := fun a b => Aadd a b.
   Definition Aopp : A -> A := fun a => Aopp a.
   Definition Amul : A -> A -> A := fun a b => Amul a b.
@@ -650,17 +676,77 @@ Module RingElementTypeA
   Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
   Proof.
     repeat constructor; intros;
-      auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq; try ring.
+      auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq; ring.
   Qed.
 
   Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
   Proof.
     repeat constructor; intros;
-      auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq;
-      try ring.
+      auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq; ring.
   Qed.
 
 End RingElementTypeA.
+
+Module RingElementTypeC
+<: RingElementType.
+  Include ElementTypeC.
+
+  Definition A1 : A := 1.
+  (** Note that, this explicit annotation is must, 
+      otherwise, the ring has no effect. (because C and A are different) *)
+  (* Definition Aadd := Cadd. *)
+  (* Definition Aopp := Copp. *)
+  (* Definition Amul := Cmul. *)
+  Definition Aadd : A -> A -> A := fun a b => Cadd a b.
+  Definition Aopp : A -> A := fun a => Copp a.
+  Definition Amul : A -> A -> A := fun a b => Cmul a b.
+  
+  Notation Asub := (fun x y => Aadd x (Aopp y)).
+  Global Infix "+" := Aadd : A_scope.
+  Global Infix "*" := Amul : A_scope.
+  Global Notation "- a" := (Aopp a) : A_scope.
+  Global Infix "-" := Asub : A_scope.
+
+  Lemma Aadd_aeq_mor : Proper (Aeq  ==> Aeq ==> Aeq) (Aadd).
+  Proof.
+    unfold Proper, respectful. intros. rewrite H,H0. easy.
+  Qed.
+  (* Global Existing Instance Aadd_aeq_mor. *)
+
+  Lemma Aopp_aeq_mor : Proper (Aeq ==> Aeq) (Aopp).
+  Proof.
+    unfold Proper, respectful. intros. rewrite H. easy.
+  Qed.
+  (* Global Existing Instance Aopp_aeq_mor. *)
+
+  Lemma Amul_aeq_mor : Proper (Aeq ==> Aeq ==> Aeq) (Amul).
+  Proof.
+    unfold Proper, respectful. intros. rewrite H,H0. easy.
+  Qed.
+  (* Global Existing Instance Amul_aeq_mor. *)
+
+  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Proof.
+    constructor; intros;
+      unfold A,Aeq,Aadd,Aopp,Amul,A0,A1;
+      unfold ElementTypeC.Aeq,ElementTypeC.A0,ElementTypeC.A; ring.
+  Qed.
+
+  Add Ring Ring_thy_inst : Ring_thy.
+  
+  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Proof.
+    repeat constructor; intros;
+      auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq; ring.
+  Qed.
+
+  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Proof.
+    repeat constructor; intros;
+      auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq; ring.
+  Qed.
+
+End RingElementTypeC.
 
 
 Module RingElementTypeFun (I O : RingElementType) <: RingElementType.
@@ -975,6 +1061,42 @@ Module FieldElementTypeA
   
 End FieldElementTypeA.
 
+Module FieldElementTypeC
+<: FieldElementType.
+  Include RingElementTypeC.
+  
+  Definition Ainv := Cinv.
+  
+  Notation Adiv := (fun x y => Amul x (Ainv y)).
+
+  Lemma Ainv_aeq_mor : Proper (Aeq ==> Aeq) Ainv.
+  Proof.
+    unfold Proper, respectful. intros. rewrite H. easy.
+  Qed.
+
+  Lemma A1_neq_A0 : ~(A1 == A0)%A.
+  Proof.
+    cbv in *. auto with complex.
+  Qed.
+
+  Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Proof.
+    constructor; intros; auto with complex; try easy.
+    apply Ring_thy. apply Cmul_inv_l. auto.
+  Qed.
+
+  Add Field Field_thy_inst : Field_thy.
+  
+  Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Proof.
+    constructor. apply Ring_inst.
+    intros. unfold Amul,Ainv,Aeq,A1,A. field. auto.
+    apply A1_neq_A0.
+    apply Ainv_aeq_mor.
+  Qed.
+  
+End FieldElementTypeC.
+
 (* Module FieldElementTypeFun (I O : FieldElementType) <: FieldElementType. *)
 (*   Include (RingElementTypeFun I O). *)
 
@@ -1102,3 +1224,13 @@ Module DecidableFieldElementTypeA
   Qed.
 End DecidableFieldElementTypeA.
 
+Module DecidableFieldElementTypeC
+<: DecidableFieldElementType.
+  Include FieldElementTypeC.
+  Import DecidableElementTypeC.
+
+  Lemma Dec_Aeq : Decidable Aeq.
+  Proof.
+    apply Dec_Aeq.
+  Qed.
+End DecidableFieldElementTypeC.

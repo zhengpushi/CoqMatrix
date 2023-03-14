@@ -99,7 +99,7 @@ Global Hint Unfold
   Rplus_opp_l         (* - r + r = 0 *)
   (* x *)
   Rsqr_0              (* 0² = 0 *)
-  Rsqr_0              (* 1² = 1 *)
+  Rsqr_1              (* 1² = 1 *)
   Rmult_0_l           (* 0 * r = 0 *)
   Rmult_0_r           (* r * 0 = 0 *)
   Rmult_1_l           (* 1 * r = r *)
@@ -240,14 +240,32 @@ Qed.
 
 
 (* ======================================================================= *)
+(** ** R0 and 0 *)
+
+(* (** We always prefer 0 *) *)
+(* Lemma R0_eq_0 : R0 = 0. *)
+(* Proof. *)
+(*   auto. *)
+(* Qed. *)
+(* #[export] Hint Rewrite R0_eq_0 : R. *)
+
+Lemma Rsqr_R0 : R0² = R0.
+Proof.
+  ra.
+Qed.
+#[export] Hint Rewrite Rsqr_R0 : R.
+Global Hint Resolve Rsqr_R0 : R.
+
+
+(* ======================================================================= *)
 (** ** R1 and 1 *)
 
-(** We always prefer 1 *)
-Lemma R1_eq_1 : R1 = 1.
-Proof.
-  auto.
-Qed.
-#[export] Hint Rewrite R1_eq_1 : R.
+(* (** We always prefer 1 *) *)
+(* Lemma R1_eq_1 : R1 = 1. *)
+(* Proof. *)
+(*   auto. *)
+(* Qed. *)
+(* #[export] Hint Rewrite R1_eq_1 : R. *)
 
 Lemma Rsqr_1 : 1² = 1.
 Proof.
@@ -307,11 +325,24 @@ Proof.
   ra.
 Qed.
 
+
+(** The sum of squares of two real numbers is non-negative *)
+Lemma Rplus_sqr_ge0_form2 : forall r1 r2 : R, 0 <= r1 * r1 + r2 * r2.
+Proof.
+  ra.
+Qed.
+
 (** The sum of squares of two real numbers is positive, iff they are not both 0 *)
 Lemma Rplus_sqr_gt0 : forall r1 r2 : R, 0 < r1² + r2² <-> (r1 <> 0 \/ r2 <> 0).
 Proof.
   ra.
 Qed.
+
+Lemma Rplus_sqr_gt0_l : forall r1 r2, r1 <> 0 -> 0 < r1² + r2².
+Proof. ra. Qed.
+
+Lemma Rplus_sqr_gt0_r : forall r1 r2, r2 <> 0 -> 0 < r1² + r2².
+Proof. ra. Qed.
 
 (** If the sum of squares of two real numbers is zero, then the second number is 0 *)
 Lemma Rplus_sqr_eq_0_r : forall r1 r2, r1² + r2² = 0 -> r2 = 0.
@@ -329,6 +360,12 @@ Qed.
 
 (** r1² + r2² = 0 <-> r1 = 0 /\ r2 = 0 *)
 Lemma Rplus_sqr_eq0_iff : forall r1 r2, r1² + r2² = 0 <-> r1 = 0 /\ r2 = 0.
+Proof.
+  ra.
+Qed.
+
+(** r1² + r2² = 0 <-> r1 = 0 /\ r2 = 0 *)
+Lemma Rplus_sqr_eq0_iff_form2 : forall r1 r2, r1 * r1 + r2 * r2 = 0 <-> r1 = 0 /\ r2 = 0.
 Proof.
   ra.
 Qed.
@@ -354,16 +391,17 @@ Lemma Rplus_sqr_neq0_iff4 : forall r1 r2 r3 r4 : R,
 Proof. ra. Qed.
 
 Global Hint Resolve
-  Rle_0_xx           (* 0 <= x * x *)
-  Rplus_sqr_ge0      (* 0 <= r1² + r2² *)
-  Rplus_sqr_gt0      (* 0 < r1² + r2² *)
-  Rplus_sqr_eq_0_l   (* r1² + r2² = 0 -> r1 = 0 *)
-  Rplus_sqr_eq_0_r   (* r1² + r2² = 0 -> r2 = 0 *)
-  Rplus_sqr_neq0_iff2 (* r1<>0 \/ r2<>0 <-> r1² + r2²<>0 *)
-  Rplus_sqr_neq0_iff3 (* r1,r2,r3, ... *)
-  Rplus_sqr_neq0_iff4 (* r1,r2,r3,r4, ... *)
+  Rle_0_xx             (* 0 <= x * x *)
+  Rplus_sqr_ge0        (* 0 <= r1² + r2² *)
+  Rplus_sqr_ge0_form2  (* 0 <= r1² + r2² *)
+  Rplus_sqr_gt0        (* 0 < r1² + r2² *)
+  Rplus_sqr_eq_0_l     (* r1² + r2² = 0 -> r1 = 0 *)
+  Rplus_sqr_eq_0_r     (* r1² + r2² = 0 -> r2 = 0 *)
+  Rplus_sqr_neq0_iff2  (* r1<>0 \/ r2<>0 <-> r1² + r2²<>0 *)
+  Rplus_sqr_neq0_iff3  (* r1,r2,r3, ... *)
+  Rplus_sqr_neq0_iff4  (* r1,r2,r3,r4, ... *)
   Rplus_sqr_sqr_neq0_iff_Rplus_sqr_sqr_gt0 (* r1² + r2²<>0 <-> 0 <r1² + r2² *)
-  R_neq1              (* 2 * a * b <= a² + b² *)
+  R_neq1               (* 2 * a * b <= a² + b² *)
   : R.
 
 Section test.
@@ -734,12 +772,10 @@ Section TEST_zero_lt.
   Goal forall r1 r2, r1 <> 0 -> 0 < r1 * r1 + r2 * r2. ra. Qed.
   Goal forall r1 r2, r1 <> 0 -> 0 < r1² + r2 * r2. ra. Qed.
   Goal forall r1 r2, r1 <> 0 -> 0 < r1 * r1 + r2². ra. Qed.
-  Goal forall r1 r2, r1 <> 0 -> 0 < r1² + r2². ra. Qed.
   
   Goal forall r1 r2, r2 <> 0 -> 0 < r1 * r1 + r2 * r2. ra. Qed.
   Goal forall r1 r2, r2 <> 0 -> 0 < r1² + r2 * r2. ra. Qed.
   Goal forall r1 r2, r2 <> 0 -> 0 < r1 * r1 + r2². ra. Qed.
-  Goal forall r1 r2, r2 <> 0 -> 0 < r1² + r2². ra. Qed.
   
   Goal forall r1 r2, 0 < r1 -> 0 < r1 * r1 + r2 * r2. ra. Qed.
   Goal forall r1 r2, 0 < r2 -> 0 < r1 * r1 + r2 * r2. ra. Qed.
