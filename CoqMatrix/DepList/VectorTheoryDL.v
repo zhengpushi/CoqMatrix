@@ -211,11 +211,17 @@ Module RingVectorTheoryDL (E : RingElementType) <: RingVectorTheory E.
   Notation "- v" := (vopp v).
 
   (** v + (- v) = vec0 *)
-  Lemma vadd_opp : forall {n} (v : vec n), v + (- v) == vec0.
+  Lemma vadd_opp_r : forall {n} (v : vec n), v + (- v) == vec0.
   Proof.
     intros. apply madd_opp.
   Qed.
-  
+
+  (** v + (- v) = vec0 *)
+  Lemma vadd_opp_l : forall {n} (v : vec n), (- v) + v == vec0.
+  Proof.
+    intros. rewrite vadd_comm. apply madd_opp.
+  Qed.
+
 
   (** *** Vector subtraction *)
 

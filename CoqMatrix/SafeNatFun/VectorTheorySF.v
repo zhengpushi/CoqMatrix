@@ -174,9 +174,13 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   Global Notation "- v" := (vopp v) : vec_scope.
 
   (** v + (- v) = vec0 *)
-  Lemma vadd_opp : forall {n} (v : vec n), v + (- v) == vec0.
+  Lemma vadd_opp_r : forall {n} (v : vec n), v + (- v) == vec0.
   Proof. intros. apply vadd_opp. Qed.
-  
+
+  (** (- v) + v = vec0 *)
+  Lemma vadd_opp_l : forall {n} (v : vec n), (- v) + v == vec0.
+  Proof. intros. rewrite vadd_comm. apply vadd_opp. Qed.
+
 
   (** *** Vector subtraction *)
 

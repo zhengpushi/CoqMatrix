@@ -114,7 +114,8 @@ Module Type RingVectorTheory (E : RingElementType) <: BasicVectorTheory E.
   (** *** Vector opposition *)
   Parameter vopp : forall {n} (v : vec n), vec n.
   Notation "- v" := (vopp v) : vec_scope.
-  Axiom vadd_opp : forall {n} (v : vec n), v + (- v) == vec0 n.
+  Axiom vadd_opp_l : forall {n} (v : vec n), (- v) + v == vec0 n.
+  Axiom vadd_opp_r : forall {n} (v : vec n), v + (- v) == vec0 n.
 
   (** *** Vector subtraction *)
   Parameter vsub : forall {n} (v1 v2 : vec n), vec n.

@@ -201,11 +201,16 @@ Module RingVectorTheoryDR (E : RingElementType) <: RingVectorTheory E.
   Definition vopp {n} (v : vec n) : vec n := (-v)%mat.
   Notation "- v" := (vopp v) : vec_scope.
 
-  Lemma vadd_opp : forall {n} (v : vec n), v + (- v) == vec0.
+  Lemma vadd_opp_r : forall {n} (v : vec n), v + (- v) == vec0.
   Proof.
     intros. apply madd_opp.
   Qed.
-  
+
+  Lemma vadd_opp_l : forall {n} (v : vec n), (- v) + v == vec0.
+  Proof.
+    intros. rewrite vadd_comm. apply madd_opp.
+  Qed.
+
 
   (** *** Vector subtraction *)
 
