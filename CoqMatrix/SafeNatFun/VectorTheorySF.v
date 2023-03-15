@@ -3,7 +3,7 @@
   This file is part of CoqMatrix. It is distributed under the MIT
   "expat license". You should have recieved a LICENSE file with it.
 
-  purpose   : Vector Theory implemented with SafeNatFun
+  purpose   : Vector Theory implemented with SafeNatFun (with Module)
   author    : ZhengPu Shi
   date      : 2021.12
   
@@ -13,7 +13,7 @@
 
 
 Require Export VectorTheory.
-Require Import SafeNatFun.MatrixTheorySF.
+Require Export SafeNatFun.Vector.
 
 
 (* ######################################################################### *)
@@ -23,7 +23,7 @@ Module BasicVectorTheorySF (E : ElementType).
 
   (* ==================================== *)
   (** ** Also contain matrix theory *)
-  Module Export BasicMatrixTheorySF := BasicMatrixTheorySF E.
+  (* Module Export BasicMatrixTheorySF := BasicMatrixTheorySF E. *)
 
   (* ==================================== *)
   (** ** Vector element type *)
@@ -38,140 +38,82 @@ Module BasicVectorTheorySF (E : ElementType).
   
   (* ==================================== *)
   (** ** Vector type *)
-  
-  Definition vec n := mat n 1.
+
+  Definition vec n := @vec A n.
 
   (** matrix equality *)
-  Definition veq {n} (v1 v2 : vec n) := @meq n 1 v1 v2.
+  Definition veq {n} (v1 v2 : vec n) : Prop := @veq _ Aeq n v1 v2.
   Global Infix "==" := veq : vec_scope.
 
   (** meq is equivalence relation *)
   Lemma veq_equiv : forall n, Equivalence (veq (n:=n)).
-  Proof.
-    intros. unfold veq. unfold meq.
-    (* apply meq_equiv. *)
-    (* Qed. *)
-    (* Tips: a bit different to other models. *)
-  Admitted.
+  Proof. apply veq_equiv. Qed.
 
   (** Get element of vector *)
-  Definition vnth {n} (v : vec n) i : A := v!i!0.
+  Definition vnth {n} (v : vec n) i : A := vnth v i.
   Global Notation "v ! i " := (vnth v i) : vec_scope.
 
   (** veq and mnth should satisfy this constraint *)
   Lemma veq_iff_vnth : forall {n : nat} (v1 v2 : vec n),
       (v1 == v2) <-> (forall i, i < n -> (v1!i == v2!i)%A).
-  Proof.
-    intros.
-  Admitted.
+  Proof. intros. apply veq_iff_vnth. Qed.
   
 
   (* ==================================== *)
   (** ** Convert between list and vector *)
-  Definition v2l {n} (v : vec n) : list A := @Matrix.mcol _ n 1 0 v.
-  Definition l2v {n} (l : list A) : vec n := l2m (row2col l).
+  Definition v2l {n} (v : vec n) : list A := v2l v.
+  Definition l2v {n} (l : list A) : vec n := l2v A0 n l.
   
   Lemma v2l_length : forall {n} (v : vec n), length (v2l v) = n.
-  Admitted.
+  Proof. intros. apply v2l_length. Qed.
   
   Lemma v2l_l2v_id : forall {n} (l : list A),
     length l = n -> (@v2l n (@l2v n l) == l)%list.
-  Admitted.
+  Proof. intros. apply v2l_l2v_id; auto. Qed.
 
   Lemma l2v_v2l_id : forall {n} (v : vec n), l2v (v2l v) == v.
-  Admitted.
+  Proof. intros. apply l2v_v2l_id; auto. Qed.
   
   (* ==================================== *)
   (** ** Convert between tuples and vector *)
-  Definition t2v_2 (t : @T2 A) : vec 2 :=
-    let '(a,b) := t in l2m [[a];[b]].
-  Definition t2v_3 (t : @T3 A) : vec 3 :=
-    let '(a,b,c) := t in l2m [[a];[b];[c]].
-  Definition t2v_4 (t : @T4 A) : vec 4 :=
-    let '(a,b,c,d) := t in l2m [[a];[b];[c];[d]].
+  Definition t2v_2 (t : @T2 A) : vec 2 := t2v_2 (A0:=A0) t.
+  Definition t2v_3 (t : @T3 A) : vec 3 := t2v_3 (A0:=A0) t.
+  Definition t2v_4 (t : @T4 A) : vec 4 := t2v_4 (A0:=A0) t.
 
-  Definition v2t_2 (v : vec 2) : @T2 A := (v!0, v!1).
-  Definition v2t_3 (v : vec 3) : @T3 A := (v!0, v!1, v!2).
-  Definition v2t_4 (v : vec 4) : @T4 A := (v!0, v!1, v!2, v!3).
+  Definition v2t_2 (v : vec 2) : @T2 A := v2t_2 v.
+  Definition v2t_3 (v : vec 3) : @T3 A := v2t_3 v.
+  Definition v2t_4 (v : vec 4) : @T4 A := v2t_4 v.
   
   Lemma v2t_t2v_id_2 : forall (t : A * A), v2t_2 (t2v_2 t) = t.
-  Proof.
-    intros. destruct t. simpl. unfold v2t_2. f_equal.
-  Qed.
+  Proof. apply v2t_t2v_id_2. Qed.
   
   Lemma t2v_v2t_id_2 : forall (v : vec 2), t2v_2 (v2t_2 v) == v.
-  Proof.
-    intros. apply veq_iff_vnth. intros i Hi. simpl.
-    repeat (try destruct i; auto; try lia); easy.
-  Qed.
+  Proof. apply t2v_v2t_id_2. Qed.
   
   (** mapping of a vector *)
-  Definition vmap {n} (v : vec n) f : vec n := mmap f v.
+  Definition vmap {n} (v : vec n) f : vec n := vmap v f.
   
   (** folding of a vector *)
-(*   Definition vfold : forall {B : Type} {n} (v : vec n) (f : A -> B) (b : B), B. *)
+  (* Definition vfold : forall {B : Type} {n} (v : vec n) (f : A -> B) (b : B), B. *)
   
   (** mapping of two matrices *)
-  Definition vmap2 {n} (v1 v2 : vec n) f : vec n := mmap2 f v1 v2.
+  Definition vmap2 {n} (v1 v2 : vec n) f : vec n := vmap2 v1 v2 f.
 
   (* ======================================================================= *)
   (** ** Advanced matrix construction by mixing vectors and matrices *)
   Section AdvancedConstrtuct.
 
-    (* Check A. *)
-    (* Check Equiv_Aeq. *)
-    (* Context `{Equiv_Aeq : Equivalence A Aeq} {A0 A1 : A}. *)
-    (* Infix "==" := (meq (Aeq:=Aeq)) : mat_scope. *)
-
-    (* (** Vector type *) *)
-    (* Definition vecr n := @mat A 1 n. *)
-    (* Definition vecc n := @mat A n 1. *)
-    
     (** Construct a matrix with a vector and a matrix by row *)
     Definition mconsr {r c} (v : vec c) (m : mat r c) : mat (S r) c :=
-      mk_mat (fun ri ci => match ri with
-                             | O => v ! ci
-                             | _ => m ! (ri - 1) ! ci
-                             end).
-    
+      mconsr v m.
+
     (** Construct a matrix with a vector and a matrix by column *)
     Definition mconsc {r c} (v : vec r) (m : mat r c) : mat r (S c) :=
-      mk_mat (fun ri ci => match ci with
-                             | O => v ! ri
-                             | _ => m ! ri ! (ci - 1)
-                             end).
-    
-    (* (** Equality of two forms of ConstructByRow *) *)
-    (* Lemma mconsr_eq {r c} (v : vecr c) (m : @mat A r c) : mconsr v m == (v, m). *)
-    (* Proof. unfold mconsr. auto. Qed. *)
-    
-    (* (** Construct a matrix by rows with the matrix which row number is 0 *) *)
-    (* Lemma mconsr_mr0 : forall {n} (v : @vec A n) (m : @mat A 0 n), *)
-    (*   mconsr v m = [v]. *)
-    (* Proof. intros. destruct m. unfold mconsr. auto. Qed. *)
-    
-    (* (** Construct a matrix by rows with the matrix which row column is 0 *) *)
-    (* Lemma mconsr_mc0 : forall {n} (v : @vec A 0) (m : @mat A n 0), *)
-    (*   mconsr v m = (tt, m). *)
-    (* Proof. intros. destruct v. unfold mconsr. auto. Qed. *)
-    
-    (* (** Construct a matrix by columns with the matrix which row number is 0 *) *)
-    (* Lemma mconsc_mr0 : forall {n} (v : @vec A 0) (m : @vec (@vec A n) 0), *)
-    (*   mconsc v m = tt. *)
-    (* Proof. intros. destruct m. unfold mconsc. auto. Qed.   *)
+      mconsc v m.
 
   End AdvancedConstrtuct.
   
 End BasicVectorTheorySF.
-
-Module Test_BasicVectorTheorySF.
-  Module Import M := BasicVectorTheorySF ElementTypeNat.
-  Definition v1 : vec 3 := l2v [1;2;3].
-  Definition m1 : mat 3 3 := l2m [[10;11;12];[13;14;15];[16;17;18]].
-  Goal v1!(v1!0) = 2. auto. Qed.
-  Goal m2l (mconsr v1 m1) = [[1;2;3];[10;11;12];[13;14;15];[16;17;18]]. auto. Qed.
-  Goal m2l (mconsc v1 m1) = [[1;10;11;12];[2;13;14;15];[3;16;17;18]]. auto. Qed.
-End Test_BasicVectorTheorySF.
 
   
 (* ######################################################################### *)
@@ -185,134 +127,106 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   Include (BasicVectorTheorySF E).
 
   (** Import ring matrix theory *)
-  Module Export RingMatrixTheorySF := RingMatrixTheorySF E.
+  (* Module Export RingMatrixTheorySF := RingMatrixTheorySF E. *)
 
   Open Scope mat_scope.
   Open Scope vec_scope.
 
   (** ** Zero vector *)
-  Definition vec0 {n} : vec n := mat0 n 1.
+  Definition vec0 {n} : vec n := vec0 (A0:=A0).
 
   (** Assert that a vector is an zero vector. *)
-  Definition vzero {n} (v : vec n) : Prop := v == vec0.
+  Definition vzero {n} (v : vec n) : Prop := vzero (A0:=A0) (Aeq:=Aeq) v.
 
   (** Assert that a vector is an non-zero vector. *)
-  Definition vnonzero {n} (v : vec n) : Prop := ~(vzero v).
+  Definition vnonzero {n} (v : vec n) : Prop := vnonzero (A0:=A0) (Aeq:=Aeq) v.
   
   (** vec0 is equal to mat0 with column 1 *)
-  Lemma vec0_eq_mat0 : forall n, vec0 = mat0 n 1.
-  Proof.
-    intros. easy.
-  Qed.
+  Lemma vec0_eq_mat0 : forall n, vec0 == mat0 A0 n 1.
+  Proof. apply vec0_eq_mat0. Qed.
   
   
   (** *** Vector addition *)
 
-  Definition vadd {n} (v1 v2 : vec n) : vec n := @madd n 1 v1 v2.
+  Definition vadd {n} (v1 v2 : vec n) : vec n := vadd (Aadd:=Aadd) v1 v2.
   Global Infix "+" := vadd : vec_scope.
 
   (** v1 + v2 = v2 + v1 *)
   Lemma vadd_comm : forall {n} (v1 v2 : vec n), (v1 + v2) == (v2 + v1).
-  Proof.
-    intros. apply (@madd_comm n 1).
-  Qed.
+  Proof. intros. apply vadd_comm. Qed.
 
   (** (v1 + v2) + v3 = v1 + (v2 + v3) *)
   Lemma vadd_assoc : forall {n} (v1 v2 v3 : vec n), (v1 + v2) + v3 == v1 + (v2 + v3).
-  Proof.
-    intros. apply (@madd_assoc n 1).
-  Qed.
+  Proof. intros. apply vadd_assoc. Qed.
 
   (** vec0 + v = v *)
   Lemma vadd_0_l : forall {n} (v : vec n), vec0 + v == v.
-  Proof.
-    intros. apply (@madd_0_l n 1).
-  Qed.
+  Proof. intros. apply vadd_0_l. Qed.
 
   (** v + vec0 = v *)
   Lemma vadd_0_r : forall {n} (v : vec n), v + vec0 == v.
-  Proof.
-    intros. apply (@madd_0_r n 1).
-  Qed.
+  Proof. intros. apply vadd_0_r. Qed.
 
   
   (** *** Vector opposite *)
   
-  Definition vopp {n} (v : vec n) : vec n := @mopp n 1 v.
+  Definition vopp {n} (v : vec n) : vec n := vopp (Aopp:=Aopp) v.
   Global Notation "- v" := (vopp v) : vec_scope.
 
   (** v + (- v) = vec0 *)
   Lemma vadd_opp : forall {n} (v : vec n), v + (- v) == vec0.
-  Proof.
-    intros. apply (@madd_opp n 1).
-  Qed.
+  Proof. intros. apply vadd_opp. Qed.
   
 
   (** *** Vector subtraction *)
 
-  Definition vsub {n} (v1 v2 : vec n) : vec n := v1 + (- v2).
+  Definition vsub {n} (v1 v2 : vec n) : vec n := vsub (Aadd:=Aadd) (Aopp:=Aopp) v1 v2.
   Global Infix "-" := vsub : vec_scope.
 
 
   (** *** Vector scalar multiplication *)
 
-  Definition vcmul {n} a (v : vec n) : vec n := @mcmul n 1 a v.
-  Definition vmulc {n} (v : vec n) a : vec n := @mmulc n 1 v a.
+  Definition vcmul {n} a (v : vec n) : vec n := vcmul (Amul:=Amul) a v.
+  Definition vmulc {n} (v : vec n) a : vec n := vmulc (Amul:=Amul) v a.
   Global Infix "c*" := vcmul : vec_scope.
   Global Infix "*c" := vmulc : vec_scope.
 
   (** v *c a = a c* v *)
   Lemma vmulc_eq_vcmul : forall {n} a (v : vec n), (v *c a) == (a c* v).
-  Proof.
-    intros. apply (@mmulc_eq_mcmul n 1).
-  Qed.
+  Proof. intros. apply vmulc_eq_vcmul. Qed.
 
   (** a c* (b c* v) = (a * b) c* v *)
   Lemma vcmul_assoc : forall {n} a b (v : vec n), a c* (b c* v) == (a * b)%A c* v.
-  Proof.
-    intros. apply (@mcmul_assoc n 1).
-  Qed.
+  Proof. intros. apply vcmul_assoc. Qed.
 
   (** a c* (b c* v) = b c* (a c* v) *)
   Lemma vcmul_perm : forall {n} a b (v : vec n), a c* (b c* v) == b c* (a c* v).
-  Proof.
-    intros. apply (@mcmul_perm n 1).
-  Qed.
+  Proof. intros. apply vcmul_perm. Qed.
 
   (** (a + b) c* v = (a c* v) + (b c* v) *)
   Lemma vcmul_add_distr_l : forall {n} a b (v : vec n), 
     (a + b)%A c* v == (a c* v) + (b c* v).
-  Proof.
-    intros. apply (@mcmul_add_distr_r n 1).
-  Qed.
+  Proof. intros. apply vcmul_add_distr_l. Qed.
 
   (** a c* (v1 + v2) = (a c* v1) + (a c* v2) *)
   Lemma vcmul_add_distr_r : forall {n} a (v1 v2 : vec n), 
     a c* (v1 + v2) == (a c* v1) + (a c* v2).
-  Proof.
-    intros. unfold vadd. apply (@mcmul_add_distr_l n 1).
-  Qed.
+  Proof. intros. apply vcmul_add_distr_r. Qed.
 
   (** 1 c* v = v *)
   Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
-  Proof.
-    intros. apply (@mcmul_1_l n 1).
-  Qed.
+  Proof. intros. apply vcmul_1_l. Qed.
 
   (** 0 c* v = vec0 *)
   Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0.
-  Proof.
-    intros. apply (@mcmul_0_l n 1).
-  Qed.
+  Proof. intros. apply vcmul_0_l. Qed.
   
   
   (** *** Vector dot product *)
   
-  (** dot production of two vectors.
-      Here, we use matrix multiplication to do it, and it is a different way to 
-      general situation. *)
+  (** dot production of two vectors. *)
   Definition vdot {n : nat} (v1 v2 : vec n) :=
-    scalar_of_mat (@mmul 1 n 1 (v1\T) v2)%mat.
+    vdot (A0:=A0) (Aadd:=Aadd) (Amul:=Amul) v1 v2.
   
 End RingVectorTheorySF.
 
@@ -326,7 +240,7 @@ Module DecidableFieldVectorTheorySF (E : DecidableFieldElementType)
 
   (* ==================================== *)
   (** ** Also contain matrix theory *)
-  Module Export DecidableFieldMatrixTheorySF := DecidableFieldMatrixTheorySF E.
+  (* Module Export DecidableFieldMatrixTheorySF := DecidableFieldMatrixTheorySF E. *)
 
   Export E.
   Include (RingVectorTheorySF E).
@@ -336,35 +250,15 @@ Module DecidableFieldVectorTheorySF (E : DecidableFieldElementType)
 
   (** veq is decidable *)
   Lemma veq_dec : forall (n : nat), Decidable (veq (n:=n)).
-  Proof. intros. apply meq_dec. Qed.
+  Proof. intros. apply veq_dec. Qed.
 
   Global Existing Instance veq_dec.
 
   (** It is decidable that if a vector is zero vector. *)
   Lemma vzero_dec : forall {n} (v : vec n), {vzero v} + {vnonzero v}.
-  Proof.
-    intros. apply veq_dec.
-  Qed.
+  Proof. intros. apply veq_dec. Qed.
   
 End DecidableFieldVectorTheorySF.
-
-
-(* ######################################################################### *)
-(** * Test  *)
-Module Test.
-
-  Module Import VectorR := RingVectorTheorySF RingElementTypeR.
-  Import Reals.
-  Open Scope R.
-  
-  Definition v1 := @l2v 3 [1;2;3].
-  Definition v2 := @l2v 3 [4;5;6].
-  Example vdot_ex1 : vdot v1 v2 = (4+10+18)%R.
-  Proof.
-    compute. ring.
-  Qed.
-  
-End Test.
 
   
 (** ** Others, later ... *)

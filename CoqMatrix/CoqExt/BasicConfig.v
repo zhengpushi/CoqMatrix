@@ -47,6 +47,7 @@ Reserved Infix    "/"       (at level 40, left associativity).
 Reserved Infix    "c*"      (at level 40, left associativity).
 Reserved Infix    "*c"      (at level 40, left associativity).
 Reserved Infix    "\o"      (at level 50, no associativity).
+Reserved Infix    "⋅"       (at level 40, no associativity).
 Reserved Notation "- a"     (at level 35, right associativity).
 Reserved Notation "/ a"     (at level 35, right associativity).
 Reserved Notation "a \T"    (at level 34, left associativity).

@@ -116,34 +116,31 @@ Section DimAny.
   Qed.
   
   (** If k times a non-zero vector equal to zero, then k must be zero *)
+  (*
+    v <> 0 ==> ~(∀ i, v[i] = 0)
+    k*v = 0 ==> ∀ i, k*v[i] = 0
+    {k=0}+{k<>0} ==> k<>0  (if k=0, then qed)
+    ---------------------------
+    ∃ i, v[i] <> 0, then, k*v[i] <> 0, thus, contradict.
+   *)
   Lemma vcmul_nonzero_eq_zero_imply_k0 : forall {n} (v : vec n) k,
       vnonzero v -> k c* v == vec0 -> k = 0.
   Proof.
-    intros. destruct v as [v].
-    unfold vnonzero,vzero,vec0,mat0,vcmul,veq in *.
-    (* Tips: use "rewrite xx in *" in ocaml_4.07.1 give error "nothing to write",
-       so, I write two command manually *)
-    (* rewrite meq_iff_mnth in *. *)
-    rewrite meq_iff_mnth in H.
-    rewrite meq_iff_mnth in H0.
-    simpl in *.
-    (*  ∀ij(k * v i j = 0)  ~∀ij(v i j = 0)   -> k = 0 *)
-
+    intros. destruct v as [v]. cbv in *.
+    destruct (decidable k 0); auto.
     (* idea: from "~(∀ij(v i j = 0)" to "∃ij(v i j≠0)" *)
     (* Tips, a good practice of logic proposition *)
     assert (exists (ij:nat*nat), let (i,j) := ij in (i<n)%nat /\ (j<1)%nat /\ ~(v i j == A0)%A).
-    { apply not_all_not_ex. intro.
-      destruct H. intros. specialize (H1 (ri,ci)). simpl in H1.
-      remember (ri < n)%nat as A.
-      remember (ci < 1)%nat as B.
-      remember (v ri ci == A0)%A as C.
-      apply not_and_or in H1. destruct H1; try easy.
-      apply not_and_or in H1. destruct H1; try easy.
-      apply NNPP in H1. auto. }
-    destruct H1 as [(ri,ci)  H1]. destruct H1 as [H1 [H2 H3]].
-    specialize (H0 ri ci H1 H2).
-    (* k*x=0  ~(x=0)  ->  k=0 *)
-    apply Rmult_integral in H0. destruct H0; try easy.
+    { clear k H0 n0.
+      apply not_all_not_ex. intro.
+      destruct H. intros. specialize (H0 (i,0)%nat). simpl in H0.
+      apply not_and_or in H0. destruct H0; try easy.
+      apply not_and_or in H0. destruct H0; try easy; try lia.
+      apply NNPP in H0.
+      assert (j = 0%nat) by lia. subst. auto. }
+    destruct H1. destruct x as (i,j). destruct H1. destruct H2.
+    specialize (H0 i j H1 H2).
+    apply Rmult_integral in H0. destruct H0; easy.
   Qed.
 
   (** If use k1 and k2 to left multiplicate a non-zero vector get same result, 
@@ -206,7 +203,7 @@ Section DimAny.
       vparallel_ver1 v1 v2 <-> vparallel_ver2 v1 v2.
   Proof.
     intros. unfold vparallel_ver1, vparallel_ver2.
-    unfold vzero, vnonzero. split; intros.
+    unfold vzero, vnonzero, Vector.vzero. split; intros.
     - destruct H. destruct H.
       + right. right. exists x. auto.
       + destruct (decidable v1 vec0); auto.

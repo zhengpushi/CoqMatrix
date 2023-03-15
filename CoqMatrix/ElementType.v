@@ -1085,7 +1085,7 @@ Module FieldElementTypeC
     apply Ring_thy. apply Cmul_inv_l. auto.
   Qed.
 
-  Add Field Field_thy_inst : Field_thy.
+  (* Add Field Field_thy_inst : Field_thy. *)
   
   Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
   Proof.

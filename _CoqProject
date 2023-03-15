@@ -58,6 +58,7 @@ CoqMatrix/NatFun/MatrixTheoryNF.v
 CoqMatrix/NatFun/VectorTheoryNF.v
 CoqMatrix/SafeNatFun/Matrix.v
 CoqMatrix/SafeNatFun/MatrixTheorySF.v
+CoqMatrix/SafeNatFun/Vector.v
 CoqMatrix/SafeNatFun/VectorTheorySF.v
 CoqMatrix/FinFun/Matrix.v
 CoqMatrix/FinFun/MatrixTheoryFF.v

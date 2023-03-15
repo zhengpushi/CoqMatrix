@@ -122,6 +122,36 @@ Proof.
   intro; intros. rewrite H; easy.
 Qed.
 
+(** ( / a) is proper function about (==) *)
+Lemma Qinv_Qeq_proper : Proper (Qeq ==> Qeq) Qinv.
+Proof.
+  intro; intros. rewrite H; easy.
+Qed.
+
+
+(* ######################################################################### *)
+(** ** Instance of classes which defined in HierarchySetoid *)
+
+Global Instance Ring_Q : Ring Qplus 0 Qopp Qmult 1 Qeq.
+Proof.
+  repeat constructor; intros; try ring;
+    try apply Qplus_Qeq_proper;
+    try apply Qmult_Qeq_proper;
+    try apply Qopp_Qeq_proper;
+    try apply Qeq_equiv.
+Defined.
+
+Global Instance Field_Q : Field Qplus 0 Qopp Qmult 1 Qinv Qeq.
+Proof.
+  repeat constructor; intros; try field; auto;
+    try apply Qplus_Qeq_proper;
+    try apply Qmult_Qeq_proper;
+    try apply Qopp_Qeq_proper;
+    try apply Qinv_Qeq_proper;
+    try apply Qeq_equiv.
+  easy.
+Defined.
+
 
 (* ######################################################################### *)
 (** ** Others *)

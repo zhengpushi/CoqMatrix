@@ -877,6 +877,53 @@ Qed.
 Add Field Complex_field_inst : Complex_field.
 
 
+(** *** Instance of classes which defined in HierarchySetoid *)
+
+(** ( + ) is proper function about (==) *)
+Lemma Cplus_eq_proper : Proper (eq ==> eq ==> eq) Cadd.
+Proof.
+  intro;intros. intro;intros. rewrite H,H0;easy.
+Qed.
+
+(** ( * ) is proper function about (==) *)
+Lemma Cmult_eq_proper : Proper (eq ==> eq ==> eq) Cmul.
+Proof.
+  intro;intros. intro;intros. rewrite H,H0;easy.
+Qed.
+
+(** ( - a) is proper function about (==) *)
+Lemma Copp_eq_proper : Proper (eq ==> eq) Copp.
+Proof.
+  intro; intros. rewrite H; easy.
+Qed.
+
+(** ( / a) is proper function about (==) *)
+Lemma Cinv_eq_proper : Proper (eq ==> eq) Cinv.
+Proof.
+  intro; intros. rewrite H; easy.
+Qed.
+
+Global Instance Ring_C : Ring Cadd 0 Copp Cmul 1 eq.
+Proof.
+  repeat constructor; intros; try ring;
+    try apply Cplus_eq_proper;
+    try apply Cmult_eq_proper;
+    try apply Copp_eq_proper;
+    try apply eq_equivalence.
+Defined.
+
+Global Instance Field_C : Field Cadd 0 Copp Cmul 1 Cinv eq.
+Proof.
+  repeat constructor; intros; try field; auto;
+    try apply Cplus_eq_proper;
+    try apply Cmult_eq_proper;
+    try apply Copp_eq_proper;
+    try apply Cinv_eq_proper;
+    try apply eq_equivalence.
+  apply C1_neq_C0.
+Defined.
+
+
 (** *** Conjugate of complex numbers *)
 Section Cconj.
 

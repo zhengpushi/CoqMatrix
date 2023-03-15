@@ -20,8 +20,8 @@
  *)
 
 
-Require Import TupleExt HierarchySetoid SetoidListListExt.
-Require Import Sequence.
+Require Export TupleExt HierarchySetoid SetoidListListExt.
+Require Export Sequence.
 
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
@@ -175,14 +175,14 @@ Section l2m_m2l.
 
   Lemma m2l_length : forall {r c} (m : mat r c), length (m2l m) = r.
   Proof.
-    intros. unfold m2l. rewrite map_length. rewrite seq_length. auto.
+    intros. unfold m2l. rewrite map_length, seq_length. auto.
   Qed.
   
   Lemma m2l_width : forall {r c} (m : mat r c), width (m2l m) c.
   Proof.
     intros. unfold width,m2l.
     apply Forall_map.
-    apply Forall_nth. intros. rewrite map_length. apply seq_length.
+    apply Forall_nth. intros. rewrite map_length, seq_length; auto.
   Qed.
 
   Lemma l2m_m2l_id : forall {r c} (m : mat r c), (@l2m r c (m2l m)) == m.
@@ -202,8 +202,8 @@ Section l2m_m2l.
     rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)); auto.
     - intros. rewrite ?nth_map_seq; auto.
       rewrite ?Nat.add_0_r. apply Nat.ltb_lt in H1,H2. rewrite H1,H2; simpl. easy.
-    - rewrite map_length. apply seq_length.
-    - apply width_map. intros. rewrite map_length. apply seq_length.
+    - rewrite map_length, seq_length; auto.
+    - apply width_map. intros. rewrite map_length, seq_length; auto.
   Qed.
 
   Lemma l2m_inj : forall {r c} (d1 d2 : list (list A)),
@@ -230,10 +230,10 @@ Section l2m_m2l.
     rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)) in H0.
     - specialize (H0 i j H H1).
       rewrite ?nth_map_seq in H0; auto. rewrite ?Nat.add_0_r in H0. auto.
-    - rewrite map_length. apply seq_length.
-    - rewrite map_length. apply seq_length.
-    - apply width_map. intros. rewrite map_length. apply seq_length.
-    - apply width_map. intros. rewrite map_length. apply seq_length.
+    - rewrite map_length, seq_length; auto.
+    - rewrite map_length, seq_length; auto.
+    - apply width_map. intros. rewrite map_length, seq_length; auto.
+    - apply width_map. intros. rewrite map_length, seq_length; auto.
   Qed.
   
   Lemma m2l_surj : forall {r c} (d : list (list A)),
