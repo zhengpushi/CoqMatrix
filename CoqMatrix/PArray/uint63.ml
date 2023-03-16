@@ -1,4 +1,9 @@
-(* type t = int64 *)
-let of_int = Int64.of_int
-let l_and = Int64.logand
-let equal = Int64.equal
+type t = int
+let of_int = fun i -> i
+let l_and = Int.logand
+let equal = Int.equal
+let l_sl = Int.shift_left
+let l_sr = Int.shift_right_logical
+let l_or = Int.logor
+let sub = Int.sub
+             

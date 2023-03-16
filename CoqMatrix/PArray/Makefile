@@ -5,8 +5,6 @@
 
 test : test.ml matrix.ml
 	@ocamlc -o $@ uint63.ml parray.ml matrix.mli matrix.ml test.ml
-	# @ocamlc -c matrix.mli
-	# @ocamlfind ocamlc -o $@ -linkpkg matrix.ml -package unix Uint63
 
 # matrix : matrix.ml
 # 	@ocamlc.opt -c matrix.mli
