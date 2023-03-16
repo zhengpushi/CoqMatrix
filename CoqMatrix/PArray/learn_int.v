@@ -25,7 +25,7 @@ From Coq Require Import Extraction.
 (** * Extraction to OCaml *)
 
 (** Come from "ExtrOCamlInt63" *)
-Extract Constant PrimInt63.int => "int64".
+Extract Constant PrimInt63.int => "int".
 
 
 (** Come from "ExtrOCamlPArray" *)
@@ -41,15 +41,16 @@ Extract Constant PArray.set => "Array.set".
 Extract Constant PArray.length => "Array.length".
 Extract Constant PArray.copy => "Array.copy".
 
-Extract Constant Uint63.land => "Int64.logand".
-Extract Constant Uint63.lsr => "Int64.shift_right_logical".
-Extract Constant Uint63.eqb => "Int64.equal".
+Extract Constant Uint63.land => "Int.logand".
+Extract Constant Uint63.lsr => "Int.shift_right_logical".
+Extract Constant Uint63.eqb => "Int.equal".
 
-Extract Constant Uint63.sub => "Int64.sub".
-Extract Constant Uint63.lsl => "Int64.shift_left".
-Extract Constant Uint63.lor => "Int64.logor".
-Extract Constant Uint63.is_zero => "fun i -> Int64.equal i 0L".
-Extract Constant Uint63.is_even => "fun i -> is_zero (land i 1L)".
+Extract Constant Uint63.sub => "Int.sub".
+Extract Constant Uint63.lsl => "Int.shift_left".
+Extract Constant Uint63.lor => "Int.logor".
+(* Extract Constant Uint63.of_int => "fun i -> Int.equal i 0L". *)
+(* Extract Constant Uint63.is_zero => "fun i -> Int.equal i 0L". *)
+(* Extract Constant Uint63.is_even => "fun i -> is_zero (land i 1L)". *)
 (* Extract Constant 1 => "fun i -> is_zero (land i 1L)". *)
 (* is_even = fun i : int => is_zero (i land 1) *)
 
@@ -69,7 +70,14 @@ Extract Constant Uint63.is_even => "fun i -> is_zero (land i 1L)".
 Definition i2n : int -> nat := fun i => BinInt.Z.to_nat (Uint63.to_Z i).
 Definition n2i : nat -> int := fun n : nat => Uint63.of_Z (BinInt.Z.of_nat n).
 
-Open Scope int63_scope.
+Recursive Extraction is_even.
+Import ZArith.
+
+
+Extraction "mat.ml" is_even.
+Zplus. is_even.
+Check 1.
+Recursive Extraction Uint63.to_Z_rec.
 Search 1.
 Open Scope int63_scope.
 Check 1.
@@ -79,7 +87,6 @@ Locate 1.
 Check 1.
 Print 1.
 Print to_Z_rec.
-Recursive Extraction Uint63.to_Z_rec.
 Print Uint63.is_even.
 Set Printing All.
 (* Check 1%int63. *)

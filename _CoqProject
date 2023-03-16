@@ -32,6 +32,8 @@ CoqMatrix/CoqExt/SetoidListExt.v
 CoqMatrix/CoqExt/SetoidListListExt.v
 CoqMatrix/CoqExt/HierarchySetoid.v
 CoqMatrix/CoqExt/Sequence.v
+CoqMatrix/CoqExt/MyExtrOCamlInt63.v
+CoqMatrix/CoqExt/MyExtrOCamlPArray.v
 
 # ===== Complex =====
 CoqMatrix/Complex/Complex.v
