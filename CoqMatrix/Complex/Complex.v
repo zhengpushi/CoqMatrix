@@ -55,12 +55,11 @@ Section general_useful_props.
     rewrite <- sqrt_square.
     - apply sqrt_le_1_alt.
       apply Rle_trans with (Rabs a * Rabs a + Rabs b * Rabs b)%R.
-      + rewrite <- ?Rabs_mult. apply Rplus_le_compat.
+      + rewrite <- !Rabs_mult. apply Rplus_le_compat.
         apply RRle_abs. apply RRle_abs.
       + ring_simplify.
-        rewrite ?Rplus_assoc. apply Rplus_le_compat_l.
-        rewrite <- Rplus_0_l at 1.
-        rewrite <- ?Rplus_assoc. apply Rplus_le_compat_r.
+        rewrite !Rplus_assoc. apply Rplus_le_compat_l.
+        rewrite <- Rplus_0_l at 1. apply Rplus_le_compat_r.
         assert (0 <= Rabs a) by ra; assert (0 <= Rabs b) by ra. ra.
     - assert (0 <= Rabs a) by ra; assert (0 <= Rabs b) by ra. ra.
   Qed.
@@ -70,10 +69,10 @@ Section general_useful_props.
   Proof.
     intros.
     apply Rsqr_incr_0_var; ra. ring_simplify.
-    autorewrite with R. rewrite ?Rsqr_sqrt; ra.
+    autorewrite with R. rewrite !Rsqr_sqrt; ra.
     ring_simplify.
-    rewrite ?Rplus_assoc; repeat apply Rplus_le_compat_l.
-    rewrite <- ?Rplus_assoc; repeat apply Rplus_le_compat_r.
+    rewrite !Rplus_assoc; repeat apply Rplus_le_compat_l.
+    rewrite <- !Rplus_assoc; repeat apply Rplus_le_compat_r.
     (* 2acbd <= a^2*d^2+b^2*c^2 *)
     autorewrite with R.
     replace (2 * a * c * b * d)%R with (2 * (a * d) * (b * c))%R by ring.
@@ -131,7 +130,7 @@ Section general_useful_props.
             replace (INR 0) with 0; auto; ring.
           * replace (x + - (2 * INR (S n) * PI)) with
               (x - (2 * INR n * PI) - 2 * PI).
-            { rewrite cos_minus; rewrite ?sin_2PI,?cos_2PI. ring_simplify; auto. }
+            { rewrite cos_minus. rewrite !sin_2PI,!cos_2PI. ring_simplify; auto. }
             { rewrite S_INR. ring. }
         + rewrite positive_nat_Z. auto.
     Qed.
@@ -156,7 +155,7 @@ Section general_useful_props.
             replace (INR 0) with 0; auto; ring.
           * replace (x + - (2 * INR (S n) * PI)) with
               (x - (2 * INR n * PI) - 2 * PI).
-            { rewrite sin_minus; rewrite ?sin_2PI,?cos_2PI. ring_simplify; auto. }
+            { rewrite sin_minus; rewrite !sin_2PI,!cos_2PI. ring_simplify; auto. }
             { rewrite S_INR. ring. }
         + rewrite positive_nat_Z. auto.
     Qed.
@@ -759,7 +758,7 @@ Section Cpow.
   Lemma Cpow_mul : forall z n m, z ^ (n * m) = (z ^ n) ^ m.
   Proof.
     intros z n m. revert n. induction m; intros; cbn.
-    - rewrite mult_0_r. easy.
+    - rewrite Nat.mul_0_r. easy.
     - rewrite <- IHm. rewrite <- Cpow_add. f_equal. lia.
   Qed.
 
@@ -825,8 +824,8 @@ Section Cinv.
     intros (a,b) H. cbv.
     assert (0 < a * a + b * b).
     { apply Cneq_iff in H; simpl in H. destruct H; ra. }
-    rewrite inv_sqrt; ra.
-    apply Rsqr_inj; ra. autorewrite with R. rewrite ?Rsqr_sqrt; ra.
+    rewrite <- sqrt_inv; ra.
+    apply Rsqr_inj; ra. autorewrite with R. rewrite !Rsqr_sqrt; ra.
     field. lra.
   Qed.
 
