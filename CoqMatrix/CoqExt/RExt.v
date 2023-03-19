@@ -88,15 +88,19 @@ Global Hint Unfold
   (* Abs *)
   Rabs_Ropp           (* Rabs (-x) = Rabs x *)
   Rabs_Rabsolu        (* Rabs (Rabs x) = Rabs x *)
+
   (* + *)
   Rplus_0_l           (* 0 + r = r *)
   Rplus_0_r           (* r + 0 = r *)
+
   (* -a *)
   Ropp_0              (* - 0 = 0 *)
   Rminus_0_r          (* r - 0 = r *)
   Ropp_involutive     (* - - r = r *)
   Rplus_opp_r         (* r + - r = 0 *)
   Rplus_opp_l         (* - r + r = 0 *)
+  Rminus_eq_0         (* r - r = 0 *)
+
   (* x *)
   Rsqr_0              (* 0² = 0 *)
   Rsqr_1              (* 1² = 1 *)
@@ -106,12 +110,19 @@ Global Hint Unfold
   Rmult_1_r           (* r * 1 = r *)
 (*   Ropp_mult_distr_r_reverse     (* r1 * - r2 = - (r1 * r2) *) *)
 (*   Ropp_mult_distr_l_reverse     (* - r1 * r2 = - (r1 * r2) *) *)
+
   (* pow *)
   pow1                (* 1 ^ n = 1 *)
   pow_O               (* x ^ 0 = 1 *)
   pow_1               (* x ^ 1 = x *)
+
+  (* Rpower *)
+  Rpower_O            (* power x 0 = 1 *)
+  Rpower_1            (* power x 1 = x *) 
+  
   (* sqr *)
   Rsqr_mult           (* (x * y)² = x² * y² *)
+
   (* sqrt *)
   sqrt_Rsqr_abs       (* (sqrt x²) = Rabs x *)
   (* Rsqr_sqrt           (* 0 <= x -> (sqrt x)² = x *) *)
@@ -180,6 +191,7 @@ Global Opaque
   asin
   atan
   acos
+  ln
 .
 
 Section TEST_psatz.
@@ -497,6 +509,11 @@ Proof.
   apply eq_sym. apply Rsqr_sqrt.
   assert (0 < sqrt x). rewrite H; auto with R.
   apply sqrt_gt0_imply_gt0 in H1. auto with R.
+Qed.
+
+Lemma sqrt_eq1_imply_eq1_rev : forall (x : R), x = 1 -> sqrt x = 1.
+Proof.
+  intros. rewrite H. rewrite sqrt_1. auto.
 Qed.
 
 (** ( √ r1 * √ r2)^2 = r1 * r2 *)
@@ -1254,27 +1271,34 @@ Definition Rltb (r1 r2 : R) : bool := if Rlt_le_dec r1 r2 then true else false.
 Infix "=?"  := Reqb : R_scope.
 Infix "<=?" := Rleb : R_scope.
 Infix "<?"  := Rltb : R_scope.
-
+Infix ">?"  := (fun x y => y <? x) : R_scope.
+Infix ">=?" := (fun x y => y <=? x) : R_scope.
 
 (** Reflection of (=) and (=?) *)
-Lemma Reqb_eq : forall x y, x =? y = true <-> x = y.
-Proof.
-  apply Aeqb_true.
-Qed.
+(* Lemma Reqb_true : forall x y, x =? y = true <-> x = y. *)
+(* Proof. *)
+(*   apply Aeqb_true. *)
+(* Qed. *)
 
-Lemma Reqb_neq : forall x y, x =? y = false <-> x <> y.
+(* Lemma Reqb_false : forall x y, x =? y = false <-> x <> y. *)
+(* Proof. *)
+(*   apply Aeqb_false. *)
+(* Qed. *)
+Lemma Reqb_reflect : forall x y, reflect (x = y) (x =? y).
 Proof.
-  apply Aeqb_false.
-Qed.
-
-Lemma Reqb_comm : forall r1 r2, (r1 =? r2) = (r2 =? r1).
-Proof.
-  intros. cbv. destruct Req_EM_T,Req_EM_T; subst; auto. easy.
+  intros. destruct (x =? y) eqn:E1; constructor.
+  - apply Aeqb_true; auto.
+  - apply Aeqb_false; auto.
 Qed.
 
 Lemma Reqb_refl : forall r, r =? r = true.
 Proof.
   intros. cbv. destruct Req_EM_T; auto.
+Qed.
+
+Lemma Reqb_comm : forall r1 r2, (r1 =? r2) = (r2 =? r1).
+Proof.
+  intros. cbv. destruct Req_EM_T,Req_EM_T; subst; auto. easy.
 Qed.
 
 Lemma Reqb_trans : forall r1 r2 r3, r1 =? r2 = true -> 
@@ -1283,6 +1307,25 @@ Proof.
   intros. cbv in *. destruct Req_EM_T,Req_EM_T,Req_EM_T; subst; auto.
 Qed.
 
+Lemma Rltb_reflect : forall x y, reflect (x < y) (x <? y).
+Proof.
+  intros. unfold Rltb. destruct (Rlt_le_dec x y); constructor; lra.
+Qed.
+
+Lemma Rleb_reflect : forall x y, reflect (x <= y) (x <=? y).
+Proof.
+  intros. unfold Rleb. destruct (Rle_lt_dec x y); constructor; lra.
+Qed.
+
+Lemma Rgtb_reflect : forall x y, reflect (x > y) (x >? y).
+Proof.
+  intros. unfold Rltb. destruct (Rlt_le_dec y x); constructor; lra.
+Qed.
+
+Lemma Rgeb_reflect : forall x y, reflect (x >= y) (x >=? y).
+Proof.
+  intros. unfold Rleb. destruct (Rle_lt_dec y x); constructor; lra.
+Qed.
 
 
 (* ######################################################################### *)
