@@ -38,6 +38,12 @@ CoqMatrix/CoqExt/MyExtrOCamlPArray.v
 # ===== Complex =====
 CoqMatrix/Complex/Complex.v
 
+# ===== Calculus =====
+CoqMatrix/Calculus/RealFunction.v
+CoqMatrix/Calculus/Derivative.v
+CoqMatrix/Calculus/Integration.v
+CoqMatrix/Calculus/Calculus.v
+
 # ===== LinearAlgebra (part 1) =====
 CoqMatrix/LinearAlgebra/PermutationExt.v
 
