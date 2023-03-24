@@ -337,6 +337,48 @@ Section ring_vector_theory.
   Definition vdot {n : nat} (v1 v2 : vec n) : A :=
     fold_left Aadd (map (fun i => v1!i * v2!i) (seq 0 n)) A0.
   
+  Infix "⋅" := vdot : vec_scope.
+
+  (** vdot is a proper morphism respect to Aeq *)
+  Lemma vdot_aeq_mor {n} :
+    Proper (veq (Aeq:=Aeq) ==> veq (Aeq:=Aeq) ==> Aeq) (@vdot n).
+  Proof.
+    repeat (hnf; intros).
+    apply fold_left_aeq_mor; try easy.
+    rewrite veq_iff_vnth in H,H0.
+    rewrite (list_eq_iff_nth A0 n); auto.
+    - intros. rewrite !nth_map_seq; auto.
+      rewrite Nat.add_0_r. rewrite H,H0; auto. easy.
+    - rewrite map_length, seq_length; auto.
+    - rewrite map_length, seq_length; auto.
+  Qed.
+  Global Existing Instance vdot_aeq_mor.
+
+  (** dot production is commutative *)
+  Lemma vdot_comm : forall {n} (v1 v2 : vec n), (v1 ⋅ v2 == v2 ⋅ v1)%A.
+  Proof.
+    intros. unfold vdot.
+    apply fold_left_aeq_mor; try easy.
+    apply SetoidListExt.map_ext. intros. ring.
+  Qed.
+
+  (** 0 * v = 0 *)
+  Lemma vdot_0_l : forall {n} (v : vec n), (vec0 ⋅ v == A0)%A.
+  Proof.
+    intros.
+    unfold vdot. cbn.
+    destruct v as [v]; simpl.
+    assert (map (fun i => A0 * v i 0) (seq 0 n) == map (fun i => A0) (seq 0 n))%list.
+    { apply SetoidListExt.map_ext. intros. ring. }
+    rewrite H. clear H.
+    induction n; simpl; try easy.
+    rewrite <- seq_shift. rewrite map_map. monoid_rw. auto.
+  Qed.
+
+  (** v * 0 = 0 *)
+  Lemma vdot_0_r : forall {n} (v : vec n), (v ⋅ vec0 == A0)%A.
+  Proof. intros. rewrite vdot_comm, vdot_0_l. easy. Qed.
+
 End ring_vector_theory.
 
 Section test.

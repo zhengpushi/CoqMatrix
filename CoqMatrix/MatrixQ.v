@@ -61,7 +61,7 @@ Export MatrixQ_SF.
 Ltac lma :=
   by_cell;
   simpl;
-  unfold A,Aeq,Aadd,Amul,A0,A1;
+  unfold A,Aeq,Aadd,Amul,Aopp,A0,A1;
   try ring;
   try field;
   try easy.

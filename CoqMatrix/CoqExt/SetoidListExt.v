@@ -837,6 +837,8 @@ End map2_map_map.
 (** ** fold of list *)
 Section fold.
   Context `{M:Monoid}.
+  Infix "==" := Aeq : A_scope.
+  Infix "==" := (eqlistA Aeq).
 
   (** fold_right is a Proper morphism *)
   Lemma fold_right_aeq_mor : Proper (Aeq ==> eqlistA Aeq ==> Aeq) (fold_right Aadd).
@@ -846,6 +848,18 @@ Section fold.
     apply IHl1. easy.
   Qed.
   Global Existing Instance fold_right_aeq_mor.
+
+  (** fold_left is a proper relation *)
+  Lemma fold_left_aeq_mor :
+    Proper (eqlistA Aeq ==> Aeq ==> Aeq) (fold_left Aadd).
+  Proof.
+    intros l1. induction l1; intros l2 Hl a1 a2 Ha.
+    - inv Hl. simpl. auto.
+    - destruct l2. easy. inv Hl.
+      simpl. apply IHl1; auto.
+      rewrite Ha,H2. easy.
+  Qed.
+  Global Existing Instance fold_left_aeq_mor.
 
 End fold.
 

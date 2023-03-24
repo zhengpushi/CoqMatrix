@@ -8,6 +8,7 @@
   date      : 2021.12
  *)
 
+Require Export MatrixQ.
 Require Import VectorAll.
 
 

@@ -237,6 +237,19 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   (** dot production of two vectors. *)
   Definition vdot {n : nat} (v1 v2 : vec n) :=
     vdot (A0:=A0) (Aadd:=Aadd) (Amul:=Amul) v1 v2.
+  Infix "⋅" := vdot : vec_scope.
+
+  (** dot production is commutative *)
+  Lemma vdot_comm : forall {n} (v1 v2 : vec n), (v1 ⋅ v2 == v2 ⋅ v1)%A.
+  Proof. intros. apply vdot_comm. Qed.
+
+  (** 0 * v = 0 *)
+  Lemma vdot_0_l : forall {n} (v : vec n), (vec0 ⋅ v == A0)%A.
+  Proof. intros. apply vdot_0_l. Qed.
+
+  (** v * 0 = 0 *)
+  Lemma vdot_0_r : forall {n} (v : vec n), (v ⋅ vec0 == A0)%A.
+  Proof. intros. apply vdot_0_r. Qed.
   
 End RingVectorTheorySF.
 

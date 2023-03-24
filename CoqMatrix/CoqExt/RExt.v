@@ -86,6 +86,7 @@ Global Hint Unfold
 (** Config hint db for autorewrite, for rewriting of equations *)
 #[export] Hint Rewrite
   (* Abs *)
+  Rabs_R0             (* Rabs 0 = 0 *)
   Rabs_Ropp           (* Rabs (-x) = Rabs x *)
   Rabs_Rabsolu        (* Rabs (Rabs x) = Rabs x *)
 
@@ -630,6 +631,12 @@ Section TEST_Rsqrt.
   
 End TEST_Rsqrt.
 
+(** Automatically prove the goal such as "sqrt x = y" *)
+Ltac solve_sqrt_eq :=
+  match goal with
+  | |- sqrt ?x = ?y => apply Rsqr_inj; [ra|ra|rewrite Rsqr_sqrt;ra]
+  end.
+
 
 (* ======================================================================= *)
 (** ** About "trigonometric functions" *)
@@ -678,6 +685,23 @@ Proof.
 Qed.
 
 #[export] Hint Rewrite
+  sin_0         (* sin 0 = 0 *)
+  cos_0         (* cos 0 = 1 *)
+  sin_PI2       (* sin (PI / 2) = 1 *)
+  cos_PI2       (* cos (PI / 2) = 0 *)
+  sin_PI2_neg   (* sin (- (PI/2)) = -1 *)
+  cos_PI2_neg   (* cos (- (PI/2)) = 0 *)
+  sin_plus_PI   (* sin (r + PI) = - (sin r) *)
+  sin_sub_PI    (* sin (r - PI) = - (sin r) *)
+  cos_plus_PI   (* cos (r + PI) = - (cos r) *)
+  cos_sub_PI    (* cos (r - PI) = - (cos r) *)
+  sin2_cos2     (* (sin x)² + (cos x)² = 1 *)
+  cos2_sin2     (* (cos x)² + (sin x)² = 1 *)
+  : R.
+
+#[export] Hint Resolve
+  sin_0         (* sin 0 = 0 *)
+  cos_0         (* cos 0 = 1 *)
   sin_PI2       (* sin (PI / 2) = 1 *)
   cos_PI2       (* cos (PI / 2) = 0 *)
   sin_PI2_neg   (* sin (- (PI/2)) = -1 *)

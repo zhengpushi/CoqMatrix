@@ -85,14 +85,32 @@ Export VectorR_SF.
 (** ** Vector with any dimension *)
 Section DimAny.
 
-  (** Square of vector length *)
-  Definition vlen_sqr {n} (v : vec n) : R := vdot v v.
+  (** Length (magnitude) of a vector *)
+  Definition vlen {n} (v : vec n) : R := sqrt (vdot v v).
 
-  (* Length (magnitude) of a vector *)
-  Definition vlen {n} (v : vec n) : R := sqrt (vlen_sqr v).
+  (** Length of a vector u is one, iff the dot product of u and u is one *)
+  Lemma vlen_eq1_iff_vdot_eq1 : forall n (u : vec n), (vlen u == A1 <-> vdot u u == A1)%A.
+  Proof.
+    intros. unfold vlen. remember (vdot u u) as r.
+    split; intros; hnf in *.
+    ra. rewrite H. ra.
+  Qed.
 
-  (** Normalization of a non-zero vector *)
-  Definition vnormalize {n} (v : vec n) (H : vnonzero v) : vec n :=
+  (** A unit vector u is a vector whose length equals one.
+      Here, we use the square of length instead of length directly,
+      but this is reasonable.
+   *)
+  Definition vunit {n} (u : vec n) : Prop := (vdot u u == A1)%A.
+
+  (** Verify the definition is reasonable *)
+  Lemma vunit_ok : forall {n} (u : vec n), vunit u <-> (vlen u == A1)%A.
+  Proof.
+    intros. split; intros; apply vlen_eq1_iff_vdot_eq1; auto.
+  Qed.
+
+  (** Normalization of a non-zero vector v.
+      That is, get a unit vector in the same directin as v. *)
+  Definition vnormalize {n} (v : vec n) : vec n :=
     let k := 1 / (vlen v) in
     vcmul k v.
   
