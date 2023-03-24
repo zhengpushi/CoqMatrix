@@ -686,6 +686,7 @@ Qed.
   sin_sub_PI    (* sin (r - PI) = - (sin r) *)
   cos_plus_PI   (* cos (r + PI) = - (cos r) *)
   cos_sub_PI    (* cos (r - PI) = - (cos r) *)
+  sin2_cos2     (* (sin x)² + (cos x)² = 1 *)
   cos2_sin2     (* (cos x)² + (sin x)² = 1 *)
   : R.
 
@@ -1286,9 +1287,7 @@ Infix ">=?" := (fun x y => y <=? x) : R_scope.
 (* Qed. *)
 Lemma Reqb_reflect : forall x y, reflect (x = y) (x =? y).
 Proof.
-  intros. destruct (x =? y) eqn:E1; constructor.
-  - apply Aeqb_true; auto.
-  - apply Aeqb_false; auto.
+  intros. unfold Reqb,Aeqb. destruct (decidable); constructor; auto.
 Qed.
 
 Lemma Reqb_refl : forall r, r =? r = true.

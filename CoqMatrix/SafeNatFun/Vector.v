@@ -95,6 +95,12 @@ Section basic_vectory_theory.
   Qed. 
 
   (* ==================================== *)
+  (** ** Make concrete vector *)
+  Definition mk_vec2 (a0 a1 : A) : vec 2 := l2v 2 [a0;a1].
+  Definition mk_vec3 (a0 a1 a2 : A) : vec 3 := l2v 3 [a0;a1;a2].
+  Definition mk_vec4 (a0 a1 a2 a3 : A) : vec 4 := l2v 4 [a0;a1;a2;a3].
+
+  (* ==================================== *)
   (** ** Convert between tuples and vector *)
   Definition t2v_2 (t : @T2 A) : vec 2 :=
     let '(a,b) := t in l2v 2 [a;b].

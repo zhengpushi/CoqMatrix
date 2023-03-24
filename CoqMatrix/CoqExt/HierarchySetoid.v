@@ -257,6 +257,11 @@ Section Dec_theory.
     intros. unfold Aeqb. destruct decidable; split; intros; auto; try easy.
   Qed.
 
+  Lemma Aeq_reflect : forall a b : A, reflect (Aeq a b) (Aeqb a b).
+  Proof.
+    intros. unfold Aeqb. destruct (decidable a b); constructor; auto.
+  Qed.
+
 End Dec_theory.
 
 (** ** Examples *)

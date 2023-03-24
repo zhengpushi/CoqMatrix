@@ -75,6 +75,12 @@ Module BasicVectorTheorySF (E : ElementType).
   Proof. intros. apply l2v_v2l_id; auto. Qed.
   
   (* ==================================== *)
+  (** ** Make concrete vector *)
+  Definition mk_vec2 (a0 a1 : A) : vec 2 := mk_vec2 (A0:=A0) a0 a1.
+  Definition mk_vec3 (a0 a1 a2 : A) : vec 3 := mk_vec3 (A0:=A0) a0 a1 a2.
+  Definition mk_vec4 (a0 a1 a2 a3 : A) : vec 4 := mk_vec4 (A0:=A0) a0 a1 a2 a3.
+
+  (* ==================================== *)
   (** ** Convert between tuples and vector *)
   Definition t2v_2 (t : @T2 A) : vec 2 := t2v_2 (A0:=A0) t.
   Definition t2v_3 (t : @T3 A) : vec 3 := t2v_3 (A0:=A0) t.

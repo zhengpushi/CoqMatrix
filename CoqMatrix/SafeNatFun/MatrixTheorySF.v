@@ -541,293 +541,38 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
   Qed.
   
   (** ** matrix theory *)
+
+  (** *** matrix inversion *)
   Section Inversion.
 
-    (* ======================================================================= *)
-    (** ** Determinant. *)
+    (** Determinant of a square matrix.  *)
+    Definition det {n} (m : smat n) : A := @det A Aadd A0 Aopp Amul A1 n m.
 
-    (** Get the sub square matrix which remove r-th row and c-th column
-        from a square matrix. *)
-    Definition submat {n} (m : smat (S n)) (r c : nat) : smat n :=
-      mk_mat
-        (fun i j =>
-           let i' := (if ltb i r then i else S i) in
-           let j' := (if ltb j c then j else S j) in
-           m!i'!j').
+    (** Determinant of a matrix of 1D *)
+    Definition det_1_1 (m : smat 1) := @det_1_1 A m.
 
-    (** Determinant of a square matrix (original definition) *)
-    (* Variable a b c : A. *)
-    (* Compute perm 0 (seq 0 3). *)
-    (* Let dl := perm 0 (seq 0 3). *)
-    (* Let l := [1;2;3]. *)
-    (* Compute nth 1 l 0. *)
-    (* Compute map (fun i => (i, nth i l 0)) (seq 0 3). *)
-    (* Compute map (fun l => map (fun i => (i, nth i l 0)) (seq 0 3)) dl. *)
-    (* Let dl1 := map (fun l => map (fun i => (i, nth i l 0)) (seq 0 3)) dl. *)
-    (* Variable a00 a01 a02 a10 a11 a12 a20 a21 a22 : A. *)
-    (* Definition m : smat 3 := mk_mat_3_3 a00 a01 a02 a10 a11 a12 a20 a21 a22. *)
-    (* Compute map (fun l => map (fun (ij:nat * nat) => let (i,j) := ij in m!i!j) l) dl1. *)
-
-    (* (** all items in a determinant *) *)
-    (* Let dl2 := map (fun l => map (fun (ij:nat * nat) => let (i,j) := ij in m!i!j) l) dl1. *)
-    (* Compute dl2. *)
-
-    (* Definition n := 3. *)
-    (* Compute perm 0 (seq 0 n). (* *)
-    (*  = [[0; 1; 2]; [0; 2; 1]; [1; 0; 2]; [1; 2; 0]; [2; 0; 1]; [2; 1; 0]] *)
-    (*  : list (list nat) *) *)
-
-    (* Definition item_of_det {n : nat} (m : smat n) (l : list nat) : A := *)
-    (*   fold_left Amul (map (fun i => m!i!(nth i l 0)) l) A1. *)
-
-    (* (** Definition of determinant *) *)
-    (* Definition det_def {n : nat} (m : smat n) : A := *)
-    (*   fold_left Aadd (map (fun l => item_of_det m l) (perm 0 (seq 0 n))) A0. *)
-
-    (* Compute det_orig m. *)
-    
-    (* Compute fold_left Amul [a00;a01;a02]. *)
-    (* Compute fold_left Aadd. *)
-
-    (* Check perm. ? *)
-    (* Fixpoint det_orig {n} : smat n -> A := *)
-    (*   match n with *)
-    (*   | 0 => fun _ => A1 *)
-    (*   | S n' => *)
-    (*       fun m => *)
-      
-    (** Determinant of a square matrix.
-        The idea: by expanding the first row *)
-    Fixpoint det {n} : smat n -> A :=
-      match n with
-      | 0 => fun _ => A1
-      | S n' =>
-          fun m =>
-            fold_left Aadd
-              (map (fun i =>
-                      let a := if Nat.even i then (m!0!i)%nat else (-(m!0!i)%nat)%A in
-                      let d := det (submat m 0 i) in
-                      (a * d)%A) (seq 0 n)) A0
-      end.
-
-    (** Prove a proposition such as:
-      "~(det m == 0) -> ~(xxx = 0)"
-      or
-      "~(xxx = 0) -> ~(det m == 0)"
-     *)
-    Ltac det_neq0_imply_neq0 :=
-      match goal with
-      | H : ~(det ?m == A0)%A |- ~(_ == A0)%A =>
-          let H1 := fresh "H1" in
-          intro H1; destruct H; cbv; ring_simplify; ring_simplify in H1; auto
-      | H : ~(_ == A0)%A |- ~(det ?m == A0)%A =>
-          let H1 := fresh "H1" in
-          intro H1; cbv in H1; destruct H; ring_simplify; ring_simplify in H1; auto
-      end.
-
-    (** Determinant of a matrix of dimension-1 *)
-    Definition det_1_1 (m : smat 1) := m!0!0.
-
-    (** det_1_1 m = det m *)
-    Lemma det_1_1_eq_det : forall m, (det_1_1 m == det m)%A.
-    Proof.
-      intros. cbv. ring.
-    Qed.
-    
-    (** det m <> 0 <-> det_exp <> 0 *)
-    Lemma det_1_1_neq0_iff : forall (m : smat 1),
-        ~ (det m == A0)%A <->  ~ (m!0!0 == A0)%A.
-    Proof.
-      intros. split; intros; det_neq0_imply_neq0.
-    Qed.
-
-    (** Determinant of a matrix of dimension-2 *)
-    Definition det_2_2 (m : smat 2) := (m!0!0 * m!1!1 - m!0!1 * m!1!0)%A.
-
-    (** det_2_2 m = det m *)
-    Lemma det_2_2_eq_det : forall m, (det_2_2 m == det m)%A.
-    Proof.
-      intros. cbv. ring.
-    Qed.
-
-    (** det m <> 0 <-> det_exp <> 0 *)
-    Lemma det_2_2_neq0_iff : forall (m : smat 2),
-        ~ (det m == A0)%A <->  ~ (m!0!0 * m!1!1 - m!0!1 * m!1!0 == A0)%A.
-    Proof.
-      intros. split; intros; det_neq0_imply_neq0.
-    Qed.
+    (** Determinant of a matrix of 2D *)
+    Definition det_2_2 (m : smat 2) := @det_2_2 A Aadd Aopp Amul m.
 
     (** Determinant of a matrix of dimension-3 *)
-    Definition det_3_3 (m : smat 3) :=
-      (m!0!0 * m!1!1 * m!2!2 - m!0!0 * m!1!2 * m!2!1 - 
-         m!0!1 * m!1!0 * m!2!2 + m!0!1 * m!1!2 * m!2!0 + 
-         m!0!2 * m!1!0 * m!2!1 - m!0!2 * m!1!1 * m!2!0)%A.
+    Definition det_3_3 (m : smat 3) := @det_3_3 A Aadd Aopp Amul m.
+    
+    (** Cramer rule, which can slving the equation with form of M*x=b.
+      Note, the result is valid only when D is not zero *)
+    Definition cramerRule {n} (M : smat n) (b : mat n 1) : mat n 1 :=
+      @cramerRule A Aadd A0 Aopp Amul A1 Ainv n M b.
+    
+    (** Inverse matrix of a matrix *)
+    Definition minv {n} (m : smat n) := @minv A Aadd A0 Aopp Amul A1 Ainv n m.
+    
+    (** Simplified formula of inverse matrix of 1D *)
+    Definition inv_1_1 (m : smat 1) : smat 1 := @inv_1_1 A A0 Amul A1 Ainv m.
 
-    (** det_3_3 m = det m *)
-    Lemma det_3_3_eq_det : forall m, (det_3_3 m == det m)%A.
-    Proof.
-      intros. cbv. ring.
-    Qed.
-    
-    (** det m <> 0 <-> det_exp <> 0 *)
-    Lemma det_3_3_neq0_iff : forall (m : smat 3),
-        ~ (det m == A0)%A <->
-          ~(m!0!0 * m!1!1 * m!2!2 - m!0!0 * m!1!2 * m!2!1 - 
-              m!0!1 * m!1!0 * m!2!2 + m!0!1 * m!1!2 * m!2!0 + 
-              m!0!2 * m!1!0 * m!2!1 - m!0!2 * m!1!1 * m!2!0 == A0)%A.
-    Proof.
-      intros. split; intros; det_neq0_imply_neq0.
-    Qed.
+    (** Simplified formula of inverse matrix of 2D *)
+    Definition inv_2_2 (m : smat 2) : smat 2 := @inv_2_2 A Aadd A0 Aopp Amul Ainv m.
 
-    (* ======================================================================= *)
-    (** ** Cramer rule *)
-    
-    (** Exchange one column of a square matrix *)
-    Definition mchgcol {n} (m : smat n) (k : nat) (v : mat n 1) : smat n :=
-      mk_mat (fun i j => if (Nat.eqb j k) then (v!i!0)%nat else m!i!j).
-    
-    (** Cramer rule, which can slving the equation with form of A*x=b.
-      Note, the result is valid on when D is not zero *)
-    Definition cramerRule {n} (A : smat n) (b : mat n 1) : mat n 1 :=
-      let D := det A in
-      mk_mat (fun i j => let Di := det (mchgcol A i b) in Di / D).
-    
-    (* ======================================================================= *)
-    (** ** Adjoint matrix (Adjugate matrix, adj(A), A* ) *)
-    (** That is: adj(A)[i,j] = algebraic remainder of A[j,i]. *)
-    
-    Definition madj {n} : smat n -> smat n := 
-      match n with
-      | O => fun m => m 
-      | S n' =>
-          fun m =>
-            mk_mat (fun i j =>
-                      let s := if Nat.even (i + j) then A1 else (-A1)%A in
-                      let d := det (submat m j i) in 
-                      (s * d)%A)
-      end.
-    
-    (* ======================================================================= *)
-    (** ** Inversion matrix of a matrix *)
-    Definition minv {n} (m : smat n) := (A1/det m) c* (madj m).
-
-    Lemma minv_correct_r : forall n (m : smat n), m * (minv m) == mat1 n.
-    Proof.
-      induction n; intros.
-      - lma.
-      (* - unfold minv in *. *)
-        Abort.
-
-    
-    
-    (* ======================================================================= *)
-    (** ** Inversion matrix of dimension-1 *)
-    Definition inv_1_1 (m : smat 1) : smat 1 := l2m [[A1/(m!0!0)]].
-
-    (** det m <> 0 -> inv_1_1 m = inv m *)
-    Lemma inv_1_1_eq_inv : forall m, ~(det m == A0)%A -> inv_1_1 m == minv m.
-    Proof.
-      lma. det_neq0_imply_neq0.
-    Qed.
-
-    (** inv_1_1 m * m = mat1 *)
-    Lemma inv_1_1_correct_l : forall (m : smat 1),
-        ~(det m == A0)%A -> (inv_1_1 m) * m == mat1 1.
-    Proof.
-      lma. det_neq0_imply_neq0.
-    Qed.
-
-    (** m * inv_1_1 m = mat1 *)
-    Lemma inv_1_1_correct_r : forall (m : smat 1),
-        ~(det m == A0)%A -> m * (inv_1_1 m) == mat1 1.
-    Proof.
-      lma. det_neq0_imply_neq0.
-    Qed.
-
-    (* ======================================================================= *)
-    (** ** Inversion matrix of dimension-2 *)
-    Definition inv_2_2 (m : smat 2) : smat 2 :=
-      let a00 := m!0!0 in
-      let a01 := m!0!1 in
-      let a10 := m!1!0 in
-      let a11 := m!1!1 in
-      let d := det_2_2 m in
-      (l2m [[a11/d; -a01/d]; [-a10/d; a00/d]])%A.
-
-    (** det m <> 0 -> inv_2_2 m = inv m *)
-    Lemma inv_2_2_eq_inv : forall m, ~(det m == A0)%A -> inv_2_2 m == minv m.
-    Proof.
-      lma; det_neq0_imply_neq0.
-    Qed.
-    
-    (** inv_2_2 m * m = mat1 *)
-    Lemma inv_2_2_correct_l : forall (m : smat 2),
-        ~(det m == A0)%A -> (inv_2_2 m) * m == mat1 2.
-    Proof.
-      lma; det_neq0_imply_neq0.
-    Qed.
-    
-    (** m * inv_2_2 m = mat1 *)
-    Lemma inv_2_2_correct_r : forall (m : smat 2),
-        ~(det m == A0)%A -> m * (inv_2_2 m) == mat1 2.
-    Proof.
-      lma; det_neq0_imply_neq0.
-    Qed.
-    
-    (* ======================================================================= *)
-    (** ** Inversion matrix of dimension-3 *)
-    (* Note, this formula could be provided from matlab, thus avoiding manual work *)
-    Definition inv_3_3 (m : smat 3) : smat 3 :=
-      let a00 := m!0!0 in
-      let a01 := m!0!1 in
-      let a02 := m!0!2 in
-      let a10 := m!1!0 in
-      let a11 := m!1!1 in
-      let a12 := m!1!2 in
-      let a20 := m!2!0 in
-      let a21 := m!2!1 in
-      let a22 := m!2!2 in
-      let d := det_3_3 m in
-      (l2m
-         [[(a11*a22 - a12*a21)/d; -(a01*a22 - a02*a21)/d; (a01*a12 - a02*a11)/d];
-          [-(a10*a22 - a12*a20)/d; (a00*a22 - a02*a20)/d; -(a00*a12 - a02*a10)/d];
-          [(a10*a21 - a11*a20)/d; -(a00*a21 - a01*a20)/d; (a00*a11 - a01*a10)/d]])%A.
-    
-    (** det m <> 0 -> inv_3_3 m = inv m *)
-    Lemma inv_3_3_eq_inv : forall m, ~(det m == A0)%A -> inv_3_3 m == minv m.
-    Proof.
-      lma; det_neq0_imply_neq0.
-    Qed.
-    
-    (** inv_3_3 m * m = mat1 *)
-    Lemma inv_3_3_correct_l : forall (m : smat 3),
-        ~(det m == A0)%A -> (inv_3_3 m) * m == mat1 3.
-    Proof.
-      lma; det_neq0_imply_neq0.
-    Qed.
-    
-    (** m * inv_3_3 m = mat1 *)
-    Lemma inv_3_3_correct_r : forall (m : smat 3),
-        ~(det m == A0)%A -> m * (inv_3_3 m) == mat1 3.
-    Proof.
-      lma; det_neq0_imply_neq0.
-    Qed.
-    
-    (* ======================================================================= *)
-    (** ** Direct compute inversion of a symbol matrix of 1/2/3rd order. *)
-    Section FindFormula.
-      Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : A.
-      Let m1 := mk_mat_1_1 a11.
-      Let m2 := mk_mat_2_2 a11 a12 a21 a22.
-      Let m3 := mk_mat_3_3 a11 a12 a13 a21 a22 a23 a31 a32 a33.
-
-      (* Compute (m2l (minv m1)). *)
-      (* Compute (m2l (minv m2)). *)
-      (* Compute (m2l (minv m3)). *)
-      (* Although this is correct, but the expression is too long. *)
-      (* We want to simplify it with RAST *)
-      
-    End FindFormula.
+    (** Simplified formula of inverse matrix of 2D *)
+    Definition inv_3_3 (m : smat 3) : smat 3 := @inv_3_3 A Aadd A0 Aopp Amul Ainv m.
 
   End Inversion.
   
@@ -844,6 +589,7 @@ Module Test.
   (* Compute m2l (m3 + m3). *)
   (* Compute m2l (m3 * m3). *)
 
+  (** inverse matrix with concrete number *)
   (* Compute m2l (minv m3). *)
   Example m4 := mk_mat_3_3 1 2 3 4 5 7 6 8 9.
   (* Compute m2l (minv m4). *)
@@ -854,9 +600,13 @@ Module Test.
   Open Scope mat_scope.
 
   Variable a b c d : R.
-  (* Eval cbv in m2l (inv_2_2 (mk_mat_2_2 a b c d)). *)
+  
+  (** inverse matrix with symbol *)
+
+  (** direct result has many redundant items *)
   (* Eval cbv in m2l (minv (mk_mat_2_2 a b c d)). *)
 
+  (** simplified result is better *)
+  (* Eval cbv in m2l (inv_2_2 (mk_mat_2_2 a b c d)). *)
+
 End Test.
-
-

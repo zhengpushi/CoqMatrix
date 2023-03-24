@@ -18,7 +18,10 @@ Require Export FunctionalExtensionality.
 
 (** A short name of "functional_extensionality" *)
 (* Definition fun_eq {A B} := @functional_extensionality A B. *)
-Ltac fun_eq := apply functional_extensionality.
+(* Ltac fun_eq := apply functional_extensionality. *)
+
+(** eta expansion *)
+(* Check eta_expansion. *)
 
 
 (** Bidirection form of functional extensionality (unary function) *)

@@ -57,6 +57,15 @@ End MatrixQ_SF.
 (** Set a default model *)
 Export MatrixQ_SF.
 
+(** Linear arithmetic for matrix of Q type *)
+Ltac lma :=
+  by_cell;
+  simpl;
+  unfold A,Aeq,Aadd,Amul,A0,A1;
+  try ring;
+  try field;
+  try easy.
+
 
 (** General usage, no need to select low-level model *)
 Section Test.
