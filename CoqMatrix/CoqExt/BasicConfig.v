@@ -54,8 +54,13 @@ Reserved Notation "a \T"    (at level 34, left associativity).
 Reserved Notation "m1 @ m2" (at level 30, no associativity).
 
 (* this level is consistent with Mathcomp.ssreflect.ssrnotations.v *)
+
+(* safe access (any index) *)
 Reserved Notation "m ! i ! j"  (at level 20, i at next level).
 Reserved Notation "v ! i"      (at level 20, i at next level).
+(* unsafe access (developer must give valid index) *)
+Reserved Notation "m $ i $ j"  (at level 20, i at next level).
+Reserved Notation "v $ i"      (at level 20, i at next level).
 
 
 
@@ -82,6 +87,8 @@ Ltac ssplit :=
 Ltac inv H :=
   inversion H; clear H; subst.
 
+Ltac simp_proper :=
+  unfold Proper; unfold respectful.
 
 
 (* ######################################################################### *)

@@ -49,6 +49,28 @@ Proof.
 Qed.
 
 
+(* ######################################################################### *)
+(** * Loop shift *)
+Section loop_shift.
+
+  (** Left loop shift *)
+  Definition nat_lshl (n : nat) (i : nat) (k : nat) : nat :=
+    Nat.modulo (i + k) n.
+
+  (** Right loop shift *)
+  Definition nat_lshr (n : nat) (i : nat) (k : nat) : nat :=
+    Nat.modulo (i + (n - (Nat.modulo k n))) n.
+
+  (* Compute List.map (fun i => nat_lshl 5 i 1) (List.seq 0 10). *)
+  (* Compute List.map (fun i => nat_lshr 5 i 1) (List.seq 0 10). *)
+  
+  (** Let S is a set of natural numbers modulo n, i.e. its elements are [0,1,...,(n-1)],
+    and n is equivalent to 0.
+    Then right loop shift S by k got T.
+    We claim that: forall i < n, (T[i] = (S[i] + k)%n /\ (S[i] = (T[i] + ?)%n) *)
+  (* Theorem nat_lshl_spec0 : forall n i k, nat_lshl n i k = Nat. *)
+
+End loop_shift.
 
 (* ######################################################################### *)
 (** * Extension for nat from (Verified Quantum Computing). *)

@@ -50,7 +50,7 @@ Module BasicVectorTheorySF (E : ElementType).
   Proof. apply veq_equiv. Qed.
 
   (** Get element of vector *)
-  Definition vnth {n} (v : vec n) i : A := vnth v i.
+  Definition vnth {n} (v : vec n) i : A := vnth (A0:=A0) v i.
   Global Notation "v ! i " := (vnth v i) : vec_scope.
 
   (** veq and mnth should satisfy this constraint *)

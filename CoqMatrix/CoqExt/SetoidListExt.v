@@ -953,6 +953,12 @@ Section ladd_opp_sub.
   Qed.
   
   Global Existing Instance ladd_aeq_mor.
+
+  (** invariant for length of ladd *)
+  Lemma ladd_length : forall l1 l2 n, length l1 = n -> length l2 = n -> length (l1 + l2) = n.
+  Proof.
+    intros. apply map2_length; auto.
+  Qed.
   
   (** l1 + l2 = l2 + l1 *)
   Lemma ladd_comm : forall l1 l2, l1 + l2 == l2 + l1.

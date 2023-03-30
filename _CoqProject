@@ -44,9 +44,6 @@ CoqMatrix/Calculus/Derivative.v
 CoqMatrix/Calculus/Integration.v
 CoqMatrix/Calculus/Calculus.v
 
-# ===== LinearAlgebra (part 1) =====
-CoqMatrix/LinearAlgebra/PermutationExt.v
-
 # ===== CoqMatrix =====
 CoqMatrix/ElementType.v
 CoqMatrix/MatrixTheory.v
@@ -95,4 +92,6 @@ CoqMatrix/VectorC.v
 #CoqMatrix/NatFun/VectorR.v
 #CoqMatrix/OCamlExtractionComparison/matrix.v
 
-# ===== LinearAlgebra (part 2) =====
+
+# ===== LinearAlgebra =====
+CoqMatrix/LinearAlgebra/PermutationExt.v

@@ -35,9 +35,15 @@ Section basic_vectory_theory.
   (** Vector type *)
   Definition vec n := @mat A n 1.
 
+  (** make a vector by a function *)
+  Definition mk_vec {n : nat} (f : nat -> A) : vec n :=
+    mk_mat (fun i j => if j =? 0 then f i else A0).
+
   (** matrix equality *)
   Definition veq {n} (v1 v2 : vec n) := meq (Aeq:=Aeq) v1 v2.
   Infix "==" := veq : vec_scope.
+
+  Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope.
 
   (** veq is equivalence relation *)
   Lemma veq_equiv : forall n, Equivalence (veq (n:=n)).
@@ -46,9 +52,18 @@ Section basic_vectory_theory.
     apply meq_equiv.
   Qed.
 
-  (** Get element of vector *)
+  (** Get element of vector (unsafe) *)
+  Notation "v $ i " := (matf v i 0) : vec_scope.
+  
+  (** Get element of vector (safe) *)
   Definition vnth {n} (v : vec n) i : A := v!i!0.
   Notation "v ! i " := (vnth v i) : vec_scope.
+
+  Lemma vnth_eq_vnth_raw : forall {n : nat} (v : vec n),
+      (forall i, i < n -> v!i == v$i)%A.
+  Proof.
+    intros. unfold vnth. apply mnth_eq_mnth_raw; auto.
+  Qed.
 
   (** veq and mnth should satisfy this constraint *)
   Lemma veq_iff_vnth : forall {n : nat} (v1 v2 : vec n),
@@ -56,20 +71,46 @@ Section basic_vectory_theory.
   Proof.
     unfold veq, vec, vnth.
     intros;  split; intros.
-    - rewrite meq_iff_mnth in H. apply H; auto.
-    - apply meq_iff_mnth. intros.
-      assert (ci = 0) by lia. rewrite H2. apply H. auto.
+    - rewrite (meq_iff_mnth (A0:=A0)) in H. apply H; auto.
+    - apply (meq_iff_mnth (A0:=A0)). intros.
+      assert (j = 0) by lia. rewrite H2. apply H. auto.
   Qed.
+
+  (* ==================================== *)
+  (** ** List like operations for vector *)
+
+  (** vcons *)
+  Definition vcons {n} (a : A) (v : vec n) : vec (S n) :=
+    mk_vec (fun i => match i with 0 => a | S i' => v $ i' end).
+
+  Lemma vcons_spec : forall n a (v : vec n) i,
+      ((vcons a v) $ 0 == a)%A /\ (i < n -> v $ i == (vcons a v) $ (S i))%A.
+  Proof.
+    intros. unfold vcons. split.
+    - intros. solve_mnth.
+    - solve_mnth.
+  Qed.
+    
+
+  (** Get a vector from a given vector by remove one element *)
+  Definition vremove {n : nat} (v : vec (S n)) (k : nat) : vec n :=
+    mk_vec (fun i => if i <? k then v ! i else v ! (S i)).
+
 
   (* ==================================== *)
   (** ** Convert between list and vector *)
   (* Definition v2l {n} (v : vec n) : list A := @Matrix.mcol _ n 1 0 v. *)
   (* Definition l2v {n} (l : list A) : vec n := l2m (A0:=A0) (row2col l). *)
 
-  Definition v2l {n} (v : vec n) : list A := map (fun i : nat => v ! i) (seq 0 n).
+  Definition v2l {n} (v : vec n) : list A := map (fun i : nat => v $ i) (seq 0 n).
 
   Definition l2v n (l : list A) : vec n :=
-    mk_mat (fun ri ci => if (ri <? n) && (ci =? 0) then nth ri l A0 else A0).
+    mk_mat (fun i j => if (i <? n) && (j =? 0) then nth i l A0 else A0).
+
+  (** list of vector to dlist *)
+  Definition vl2dl {n} (l : list (vec n)) : list (list A) :=
+    map v2l l.
+    
 
   Lemma v2l_length : forall {n} (v : vec n), length (v2l v) = n.
   Proof.
@@ -89,9 +130,9 @@ Section basic_vectory_theory.
   Lemma l2v_v2l_id : forall {n} (v : vec n), l2v n (v2l v) == v.
   Proof.
     intros. destruct v as [v].
-    unfold l2v,v2l. simpl. lma. 
-    assert (n >? i). { apply Nat.ltb_lt; auto. } rewrite H; simpl.
-    rewrite ?nth_map_seq; auto. rewrite ?Nat.add_0_r. easy.
+    unfold l2v,v2l. simpl. lma.
+    rewrite ?nth_map_seq; auto.
+    rewrite Nat.add_0_r. easy.
   Qed. 
 
   (* ==================================== *)
@@ -109,9 +150,9 @@ Section basic_vectory_theory.
   Definition t2v_4 (t : @T4 A) : vec 4 :=
     let '(a,b,c,d) := t in l2v 4 [a;b;c;d].
 
-  Definition v2t_2 (v : vec 2) : @T2 A := (v!0, v!1).
-  Definition v2t_3 (v : vec 3) : @T3 A := (v!0, v!1, v!2).
-  Definition v2t_4 (v : vec 4) : @T4 A := (v!0, v!1, v!2, v!3).
+  Definition v2t_2 (v : vec 2) : @T2 A := (v$0, v$1).
+  Definition v2t_3 (v : vec 3) : @T3 A := (v$0, v$1, v$2).
+  Definition v2t_4 (v : vec 4) : @T4 A := (v$0, v$1, v$2, v$3).
 
   Lemma v2t_t2v_id_2 : forall (t : A * A), v2t_2 (t2v_2 t) = t.
   Proof.
@@ -148,16 +189,16 @@ Section basic_vectory_theory.
     
     (** Construct a matrix with a vector and a matrix by row *)
     Definition mconsr {r c} (v : vec c) (m : mat r c) : mat (S r) c :=
-      mk_mat (fun ri ci => match ri with
-                         | O => v ! ci
-                         | _ => m ! (ri - 1) ! ci
+      mk_mat (fun i j => match i with
+                         | O => v $ j
+                         | S i' => m $ i' $ j
                          end).
     
     (** Construct a matrix with a vector and a matrix by column *)
     Definition mconsc {r c} (v : vec r) (m : mat r c) : mat r (S c) :=
-      mk_mat (fun ri ci => match ci with
-                         | O => v ! ri
-                         | _ => m ! ri ! (ci - 1)
+      mk_mat (fun i j => match j with
+                         | O => v $ i
+                         | S j' => m $ i $ j'
                          end).
     
     (* (** Equality of two forms of ConstructByRow *) *)
@@ -183,9 +224,10 @@ Section basic_vectory_theory.
 
 End basic_vectory_theory.
 Arguments l2v {A}.
-Notation "v ! i " := (vnth v i) : vec_scope.
+Notation "v $ i " := (matf v i 0) : vec_scope.
 
 Section test.
+  Notation "v ! i " := (vnth (A0:=0) v i) : vec_scope.
   Definition v1 : vec 3 := l2v 0 3 [1;2;3].
   Definition m1 : mat 3 3 := l2m (A0:=0) [[10;11;12];[13;14;15];[16;17;18]].
   Goal v1!(v1!0) = 2. auto. Qed.
@@ -335,7 +377,7 @@ Section ring_vector_theory.
   
   (** dot production of two vectors. *)
   Definition vdot {n : nat} (v1 v2 : vec n) : A :=
-    fold_left Aadd (map (fun i => v1!i * v2!i) (seq 0 n)) A0.
+    fold_left Aadd (map (fun i => v1$i * v2$i) (seq 0 n)) A0.
   
   Infix "⋅" := vdot : vec_scope.
 
@@ -345,10 +387,11 @@ Section ring_vector_theory.
   Proof.
     repeat (hnf; intros).
     apply fold_left_aeq_mor; try easy.
-    rewrite veq_iff_vnth in H,H0.
+    rewrite (veq_iff_vnth (A0:=A0)) in H,H0.
     rewrite (list_eq_iff_nth A0 n); auto.
     - intros. rewrite !nth_map_seq; auto.
-      rewrite Nat.add_0_r. rewrite H,H0; auto. easy.
+      rewrite Nat.add_0_r. rewrite <- ?(vnth_eq_vnth_raw (A0:=A0)); auto.
+      rewrite H,H0; auto. easy.
     - rewrite map_length, seq_length; auto.
     - rewrite map_length, seq_length; auto.
   Qed.

@@ -99,7 +99,7 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
   Global Existing Instance meq_equiv.
 
   (** Get n-th element of a matrix *)  
-  Definition mnth {r c} (m : mat r c) (ri ci : nat) := mnth m ri ci.
+  Definition mnth {r c} (m : mat r c) (ri ci : nat) := mnth (A0:=A0) m ri ci.
   Global Notation "m ! r ! c" := (mnth m r c) : mat_scope.
 
   (** meq and mnth should satisfy this constraint *)

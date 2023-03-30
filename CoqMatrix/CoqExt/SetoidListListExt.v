@@ -107,37 +107,36 @@ Section SetByConstant.
   (** *** Modify a list list *)
   
   (** Definition *)
-  Fixpoint dlst_chg {A} (dl : list (list A)) (ri ci : nat) (x : A) 
+  Fixpoint dlst_chg {A} (dl : list (list A)) (i j : nat) (x : A) 
     : list (list A) :=
-    match dl, ri with
+    match dl, i with
     | [], _ => []
-    | l :: dl, 0 => (lst_chg l ci x) :: dl
-    | l :: dl, S ri => l :: (dlst_chg dl ri ci x)
+    | l :: dl, 0 => (lst_chg l j x) :: dl
+    | l :: dl, S i' => l :: (dlst_chg dl i' j x)
     end. 
   
-  (* Compute dlst_chg [] 0 1 9.
-  Compute dlst_chg [[1;2];[3;4;5]] 0 1 9.
-  Compute dlst_chg [[1;2];[3;4;5]] 1 1 9.
-  Compute dlst_chg [[1;2];[3;4;5]] 2 1 9.
-  Compute dlst_chg [[1;2];[3;4;5]] 1 5 9.
-   *)
+  (* Compute dlst_chg [] 0 1 9. *)
+  (* Compute dlst_chg [[1;2];[3;4;5]] 0 1 9. *)
+  (* Compute dlst_chg [[1;2];[3;4;5]] 1 1 9. *)
+  (* Compute dlst_chg [[1;2];[3;4;5]] 2 1 9. *)
+  (* Compute dlst_chg [[1;2];[3;4;5]] 1 5 9. *)
   
   (** Length property *)
-  Lemma dlst_chg_length : forall {A} dl ri r ci x, 
+  Lemma dlst_chg_length : forall {A} dl i r j x, 
       length dl = r ->
-      length (@dlst_chg A dl ri ci x) = r.
+      length (@dlst_chg A dl i j x) = r.
   Proof.
-    intros A dl; induction dl; auto. destruct ri; intros; auto; simpl in *.
+    intros A dl; induction dl; auto. destruct i; intros; auto; simpl in *.
     destruct r; auto. easy.
   Qed.
   
   (** Width property *)
-  Lemma dlst_chg_width : forall {A} dl ri c ci x, 
+  Lemma dlst_chg_width : forall {A} dl i c j x, 
       width dl c ->
-      width (@dlst_chg A dl ri ci x) c.
+      width (@dlst_chg A dl i j x) c.
   Proof.
     unfold width. intros A dl; induction dl; auto.
-    destruct ri; intros; simpl in *; auto; inv H; constructor; auto.
+    destruct i; intros; simpl in *; auto; inv H; constructor; auto.
     apply lst_chg_length; auto.
   Qed.
 
@@ -148,21 +147,21 @@ End SetByConstant.
 (** ** Set element with a generation function *)
 Section SetByFunction.
 
-  (** Inner version, ri0 is given position, ri is changing every loop *)
-  Fixpoint dlst_chgf_aux {A} (dl : list (list A)) (ri0 ri ci : nat) 
+  (** Inner version, i0 is given position, i is changed in every loop *)
+  Fixpoint dlst_chgf_aux {A} (dl : list (list A)) (i0 i j : nat) 
     (f : nat -> nat -> A) 
     : list (list A) :=
-    match dl, ri with
+    match dl, i with
     | [], _ => []
-    | l :: dl, 0 => (lst_chgf l ci (f ri0)) :: dl
-    | l :: dl, S ri => l :: (dlst_chgf_aux dl ri0 ri ci f)
+    | l :: dl, 0 => (lst_chgf l j (f i0)) :: dl
+    | l :: dl, S i' => l :: (dlst_chgf_aux dl i0 i' j f)
     end. 
   
-  (** User version that hide ri0 parameter *)
-  Definition dlst_chgf {A} (dl : list (list A)) (ri ci : nat) 
+  (** User version that hide i0 parameter *)
+  Definition dlst_chgf {A} (dl : list (list A)) (i j : nat) 
     (f : nat -> nat -> A) 
     : list (list A) :=
-    dlst_chgf_aux dl ri ri ci f.
+    dlst_chgf_aux dl i i j f.
   
   (* Let f_gen := fun (i j : nat) => (i + j + 10).
   Compute dlst_chgf [[1;2;3;4];[4;5;6;7];[8;9;10;11]] 0 0 f_gen.
@@ -178,34 +177,34 @@ Section SetByFunction.
    *)
   
   (** Length property *)
-  Lemma dlst_chgf_aux_length : forall {A} dl ri r ri0 ci f, 
+  Lemma dlst_chgf_aux_length : forall {A} dl i r i0 j f, 
       length dl = r ->
-      length (@dlst_chgf_aux A dl ri0 ri ci f) = r.
+      length (@dlst_chgf_aux A dl i0 i j f) = r.
   Proof.
-    intros A dl; induction dl; auto. destruct ri; auto; simpl; intros.
+    intros A dl; induction dl; auto. destruct i; auto; simpl; intros.
     destruct r; auto. easy.
   Qed.
   
-  Lemma dlst_chgf_length : forall {A} dl r ri ci f, 
+  Lemma dlst_chgf_length : forall {A} dl r i j f, 
       length dl = r ->
-      length (@dlst_chgf A dl ri ci f) = r.
+      length (@dlst_chgf A dl i j f) = r.
   Proof.
     intros. apply dlst_chgf_aux_length. auto.
   Qed.
   
   (** Width property *)
-  Lemma dlst_chgf_aux_width : forall {A} dl ri c ri0 ci f, 
+  Lemma dlst_chgf_aux_width : forall {A} dl i c i0 j f, 
       width dl c ->
-      width (@dlst_chgf_aux A dl ri0 ri ci f) c.
+      width (@dlst_chgf_aux A dl i0 i j f) c.
   Proof.
     unfold width. intros A dl; induction dl; auto. 
-    induction ri; intros; simpl in *; auto; inv H; constructor; auto.
+    induction i; intros; simpl in *; auto; inv H; constructor; auto.
     apply lst_chgf_length; auto.
   Qed.
   
-  Lemma dlst_chgf_width : forall {A} dl ri c ci f, 
+  Lemma dlst_chgf_width : forall {A} dl i c j f, 
       width dl c ->
-      width (@dlst_chgf A dl ri ci f) c.
+      width (@dlst_chgf A dl i j f) c.
   Proof.
     intros. apply dlst_chgf_aux_width; auto.
   Qed.
@@ -218,12 +217,12 @@ End SetByFunction.
 Section SetRowByConstant.
   
   (** Definition *)
-  Fixpoint dlst_chgrow {A} (dl : list (list A)) (ri : nat) (x : list A) 
+  Fixpoint dlst_chgrow {A} (dl : list (list A)) (i : nat) (x : list A) 
     : list (list A) :=
-    match dl, ri with
+    match dl, i with
     | [], _ => []
     | l :: dl, 0 => x :: dl
-    | l :: dl, S ri => l :: (dlst_chgrow dl ri x)
+    | l :: dl, S i' => l :: (dlst_chgrow dl i' x)
     end. 
   
   (*   Compute dlst_chgrow [] 0 [8;9].
@@ -232,22 +231,22 @@ Section SetRowByConstant.
   Compute dlst_chgrow [[1;2];[3;4;5]] 2 [8;9].
    *)  
   (** Length property *)
-  Lemma dlst_chgrow_length : forall {A} dl ri r x, 
+  Lemma dlst_chgrow_length : forall {A} dl i r x, 
       length dl = r ->
-      length (@dlst_chgrow A dl ri x) = r.
+      length (@dlst_chgrow A dl i x) = r.
   Proof.
-    intros A dl; induction dl; auto. destruct ri; auto; intros; simpl in *.
+    intros A dl; induction dl; auto. destruct i; auto; intros; simpl in *.
     destruct r; auto. easy.
   Qed.
   
   (** Width property *)
-  Lemma dlst_chgrow_width : forall {A} dl ri c x,
+  Lemma dlst_chgrow_width : forall {A} dl i c x,
       length x = c ->
       width dl c ->
-      width (@dlst_chgrow A dl ri x) c.
+      width (@dlst_chgrow A dl i x) c.
   Proof.
     unfold width; intros A dl; induction dl; auto. 
-    induction ri; intros; simpl in *; inv H0; constructor; auto.
+    induction i; intros; simpl in *; inv H0; constructor; auto.
   Qed.
 
 End SetRowByConstant.
@@ -257,21 +256,21 @@ End SetRowByConstant.
 (** ** Set row with a generation function *)
 Section SetRowByFunction.
   
-  (** Inner version, ri0 is given position, ri is changing every loop *)
-  Fixpoint dlst_chgrowf_aux {A} (dl : list (list A)) (ri0 ri : nat) 
+  (** Inner version, i0 is given position, i is changed in every loop *)
+  Fixpoint dlst_chgrowf_aux {A} (dl : list (list A)) (i0 i : nat) 
     (f : nat -> list A) 
     : list (list A) :=
-    match dl, ri with
+    match dl, i with
     | [], _ => []
-    | l :: dl, 0 => (f ri0) :: dl
-    | l :: dl, S ri => l :: (dlst_chgrowf_aux dl ri0 ri f)
+    | l :: dl, 0 => (f i0) :: dl
+    | l :: dl, S i' => l :: (dlst_chgrowf_aux dl i0 i' f)
     end. 
   
-  (** User version that hide ri0 parameter *)
-  Definition dlst_chgrowf {A} (dl : list (list A)) (ri : nat) 
+  (** User version that hide i0 parameter *)
+  Definition dlst_chgrowf {A} (dl : list (list A)) (i : nat) 
     (f : nat -> list A) 
     : list (list A) :=
-    dlst_chgrowf_aux dl ri ri f.
+    dlst_chgrowf_aux dl i i f.
   
   (*   Let f_gen := fun (i : nat) => [i+10;i+11;i+12].
   Compute dlst_chgrowf [[1;2;3;4];[4;5;6;7];[8;9;10;11]] 0 f_gen.
@@ -281,35 +280,35 @@ Section SetRowByFunction.
    *) 
   
   (** Length property *)
-  Lemma dlst_chgrowf_aux_length : forall {A} dl ri r ri0 f, 
+  Lemma dlst_chgrowf_aux_length : forall {A} dl i r i0 f, 
       length dl = r ->
-      length (@dlst_chgrowf_aux A dl ri0 ri f) = r.
+      length (@dlst_chgrowf_aux A dl i0 i f) = r.
   Proof.
-    intros A dl; induction dl; auto. induction ri; auto.
+    intros A dl; induction dl; auto. induction i; auto.
     intros. simpl. destruct r; auto. easy.
   Qed.
   
-  Lemma dlst_chgrowf_length : forall {A} dl r ri f, 
+  Lemma dlst_chgrowf_length : forall {A} dl r i f, 
       length dl = r ->
-      length (@dlst_chgrowf A dl ri f) = r.
+      length (@dlst_chgrowf A dl i f) = r.
   Proof.
     intros. apply dlst_chgrowf_aux_length. auto.
   Qed.
   
   (** Width property *)
-  Lemma dlst_chgrowf_aux_width : forall {A} dl ri c ri0 f, 
-      length (f ri0) = c ->
+  Lemma dlst_chgrowf_aux_width : forall {A} dl i c i0 f, 
+      length (f i0) = c ->
       width dl c ->
-      width (@dlst_chgrowf_aux A dl ri0 ri f) c.
+      width (@dlst_chgrowf_aux A dl i0 i f) c.
   Proof.
     unfold width; intros A dl; induction dl; auto. 
-    induction ri; intros; simpl in *; auto; inv H0; constructor; auto.
+    induction i; intros; simpl in *; auto; inv H0; constructor; auto.
   Qed.
   
-  Lemma dlst_chgrowf_width : forall {A} dl ri c f, 
-      length (f ri) = c ->
+  Lemma dlst_chgrowf_width : forall {A} dl i c f, 
+      length (f i) = c ->
       width dl c ->
-      width (@dlst_chgrowf A dl ri f) c.
+      width (@dlst_chgrowf A dl i f) c.
   Proof.
     intros. apply dlst_chgrowf_aux_width; auto.
   Qed.
@@ -340,8 +339,8 @@ Section props_dlist.
       (H1 : length dl1 = r) (H2 : length dl2 = r)
       (H3 : width dl1 c) (H4 : width dl2 c),
       dl1 == dl2 <->
-        (forall (ri ci : nat), ri < r -> ci < c -> 
-                        (nth ci (nth ri dl1 []) A0 == nth ci (nth ri dl2 []) A0))%A.
+        (forall (i j : nat), i < r -> j < c -> 
+                      (nth j (nth i dl1 []) A0 == nth j (nth i dl2 []) A0))%A.
   Proof.
     intros; split; intros.
     - rewrite H. easy.
@@ -460,10 +459,10 @@ Section f2dl_dl2f.
   Infix "==" := (eqlistA (eqlistA Aeq)).
 
   Definition f2dl {r c : nat} (f : nat -> nat -> A) : list (list A) :=
-    map (fun ri => f2l (n:=c) (f ri)) (seq 0 r).
+    map (fun i => f2l (n:=c) (f i)) (seq 0 r).
 
   Definition dl2f {r c : nat} (dl : list (list A)) : nat -> nat -> A :=
-    fun ri ci => nth ci (nth ri dl []) A0.
+    fun i j => nth j (nth i dl []) A0.
 
   Lemma f2dl_length : forall r c f, length (@f2dl r c f) = r.
   Proof.
@@ -483,7 +482,7 @@ End f2dl_dl2f.
 
 Section test.
   (** [[1;2;3];[4;5;6];[7;8;9]] *)
-  Let f := fun ri ci => ri * 3 + ci + 1.
+  Let f := fun i j => i * 3 + j + 1.
   Let dl := @f2dl nat 3 3 f.
   (* Compute dl. *)
 
