@@ -209,6 +209,7 @@ Ltac by_cell :=
 Global Ltac lma :=
   by_cell;
   try (
+      try lia;
       try (compute; ring);
       try (compute; field);
       try (compute; easy));
@@ -1231,6 +1232,18 @@ Section matrix_inversion.
   End inv.
 
 End matrix_inversion.
+
+Section test.
+  (* A Formal Proof of Sasaki-Murao Algorithm
+     https://pdfs.semanticscholar.org/ddc3/e8185e10a1d476497de676a3fd1a6ae29595.pdf
+   *)
+  Import ZArith.
+  Open Scope Z.
+  Let m1 := @l2m _ 0 4 4 [[2;2;4;5];[5;8;9;3];[1;2;8;5];[6;6;7;1]].
+  Notation det := (det (Aadd:=Z.add) (Aopp:=Z.opp) (Amul:=Z.mul) (A0:=0) (A1:=1)).
+  (* Compute det m1. *)
+  (* Check det. *)
+End test.
 
 (* ==================================== *)
 (** ** Gauss Elimination *)

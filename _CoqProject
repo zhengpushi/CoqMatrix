@@ -86,11 +86,12 @@ CoqMatrix/VectorQc.v
 CoqMatrix/VectorR.v
 CoqMatrix/VectorC.v
 
-
 #CoqMatrix/NatFun/Inversion.v
 #CoqMatrix/DepRec/VectorR.v
 #CoqMatrix/NatFun/VectorR.v
 #CoqMatrix/OCamlExtractionComparison/matrix.v
+
+CoqMatrix/examples.v
 
 
 # ===== LinearAlgebra =====

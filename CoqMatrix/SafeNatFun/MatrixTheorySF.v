@@ -495,6 +495,21 @@ Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
   Proof.
     intros. apply mmul_1_r.
   Qed.
+
+  (** a c* (m1 * m2) = (a c* m1) * m2. *)
+  Lemma mcmul_mul_assoc : forall {r c s} (a : A) (m1 : mat r c) (m2 : mat c s), 
+      a c* (m1 * m2) == (a c* m1) * m2.
+  Proof.
+    intros. apply mcmul_mul_assoc.
+  Qed.
+  
+  (** m1 * (a c* m2) = a c* (m1 * m2). *)
+  Lemma mcmul_mul_perm : forall {r c s} (a : A) (m1 : mat r c) (m2 : mat c s), 
+      a c* (m1 * m2) == m1 * (a c* m2).
+  Proof.
+    intros. apply mcmul_mul_perm.
+  Qed.
+
   
   (** Auto unfold these definitions *)
   Global Hint Unfold madd mopp msub mcmul mmul : mat.

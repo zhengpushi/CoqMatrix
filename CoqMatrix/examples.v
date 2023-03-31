@@ -20,21 +20,21 @@ Module Example4Nat.
   (** Then, all functions, theorems, notations are available *)
   Example dl := [[1;2;3];[4;5;6]].
   Example m1 : mat 2 3 := @l2m 2 3 dl.
-  Compute (m2l m1). (* = [[1; 2; 3]; [4; 5; 6]] : list (list A) *)
-  Compute (mnth m1 0 1). (* = 2 : A *)
-  Compute (m2l (m1\T)). (* = [[1; 4]; [2; 5]; [3; 6]] : list (list A) *)
+  (* Compute (m2l m1). (* = [[1; 2; 3]; [4; 5; 6]] : list (list A) *) *)
+  (* Compute (mnth m1 0 1). (* = 2 : A *) *)
+  (* Compute (m2l (m1\T)). (* = [[1; 4]; [2; 5]; [3; 6]] : list (list A) *) *)
   Goal mmap S m1 == l2m [[2;3;4];[5;6;7]].
   Proof. lma. Qed.
 
   (** Check that if A is nat really *)
-  Print A. (* A = nat : Type *)
+  (* Print A. (* A = nat : Type *) *)
 
   (** You can mixed use all models *)
   Import MatrixAllNat. (* all models *)
-  Compute @DL.l2m 2 3 dl.
-  Compute @DP.l2m 2 3 dl.
-  Compute @DR.l2m 2 3 dl.
-  Compute @NF.l2m 2 3 dl.
+  (* Compute @DL.l2m 2 3 dl. *)
+  (* Compute @DP.l2m 2 3 dl. *)
+  (* Compute @DR.l2m 2 3 dl. *)
+  (* Compute @NF.l2m 2 3 dl. *)
   
 End Example4Nat.
 
@@ -72,6 +72,23 @@ Module Example4Q.
 End Example4Q.
 
 
+Module Example4R.
+  
+  Import MatrixR.
+
+  Goal forall r s t (m1 : mat r s) (m2 : mat s t) (c : R),
+      (c c* m1) * m2 == m1 * (c c* m2).
+  Proof.
+    intros.
+    rewrite <- mcmul_mul_assoc.
+    rewrite <- mcmul_mul_perm.
+    easy.
+  Qed.
+
+End Example4R.
+
+
+
 (** * Mutual conversion and mixed use between multiple models *)
 Module Example4Cvt.
   
@@ -84,11 +101,12 @@ Module Example4Cvt.
 
   (** convert from one model to other models *)
   Example m : NF.mat 2 2 := NF.mk_mat_2_2 1 2 3 4.
-  Compute nf2dl m. (* = [[1; 2]; [3; 4]]%vector : DL.mat 2 2 *)
-  Compute nf2dp m. (* = (1, (2, tt), (3, (4, tt), tt)) : DP.mat 2 2 *)
-  Compute nf2dr m. (* = {| mdata := [[1;2];[3;4]]; .. |} : DR.mat 2 2 *)
+  (* Compute nf2dl m. (* = [[1; 2]; [3; 4]]%vector : DL.mat 2 2 *) *)
+  (* Compute nf2dp m. (* = (1, (2, tt), (3, (4, tt), tt)) : DP.mat 2 2 *) *)
+  (* Compute nf2dr m. (* = {| mdata := [[1;2];[3;4]]; .. |} : DR.mat 2 2 *) *)
+  
+  (* Note!! next evaluation on FF is crashed! *)
   (* Compute nf2ff m. *)
-  (* The evaluation on FF is crashed! *)
 
   (** prove that {SF -> DL -> DP -> DR -> NF -> DL -> SF} return back *)
   Goal forall r c (m0 : SF.mat r c),
@@ -116,6 +134,7 @@ Module Example4CoordinateSystem.
   
   Import MatrixR.
   Open Scope R.
+  
   Variable ψ θ φ: R.
   Let Rx := mk_mat_3_3 1 0 0 0 (cos φ) (sin φ) 0 (-sin φ) (cos φ).
   Let Ry := mk_mat_3_3 (cos θ) 0 (-sin θ) 0 1 0 (sin θ) 0 (cos θ).
@@ -203,7 +222,7 @@ Module Example4VectorTheory.
   Let l1 := [1;2;3;4;5].
   Let v1 : vec 5 := l2v l1.
   Let l2 := v2l v1.
-  Compute vnth v1 1. (* = (R1 + R1)%R : A *)
+  (* Compute vnth v1 1. (* = (R1 + R1)%R : A *) *)
 
   (** Next, we can prove equation using theorems in CoqMatrix *)
   Goal forall (n : nat) (v1 v2 v3 : vec n),

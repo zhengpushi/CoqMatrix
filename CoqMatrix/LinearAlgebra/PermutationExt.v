@@ -16,10 +16,54 @@
 Require Import SetoidListExt.
 Require Import SafeNatFun.Vector.
 
-Module Perm_with_list.
-  (* ######################################################################### *)
-  (** * Computable permutation *)
 
+(* ######################################################################### *)
+(** * reverse-order-number of a list *)
+Section ronum.
+
+  Context {A : Type}.
+  Context {Altb : A -> A -> bool}.
+  Infix "<?" := Altb.
+  (* Context {Alt : A -> A -> Prop}. *)
+  (* Context {Alt_dec : Decidable Alt}. *)
+
+  Definition ronum1 (a : A) (l : list A) : nat :=
+    fold_left (fun (n : nat) (b : A) => n + (if b <? a then 1 else 0)) l 0.
+  
+  Fixpoint ronum (l : list A) : nat :=
+    match l with
+    | [] => 0
+    | x :: l' => ronum1 x l' + ronum l'
+    end.
+
+  (** ** parity of a list *)
+  Section parity.
+
+    (** Give speciall name for parity *)
+    Definition Parity := bool.
+    Definition POdd := true.
+    Definition PEven := false.
+
+    (** Calulate parity of a list *)
+    Definition perm_parity (l : list A) : Parity := odd (ronum l).
+    
+    (** Is two list have different parity? *)
+    Definition perm_parity_diff (l1 l2 : list A) : Prop :=
+      let p1 := perm_parity l1 in
+      let p2 := perm_parity l2 in
+      p1 = (negb p2).
+    
+  End parity.
+
+End ronum.
+
+(* Compute ronum (Altb:=Nat.ltb) [2;4;3;1]. *)
+(* Compute ronum (Altb:=Nat.ltb) [2;1;3;4]. *)
+
+
+(* ######################################################################### *)
+(** * Permutation of a list *)
+Module Perm_with_list.
 
   (** ** Permutation of a list of n elements *)
   Section perm.
@@ -109,57 +153,19 @@ Module Perm_with_list.
   (* Compute perm [1;2]. *)
   (* Compute perm [1;2;3]. *)
   (* Compute perm [1;2;3;4]. *)
-
-
-  (** ** reverse-order-number of a permutation *)
-  Section ronum.
-
-    Context {A : Type}.
-    Context {Altb : A -> A -> bool}.
-    Infix "<?" := Altb.
-    (* Context {Alt : A -> A -> Prop}. *)
-    (* Context {Alt_dec : Decidable Alt}. *)
-
-    Definition ronum1 (a : A) (l : list A) : nat :=
-      fold_left (fun (n : nat) (b : A) => n + (if b <? a then 1 else 0)) l 0.
-    
-    Fixpoint ronum (l : list A) : nat :=
-      match l with
-      | [] => 0
-      | x :: l' => ronum1 x l' + ronum l'
-      end.
-    
-  End ronum.
-
-  (* Compute ronum (Altb:=Nat.ltb) [2;4;3;1]. *)
-  (* Compute ronum (Altb:=Nat.ltb) [2;1;3;4]. *)
-
-  (** ** odd/even permutation *)
-  Section odd_even.
-    Context {A : Type}.
-    Context {Altb : A -> A -> bool}.
-
-    Definition odd_perm (l : list A) : bool := odd (ronum (Altb:=Altb) l).
-    Definition even_perm (l : list A) : bool := even (ronum (Altb:=Altb) l).
-  End odd_even.
-
-  (** ** transposition, exchange, swap *)
-  Section exchange.
-    
-
-  End exchange.
-
 End Perm_with_list.
 
 
+(* ######################################################################### *)
+(** * Permutation of a vector *)
 Module Perm_with_vector.
-  (* ######################################################################### *)
-  (** * Computable permutation *)
 
+  Context {A : Type} {A0 : A}.
+  Context {Altb : A -> A -> bool}.
+  Infix "!" := (vnth (A0:=A0)) : vec_scope.
+  
   (** ** Permutation of a list of n elements *)
   Section perm.
-    Context {A : Type} {A0 : A}.
-    Notation "v ! i " := (vnth (A0:=A0) v i) : vec_scope.
     
     (** Get k-th element and remaining elements from a vector *)
     Definition pick {n : nat} (v : @vec A (S n)) (k : nat) : A * (vec n) :=
@@ -229,28 +235,55 @@ Module Perm_with_vector.
   (* Compute vl2dl (perm (l2v 0 3 [1;2;3])). *)
   (* Compute vl2dl (perm (l2v 0 4 [1;2;3;4])). *)
 
-  (** ** reverse-order-number of a permutation *)
-  Section ronum.
-
-    Context {A : Type}.
-    Context {Altb : A -> A -> bool}.
-    Infix "<?" := Altb.
-    (* Context {Alt : A -> A -> Prop}. *)
-    (* Context {Alt_dec : Decidable Alt}. *)
-
-    Definition ronum1 (a : A) (l : list A) : nat :=
-      fold_left (fun (n : nat) (b : A) => n + (if b <? a then 1 else 0)) l 0.
+  (** ** parity of a vector *)
+  Definition perm_parity {n} (v : @vec A n) : Parity :=
+    perm_parity (Altb:=Altb) (v2l v).
+  Definition perm_parity_diff {n} (v1 v2 : @vec A n) : Prop :=
+    perm_parity_diff (Altb:=Altb) (v2l v1) (v2l v2).
+  
+  (** ** transposition, exchange, swap 对换 *)
+  Section exchange.
     
-    Fixpoint ronum (l : list A) : nat :=
-      match l with
-      | [] => 0
-      | x :: l' => ronum1 x l' + ronum l'
-      end.
-    
-  End ronum.
+    Definition vexchg {n} (v : @vec A n) (i0 i1 : nat) : @vec A n :=
+      mk_vec (A0:=A0) (fun i =>
+                if i =? i0
+                then v!i1
+                else (if i =? i1 then v!i0 else v!i)).
 
-  (* Compute ronum (Altb:=Nat.ltb) [2;4;3;1]. *)
-  (* Compute ronum (Altb:=Nat.ltb) [2;1;3;4]. *)
+    (** 对换相邻位置改变排列的奇偶性 *)
+    Theorem vexchg_swap2close_parity : forall {n} (v : @vec A n) i0 i1,
+        i0 < n -> i1 < n -> (i0 = S i1 \/ i1 = S i0) ->
+        perm_parity_diff v (vexchg v i0 i1).
+    Proof.
+      (* 教科书上的证明很巧妙，难以形式化的描述出来 *)
+      intros. unfold vexchg, perm_parity_diff.
+      unfold PermutationExt.perm_parity_diff, PermutationExt.perm_parity.
+      unfold vnth,mnth. solve_mnth; try lia.
+      clear l0 l l1.
+      unfold vec in *. mat_to_fun. simpl. unfold v2l. simpl.
+      (* key part *)
+      destruct H1; subst.
+      - rename i1 into j.
+        revert v j H H0. induction n; try easy.
+        intros. simpl.
+        rewrite <- ?seq_shift. rewrite ?map_map.
+        destruct j.
+        + simpl.
+          rewrite Nat.odd_add.
+    Abort.
+    
+    (** 对换改变排列的奇偶性 *)
+    Theorem vexchg_swap2_parity : forall {n} (v : @vec A n),
+        (forall i0 i1, i0 < n -> i1 < n -> i0 <> i1 -> perm_parity_diff v (vexchg v i0 i1)).
+    Proof.
+      (* 教科书上的证明很巧妙，难以形式化的描述出来 *)
+      Admitted.
+      
+  End exchange.
+
+  (* Let v := l2v 0 3 [1;2;3]. *)
+  (* Compute v2l (vexchg v 0 1). *)
+  (* Compute v2l (vexchg v 0 2). *)
 
   (** ** odd/even permutation *)
   Section odd_even.
@@ -268,6 +301,7 @@ Module Perm_with_vector.
   End exchange.
 End Perm_with_vector.
 
-  (* ######################################################################### *)
-  (** * Determinant *)
+
+(* ######################################################################### *)
+(** * Determinant *)
 
