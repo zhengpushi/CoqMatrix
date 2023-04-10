@@ -85,84 +85,6 @@ Axiom functional_extensionality_setoid :
 
 
 (* ######################################################################### *)
-(** * Typeclasses Demo *)
-
-(** Example for usage of Class and Instance *)
-Module Demo.
-  
-  Class Decidable (A:Type) (Aeq:relation A) := {
-      decidable : forall (a b : A), {Aeq a b} + {~(Aeq a b)}
-    }.
-
-  Inductive Color := Red | Green | Blue.
-  
-  Local Instance DecidableColor : @Decidable Color eq.
-  Proof. constructor. intros. destruct a,b; try(right;easy);auto. Defined.
-
-  Goal forall c1 c2 :Color, {c1=c2} + {c1<>c2}.
-  Proof. apply decidable.  Qed.
-
-  (** Customized Aeq *)
-  Inductive ColorEq : Color -> Color -> Prop :=
-  | C_RG : ColorEq Red Green
-  | C_GB : ColorEq Green Blue.
-
-  Local Instance DecidableColor2 : @Decidable Color ColorEq.
-  Proof. constructor. intros. destruct a,b; try (right;easy);auto;
-         left; constructor. Qed.
-
-  Goal forall c1 c2 : Color, {ColorEq c1 c2} + {~(ColorEq c1 c2)}.
-  Proof. apply decidable. Defined.
-  
-End Demo.
-
-
-(** This example shows that, if we put the parameter of a Class in a Section,
-    the the proof canno't automatic find the Instance.
-    ToDo: what's the problem? *)
-Module Demo2.
-
-  Section sec.
-    Variable A : Type.
-    Class Commutative (Aop:A->A->A) := {
-        commutative : forall a b, Aop a b = Aop b a
-      }.
-  End sec.
-
-  Local Instance Comm_NatAdd : Commutative Nat.add.
-  constructor. auto with arith. Defined.
-
-  Goal forall a b : nat, (a + b = b + a)%nat.
-    apply commutative.
-    (* Tips: Here, we need to manually specify the Instance, lost the automation *)
-    apply Comm_NatAdd.
-  Qed.
-
-End Demo2.
-
-(** This example shows that, if we use Context to instead the Variable, then the above
-    problem not occur. That means, we can use parameter of a Class in a Section and 
-    won't lose automation of finding the Instance *)
-Module Demo3.
-
-  Section sec.
-    Context `{A:Type}.
-    Class Commutative (Aop:A->A->A) := {
-        commutative : forall a b, Aop a b = Aop b a
-      }.
-  End sec.
-
-  Local Instance Comm_NatAdd : Commutative Nat.add.
-  constructor. auto with arith. Defined.
-
-  Goal forall a b : nat, (a + b = b + a)%nat.
-    apply commutative.
-  Qed.
-
-End Demo3.
-
-
-(* ######################################################################### *)
 (** * A relation is equivalence relation *)
 
 (** ** Class *)
@@ -316,10 +238,10 @@ Lemma associative_inv : forall `{Equiv_Aeq : Equivalence A Aeq} {Aop:A->A->A}
 Proof. intros. rewrite -> associative. easy. Qed.
 
 (** ** Examples *)
-Goal forall a b c : nat, (a + (b + c) = (a + b) + c)%nat.
+Goal forall a b c : nat, (a + (b + c) = (a + b) + c).
   apply associative_inv. Qed.
 
-Goal forall a b c : nat, ((a + b) + c = a + (b + c))%nat.
+Goal forall a b c : nat, ((a + b) + c = a + (b + c)).
   apply associative. Qed.
 
 

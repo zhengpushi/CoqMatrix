@@ -1056,17 +1056,78 @@ End Extra.
 
 
 (* ======================================================================= *)
-(** ** Matrix Inverse *)
+(** ** Matrix Inversion with gauss elimination, by ShenNan. *)
 Section MatInv.
+
+  (** fold a sequence to a value *)
+  Fixpoint reduce {A} (n: nat) (f: A -> nat -> A) (zero: A) : A :=
+    match n with
+    | O => zero
+    | S n' => f (reduce n' f zero) n'
+    end.
+  (* reduce 5 f 0 *)
+  (* f (reduce 4 f 0) 4 *)
+  (* f (f (reduce 3 f 0) 3) 4 *)
+  (* f (f (f (reduce 2 f 0) 2) 3) 4 *)
+  (* f (f (f (f (reduce 1 f 0) 1) 2) 3) 4 *)
+  (* f (f (f (f (f (reduce 0 f 0) 1) 2) 3) 4 *)
+  (* f (f (f (f (f 0 1) 2) 3) 4 *)
+  (* Compute reduce 5 Nat.add 0. *)
+
+  (* Understand the "reduce" function *)
+  Section test.
+    (*   R a f 3 *)
+    (* = f (R a f 2) 2 *)
+    (* = f (f (R a f 1) 1) 2 *)
+    (* = f (f (f (R a f 0) 0) 1) 2 *)
+    (* = f (f (f a 0) 1) 2 *)
+    (* that is: (a0 + f0) + f1 + ... *)
+    Let Fixpoint reduce' {A} (a0:A) (f: A -> nat -> A) (n:nat) : A :=
+      match n with
+      | O => a0
+      | S n' => f (reduce' a0 f n') n'
+      end.
+
+    Import Reals.
+    Let f1 : nat -> R := fun i => INR i.
+    (* Compute reduce' R0 (fun r0 i => Rplus r0 (f1 i)) 5. *)
+    (* Compute reduce' 0 Nat.add 5. *)
+
+  End test.
+
+
+  (** 任给两个序列f g，个数n，以及关系R，生成所有这些点对点对上的关系 *)
+  Definition pointwise_n {A} (n: nat) (R: relation A) : relation (nat -> A) :=
+    fun (f g : nat -> A) => forall (i: nat), i < n -> R (f i) (g i).
+
+  (** 对于序列m1 m2, 若前 S n 个点对上都有关系R，则前 n 个点对上也有关系R。*)
+  Lemma pointwise_n_decr {A}:
+    forall (n : nat) (m1 m2 : nat -> A) (R : relation A),
+      pointwise_n (S n) R m1 m2 -> pointwise_n n R m1 m2.
+  Proof. unfold pointwise_n. intuition. Qed.
+
   
-  (** *** permutation *)
-  Section Permutation.
-    
-  End Permutation.
+  Context `{F : Field}.
+  Infix "+" := Aadd : A_scope.
+  Infix "*" := Amul : A_scope.
+  Infix "*" := (mmul (A0:=A0)(Aadd:=Aadd)(Amul:=Amul)) : mat_scope.
+
+  (* sum f(0) f(1) ... f(k-1) *)
+  Notation sum k f := (reduce k (fun acc x => (acc + f x)%A) A0).
+
+  (** (m1 * m2)[i,j] = m1.row[i] dot m2.col[j] *)
+  Parameter Mtimes_help : forall {m n p} (m1: @mat A m n) (m2: @mat A n p),
+    forall i j,
+      i < m -> j < p ->
+      mnth A0 (m1 * m2) i j = sum n (fun k => ((mnth A0 m1 i k) * (mnth A0 m2 k j))%A).
+
+  (** (f m1 m2)[i,j] = f m1[i,j] m2[i,j] *)
+  Parameter Melement_op_help :
+    forall {m n} (m1: @mat A m n) (m2: @mat A m n) (op: A -> A -> A),
+    forall i j,
+      i < m -> j < n ->
+      mnth A0 (matmap2 op m1 m2) i j = op (mnth A0 m1 i j) (mnth A0 m2 i j).
   
-  Variable A : Type.
-  
-  (*   Check mat. *)
 
 End MatInv.
 
