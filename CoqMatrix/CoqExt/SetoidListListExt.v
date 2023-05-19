@@ -1752,7 +1752,7 @@ Section ldotdl_dldotdl.
       width dl c ->
       dldotdl dl (dlzero Azero t c) == dlzero Azero (length dl) t.
   Proof.
-    induction dl; simpl; intros; auto. easy. inv H.
+    induction dl; simpl; intros; auto. inv H.
     unfold dlzero; simpl. apply cons_aeq_mor.
     - rewrite dlzero_rw. rewrite ldotdl_zero_r; auto. easy.
     - apply IHdl. auto.
