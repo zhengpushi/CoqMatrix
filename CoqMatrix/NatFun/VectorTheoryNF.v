@@ -243,13 +243,13 @@ Module RingVectorTheoryNF (E : RingElementType) <: RingVectorTheory E.
   Qed.
 
   (** 1 c* v = v *)
-  Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Lemma vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
   Proof.
     intros. apply (@mcmul_1_l n 1).
   Qed.
 
   (** 0 c* v = vec0 *)
-  Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0.
+  Lemma vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0.
   Proof.
     intros. apply (@mcmul_0_l n 1).
   Qed.

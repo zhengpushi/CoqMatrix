@@ -41,13 +41,15 @@ Require Import Coq.Logic.Description. (* constructive_definite_description *)
 Require Export List SetoidList. Import ListNotations.
 Require Export Lia Lra.
 Require Export Ring Field.
-Require Arith ZArith QArith Qcanon Reals.
+Require Import Arith ZArith QArith QcExt RExt.
+
+Open Scope nat_scope.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
 
 (* Meanwhile, like A0,A1,... also be availble *)
-Generalizable Variables A Aeq Aadd Aopp Amul Ainv Adiv.
+Generalizable Variables A Azero Aone Aeq Aadd Aopp Amul Ainv Adiv.
 
 
 (* ######################################################################### *)
@@ -65,8 +67,8 @@ Fixpoint iterate {A} (f : A -> A) (n : nat) (a0 : A) : A :=
   end.
 
 Section test.
-  Context {A} {f : A -> A} (A0 : A).
-  (* Compute iterate f 3 A0. *)
+  Context {A} {f : A -> A} (Azero : A).
+  (* Compute iterate f 3 Azero. *)
 End test.
 
 (** x is an unique element which holds by P. Setoid version *)
@@ -211,7 +213,14 @@ Goal forall a b : nat, {a = b} + {a <> b}.
 (*       Aeq x y -> forall x0 y0 : B, Beq x0 y0 -> Ceq (op x x0) (op y y0) *)
 (*   }. *)
 
-(* (** ** Instances *) *)
+(** ** Instances *)
+Hint Resolve
+  Nat.add_wd Nat.mul_wd  (* nat *)
+  Z.add_wd Z.opp_wd Z.sub_wd Z.mul_wd (* Z *)
+  Qplus_comp Qopp_comp Qminus_comp Qmult_comp Qinv_comp Qdiv_comp (* Q *)
+  Qcplus_wd Qcopp_wd Qcminus_wd Qcmult_wd Qcinv_wd Qcdiv_wd (* Qc *)
+  Rplus_wd Ropp_wd Rminus_wd Rmult_wd Rinv_wd Rdiv_wd (* R *)
+  : wd.
 
 (* (** ** Extra Theories *) *)
 
@@ -604,12 +613,12 @@ Class Isomorphism2 {A B : Type} {Aeq: relation A} {Beq: relation B}
 (** * Monoid *)
 
 (** ** Class *)
-Class Monoid {A:Type} (Aadd : A -> A -> A) (A0 : A) (Aeq:A->A->Prop) := {
+Class Monoid {A:Type} (Aadd : A -> A -> A) (Azero : A) (Aeq:A->A->Prop) := {
     monoidAaddProper :> Proper (Aeq ==> Aeq ==> Aeq) Aadd;
     monoidEquiv :> Equivalence Aeq;
     monoidAssoc :> Associative Aadd Aeq;
-    monoidIdL :> IdentityLeft Aadd A0 Aeq;
-    monoidIdR :> IdentityRight Aadd A0 Aeq;
+    monoidIdL :> IdentityLeft Aadd Azero Aeq;
+    monoidIdR :> IdentityRight Aadd Azero Aeq;
   }.
 
 (** ** Instances *)
@@ -618,38 +627,28 @@ Section Instances.
   Import Arith ZArith Qcanon Reals.
   
   Global Instance Monoid_NatAdd : Monoid Nat.add 0%nat eq.
-  split_intro; subst; auto. rewrite Nat.add_assoc; auto. Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_NatMul : Monoid Nat.mul 1%nat eq.
-  split_intro; subst; auto. rewrite Nat.mul_assoc; auto.
-  apply Nat.mul_1_l. apply Nat.mul_1_r.
-  Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_ZAdd : Monoid Z.add 0%Z eq.
-  split_intro; auto with zarith. Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_ZMul : Monoid Z.mul 1%Z eq.
-  split_intro; auto with zarith. Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_QcAdd : Monoid Qcplus 0 eq.
-  split_intro; subst; auto. rewrite Qcplus_assoc; auto.
-  apply Qcplus_0_l. apply Qcplus_0_r.
-  Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_QcMul : Monoid Qcmult 1 eq.
-  split_intro; subst; auto. rewrite Qcmult_assoc; auto.
-  apply Qcmult_1_l. apply Qcmult_1_r.
-  Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_RAdd : Monoid Rplus 0%R eq.
-  split_intro; subst; auto. apply Rplus_assoc.
-  apply Rplus_0_l. apply Rplus_0_r.
-  Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
   Global Instance Monoid_RMul : Monoid Rmult 1%R eq.
-  split_intro; subst; auto. apply Rmult_assoc.
-  apply Rmult_1_l. apply Rmult_1_r.
-  Defined.
+  repeat constructor; auto with wd; try apply eq_equivalence; intros; ring. Qed.
 
 End Instances.
 
@@ -673,84 +672,6 @@ Ltac monoid_rw :=
     rewrite associative.
 
 Ltac monoid_simpl := intros; repeat monoid_rw; try reflexivity; auto.
-
-(** This example shows that, if we give a theorem that its parameter of a instance 
-    declaration in a section, then the application of this theorem will fail, and 
-    need more manually help of inference. *)
-Module Demo_ApplyFail.
-
-  Section sec.
-    Variable A : Type.
-    Variable Aadd : A -> A -> A.
-    (* Variable A0 : A. *)
-    Context {A0 : A}.
-    Variable Aeq : relation A.
-    Context {M : @Monoid A Aadd A0 Aeq}.
-    Infix "+" := Aadd.
-    Notation "1" := A0.
-    Infix "==" := Aeq.
-    
-    Lemma monoid_assoc : forall a b c, (a + b) + c == a + (b + c).
-    Proof.
-      apply associative.
-    Qed.
-
-  End sec.
-
-  Import Qcanon.
-  
-  Local Instance Monoid_QcAdd : Monoid Qcplus 0 eq.
-  split_intro; subst; auto. rewrite Qcplus_assoc; auto.
-  apply Qcplus_0_l. apply Qcplus_0_r.
-  Defined.
-  
-  Goal forall a b c : Qc, (a + b) + c = a + (b + c).
-    intros.
-    (* Fail apply monoid_assoc. *)
-    (* Tips: the application of this theorem will fail. We need to specify the A0 *)
-    apply monoid_assoc with (A0:=0).
-    (* And, the instance won't be automaticly inferenced too, even we use a Context 
-       syntax to instead the Variable syntax.
-       Maybe the behavior is depends on the parameters it used, like A0.
-       But, when I modified the A0 with Context, the situation is still bad.
-       In the example below, I find that all the parameters need to be 
-       declared implicited, thus the automation is available. *)
-    apply Monoid_QcAdd.
-  Qed.
-  
-End Demo_ApplyFail.
-
-
-(** This example shows that, if we use implicit parameter only, the instance 
-    inference is work well. Thus, the automation is available *)
-Module Demo_ApplyFail_Fix.
-
-  Section sec.
-    Context `{M:Monoid}.
-    Infix "+" := Aadd.
-    Notation "1" := A0.
-    Infix "==" := Aeq.
-    
-    Lemma monoid_assoc : forall a b c, ((a + b) + c) == (a + (b + c)).
-    Proof.
-      apply associative.
-    Qed.
-
-  End sec.
-
-  Import Qcanon.
-  
-  Local Instance Monoid_QcAdd : Monoid Qcplus 0 eq.
-  split_intro; subst; auto. rewrite Qcplus_assoc; auto.
-  apply Qcplus_0_l. apply Qcplus_0_r.
-  Defined.
-  
-  Goal forall a b c : Qc, (a + b) + c = a + (b + c).
-  Proof.
-    intros. apply monoid_assoc.
-  Qed.
-  
-End Demo_ApplyFail_Fix.
 
 Section Theory.
   Context `{M:Monoid}.
@@ -777,8 +698,8 @@ End Examples.
 (** * Abelian monoid *)
 
 (** ** Class *)
-Class AMonoid {A} Aadd A0 Aeq := {
-    amonoidMonoid :> @Monoid A Aadd A0 Aeq;
+Class AMonoid {A} Aadd Azero Aeq := {
+    amonoidMonoid :> @Monoid A Aadd Azero Aeq;
     amonoidComm :> Commutative Aadd Aeq;
   }.
 
@@ -839,10 +760,10 @@ End Examples.
 (** * Group *)
 
 (** ** Class *)
-Class Group {A} Aadd A0 (Aopp : A -> A) Aeq := {
-    groupMonoid :> @Monoid A Aadd A0 Aeq;
-    groupInvL :> InverseLeft Aadd A0 Aopp Aeq;
-    groupInvR :> InverseRight Aadd A0 Aopp Aeq;
+Class Group {A} Aadd Azero (Aopp : A -> A) Aeq := {
+    groupMonoid :> @Monoid A Aadd Azero Aeq;
+    groupInvL :> InverseLeft Aadd Azero Aopp Aeq;
+    groupInvR :> InverseRight Aadd Azero Aopp Aeq;
     groupAaddProper :> Proper (Aeq ==> Aeq ==> Aeq) Aadd;
     groupAoppProper :> Proper (Aeq ==> Aeq) Aopp;
     (* groupDistrAinv :> DistributiveUnary Aop Ainv Aeq; *)
@@ -890,7 +811,7 @@ Section GroupTheory.
   Context `{G:Group}.
   Infix "==" := Aeq.
   Infix "+" := Aadd.
-  Notation "0" := A0.
+  Notation "0" := Azero.
   Notation "- a" := (Aopp a).
   Notation Asub := (fun x y => x + (-y)).
   Infix "-" := Asub.
@@ -1174,9 +1095,9 @@ End Examples.
 (* ======================================================================= *)
 (** ** Definition and theory *)
 
-Class AGroup {A} Aadd A0 Aopp Aeq := {
-    agroupGroup :> @Group A Aadd A0 Aopp Aeq;
-    agroupAM :> @AMonoid A Aadd A0 Aeq;
+Class AGroup {A} Aadd Azero Aopp Aeq := {
+    agroupGroup :> @Group A Aadd Azero Aopp Aeq;
+    agroupAM :> @AMonoid A Aadd Azero Aeq;
     agroupComm :> Commutative Aadd Aeq;
   }.
 
@@ -1238,9 +1159,9 @@ End Instances.
 
 (* Note that, in mathematics, mul needn't commutative, but ring_theory in Coq 
   need it. Because we want use ring tactic, so add this properties. *)
-Class Ring {A} Aadd A0 Aopp Amul A1 Aeq := {
-    ringAddAG :> @AGroup A Aadd A0 Aopp Aeq;
-    ringMulAM :> @AMonoid A Amul A1 Aeq;
+Class Ring {A} Aadd Azero Aopp Amul Aone Aeq := {
+    ringAddAG :> @AGroup A Aadd Azero Aopp Aeq;
+    ringMulAM :> @AMonoid A Amul Aone Aeq;
     ringDistrL :> DistributiveLeft Aadd Amul Aeq;
     ringDistrR :> DistributiveRight Aadd Amul Aeq;
   }.
@@ -1269,7 +1190,7 @@ Section Theory.
   Notation Asub := (fun a b => a + -b)%A.
   Infix "*" := Amul : A_scope.
 
-  Lemma make_ring_theory : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma make_ring_theory : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     constructor; intros;
       try (rewrite ?identityLeft,?associative; reflexivity);
@@ -1299,9 +1220,9 @@ End Examples.
 Module Demo_AbsRing.
   Context `{R:Ring}.
   Infix "+" := Aadd. Infix "*" := Amul. Infix "==" := Aeq.
-  Notation "0" := A0. Notation "1" := A1.
+  Notation "0" := Azero. Notation "1" := Aone.
 
-  Let ring_thy : ring_theory A0 A1 Aadd Amul (fun x y => Aadd x (Aopp y))
+  Let ring_thy : ring_theory Azero Aone Aadd Amul (fun x y => Aadd x (Aopp y))
                    Aopp Aeq := make_ring_theory.
 
   Add Ring ring_thy_inst : ring_thy.
@@ -1380,11 +1301,11 @@ End Demo_ConcrateRing.
 (** * Field *)
 
 (** ** Class *)
-Class Field {A} Aadd A0 Aopp Amul A1 Ainv Aeq := {
+Class Field {A} Aadd Azero Aopp Amul Aone Ainv Aeq := {
     (** Field: Ring + mult inversion + (1≠0) *)
-    fieldRing :> @Ring A Aadd A0 Aopp Amul A1 Aeq;
-    field_mulInvL : forall a, ~(Aeq a A0) -> Aeq (Amul (Ainv a) a) A1;
-    field_1_neq_0 : ~(Aeq A1 A0);
+    fieldRing :> @Ring A Aadd Azero Aopp Amul Aone Aeq;
+    field_mulInvL : forall a, ~(Aeq a Azero) -> Aeq (Amul (Ainv a) a) Aone;
+    field_1_neq_0 : ~(Aeq Aone Azero);
     (** additional: Ainv is proper morphism *)
     fieldAinvProper :> Proper (Aeq ==> Aeq) Ainv
   }.
@@ -1416,15 +1337,15 @@ Section Theory.
   Infix "+" := Aadd : A_scope.
   Notation "- a" := (Aopp a) : A_scope.
   Notation Asub := (fun a b => a + -b)%A.
-  Notation "0" := A0 : A_scope.
-  Notation "1" := A1 : A_scope.
+  Notation "0" := Azero : A_scope.
+  Notation "1" := Aone : A_scope.
   Infix "*" := Amul : A_scope.
   Notation "/ a" := (Ainv a) : A_scope.
   Notation Adiv := (fun a b => a * (/b))%A.
   Infix "/" := Adiv : A_scope.
 
   Lemma make_field_theory :
-    field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+    field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   Proof.
     constructor; intros;
       try (rewrite ?identityLeft,?associative; reflexivity);
@@ -1445,11 +1366,11 @@ Section Theory.
   Proof. intros. rewrite commutative. rewrite field_mulInvL; easy. Qed.
 
   (** a <> 0 -> (1/a) * a = 1 *)
-  Lemma field_mul_inv1_l : forall a : A, ~(a == 0)%A -> ((A1/a) * a == 1)%A.
+  Lemma field_mul_inv1_l : forall a : A, ~(a == 0)%A -> ((Aone/a) * a == 1)%A.
   Proof. intros. simpl. group_simpl. apply field_mul_inv_l. auto. Qed.
   
   (** a <> 0 -> a * (1/a) = 1 *)
-  Lemma field_mul_inv1_r : forall a : A, ~(a == 0)%A -> (a * (A1/a) == 1)%A.
+  Lemma field_mul_inv1_r : forall a : A, ~(a == 0)%A -> (a * (Aone/a) == 1)%A.
   Proof. intros. simpl. group_simpl. apply field_mul_inv_r. auto. Qed.
   
   (** a <> 0 -> a * b = a * c -> b = c *)

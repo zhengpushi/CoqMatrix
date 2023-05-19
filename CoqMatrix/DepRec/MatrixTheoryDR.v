@@ -52,7 +52,7 @@ Module BasicMatrixTheoryDR (E : ElementType) <: BasicMatrixTheory E.
   
   (** Get n-th element of a matrix *)  
   Definition mnth {r c} (m : mat r c) (ri ci : nat) :=
-    @mnth A A0 r c m ri ci.
+    @mnth A Azero r c m ri ci.
   Notation "m ! i ! j" := (mnth m i j).
   
   (** meq and mnth should satisfy this constraint *)
@@ -74,7 +74,7 @@ Module BasicMatrixTheoryDR (E : ElementType) <: BasicMatrixTheory E.
   
   (* Tips: we can design the needed sequence of parameters, and it maybe different 
      with the original implementation *)
-  Definition l2m {r c} (dl : list (list A)) : mat r c := l2m A0 dl r c.
+  Definition l2m {r c} (dl : list (list A)) : mat r c := l2m Azero dl r c.
 
   (** l2m is a proper morphism *)
   Lemma l2m_aeq_mor : forall r c, Proper (eqlistA (eqlistA Aeq) ==> meq) (@l2m r c).
@@ -184,9 +184,9 @@ Module BasicMatrixTheoryDR (E : ElementType) <: BasicMatrixTheory E.
     remember (hd [] dl) as l1.
     remember (hd [] (tl dl)) as l2.
     remember (hd [] (tl (tl dl))) as l3.
-    remember (hd A0 l1, hd A0 (tl l1), hd A0 (tl (tl l1))) as t1.
-    remember (hd A0 l2, hd A0 (tl l2), hd A0 (tl (tl l2))) as t2.
-    remember (hd A0 l3, hd A0 (tl l3), hd A0 (tl (tl l3))) as t3.
+    remember (hd Azero l1, hd Azero (tl l1), hd Azero (tl (tl l1))) as t1.
+    remember (hd Azero l2, hd Azero (tl l2), hd Azero (tl (tl l2))) as t2.
+    remember (hd Azero l3, hd Azero (tl l3), hd Azero (tl (tl l3))) as t3.
     exact (t1, t2, t3).
   Defined.
 
@@ -300,13 +300,13 @@ Module RingMatrixTheoryDR (E : RingElementType) <: RingMatrixTheory E.
   (** ** Algebraic matrix theory *)
 
   (** Zero matrix *)
-  Definition mat0 r c : mat r c := mat0 A0.
+  Definition mat0 r c : mat r c := mat0 Azero.
   
   (* (** A matrix is a nonzero matrix *) *)
   (* Definition matnonzero {r c} (m : mat r c) : Prop := ~(m == mat0 r c). *)
   
   (** Unit matrix *)
-  Definition mat1 n : mat n n := mat1 A0 A1.
+  Definition mat1 n : mat n n := mat1 Azero Aone.
 
   (** *** Addition of matrix *)
 
@@ -458,13 +458,13 @@ Module RingMatrixTheoryDR (E : RingElementType) <: RingMatrixTheory E.
   Qed.
   
   (** 0 * m = 0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 r c.
   Proof.
     intros. apply mcmul_0_l.
   Qed.
   
   (** 1 * m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof.
     intros. apply mcmul_1.
   Qed.
@@ -485,7 +485,7 @@ Module RingMatrixTheoryDR (E : RingElementType) <: RingMatrixTheory E.
   (** *** Multiplication of matrix *)
   
   Definition mmul {r c s} (m1 : mat r c) (m2 : mat c s) : mat r s :=
-    @mmul A A0 Aadd Amul r c s m1 m2.
+    @mmul A Azero Aadd Amul r c s m1 m2.
   Infix "*" := mmul : mat_scope.
 
   (** m1 * (m2 + m3) = (m1 * m2) + (m1 * m3) *)
@@ -557,7 +557,7 @@ Module DecidableFieldMatrixTheoryDR (E : DecidableFieldElementType)
   (** k * m = 0 -> (m = 0) \/ (k = 0) *)
   Lemma mcmul_eq0_imply_m0_or_k0 : forall {r c} (m : mat r c) k,
       let m0 := mat0 r c in
-      (k c* m == m0) -> (m == m0) \/ (k == A0)%A.
+      (k c* m == m0) -> (m == m0) \/ (k == Azero)%A.
   Proof.
     intros. apply mcmul_eq0_imply_m0_or_k0. auto.
   Qed.
@@ -565,14 +565,14 @@ Module DecidableFieldMatrixTheoryDR (E : DecidableFieldElementType)
   (** (m <> 0 \/ k * m = 0) -> k = 0 *)
   Lemma mcmul_mnonzero_eq0_imply_k0 : forall {r c} (m : mat r c) k,
       let m0 := mat0 r c in
-      ~(m == m0) -> k c* m == m0 -> (k == A0)%A.
+      ~(m == m0) -> k c* m == m0 -> (k == Azero)%A.
   Proof.
     intros. apply (mcmul_mnonzero_eq0_imply_k0 m); auto.
   Qed.
 
   (** k * m = m -> k = 1 \/ m = 0 *)
   Lemma mcmul_same_imply_coef1_or_mzero : forall {r c} k (m : mat r c),
-      k c* m == m -> (k == A1)%A \/ (m == mat0 r c).
+      k c* m == m -> (k == Aone)%A \/ (m == mat0 r c).
   Proof.
     intros. apply mcmul_same_imply_coef1_or_mzero. auto.
   Qed.
@@ -580,7 +580,7 @@ Module DecidableFieldMatrixTheoryDR (E : DecidableFieldElementType)
   (** (m1 <> 0 /\ m2 <> 0 /\ k * m1 = m2) -> k <> 0 *)
   Lemma mcmul_eq_mat_implfy_not_k0 : forall {r c} (m1 m2 : mat r c) k,
       let m0 := mat0 r c in
-      ~(m1 == m0) -> ~(m2 == m0) -> k c* m1 == m2 -> ~(k == A0)%A.
+      ~(m1 == m0) -> ~(m2 == m0) -> k c* m1 == m2 -> ~(k == Azero)%A.
   Proof.
     intros. apply mcmul_eq_mat_implfy_not_k0 with m1 m2; auto.
   Qed.
@@ -617,9 +617,9 @@ Module ExtraMatrixTheoryDR (E : DecidableFieldElementType).
   (* Proof. *)
   (*   destruct (v3_to_t3 v) as [[x y] z]. *)
   (*   refine (mk_mat_3_3 *)
-  (*     A0    (-z)    y *)
-  (*     z     A0     (-x) *)
-  (*     (-y)  x       A0)%A. *)
+  (*     Azero    (-z)    y *)
+  (*     z     Azero     (-x) *)
+  (*     (-y)  x       Azero)%A. *)
   (* Defined. *)
   
   (* Cross/Vector product of 3D vector *)
@@ -628,7 +628,7 @@ Module ExtraMatrixTheoryDR (E : DecidableFieldElementType).
   (* A matrix is a SO3 (Special Orthogonal group, rotation group) *)
   Definition so3 (m : mat 3 3) : Prop :=
     let so3_mul_unit : Prop := (m \T) * m = mat1 3 in
-    let so3_det : Prop := (det_of_mat_3_3 m) = A1 in
+    let so3_det : Prop := (det_of_mat_3_3 m) = Aone in
       so3_mul_unit /\ so3_det.
 
 End ExtraMatrixTheoryDR.

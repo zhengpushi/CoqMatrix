@@ -13,7 +13,7 @@ Require Export BasicConfig HierarchySetoid.
 Require Reals.
 
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
 (* ######################################################################### *)
 (** * Sequence by function, f : nat -> A  *)
@@ -296,20 +296,20 @@ End seq2eq.
 (** ** Sum of a sequence *)
 Section Sum.
 
-  Context `{M : AMonoid A Aadd A0 Aeq}.
+  Context `{M : AMonoid A Aadd Azero Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "+" := Aadd : A_scope.
   
   (** Sum of a sequence *)
   Fixpoint seqsum (f : nat -> A) (n : nat) : A := 
     match n with
-    | O => A0
+    | O => Azero
     | S n' => seqsum f n' + f n'
     end.
   
   (** Sum of a sequence which every element is zero get zero. *)
   Lemma seqsum_seq0 : forall (f : nat -> A) (n : nat), 
-      (forall i, i < n -> f i == A0) -> seqsum f n == A0.
+      (forall i, i < n -> f i == Azero) -> seqsum f n == Azero.
   Proof.
     intros f n H. induction n; simpl. easy.
     rewrite H; auto. rewrite IHn; auto. monoid_simpl.
@@ -337,7 +337,7 @@ Section Sum.
 
 
   (** *** Below, we need ring structure *)
-  Context `{R : Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context `{R : Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Add Ring ring_inst : make_ring_theory.
   
   Infix "*" := Amul : A_scope.
@@ -361,18 +361,18 @@ Section Sum.
 
   (** Sum a sequence which only one item in nonzero, then got this item. *)
   Lemma seqsum_unique : forall (f : nat -> A) (k : A) (n i : nat), 
-      (i < n) -> f i == k -> (forall j, i <> j -> f j == A0) ->
+      (i < n) -> f i == k -> (forall j, i <> j -> f j == Azero) ->
       seqsum f n == k.
   Proof.
     (* key idea: induction n, and case {x =? n} *)
     intros f k n. induction n; intros. easy. simpl.
     destruct (i =? n)%nat eqn : E1.
     - apply Nat.eqb_eq in E1. subst.
-      assert (seqsum f n == A0).
+      assert (seqsum f n == Azero).
       { apply seqsum_seq0. intros. apply H1. lia. }
       rewrite H0. rewrite H2. ring.
     - apply Nat.eqb_neq in E1.
-      assert (f n == A0).
+      assert (f n == Azero).
       { apply H1; auto. }
       assert (seqsum f n == k).
       { apply IHn with i; auto. lia. }

@@ -99,7 +99,7 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
   Global Existing Instance meq_equiv.
 
   (** Get n-th element of a matrix *)  
-  Definition mnth {r c} (m : mat r c) (ri ci : nat) := mnth (A0:=A0) m ri ci.
+  Definition mnth {r c} (m : mat r c) (ri ci : nat) := mnth (Azero:=Azero) m ri ci.
   Global Notation "m ! r ! c" := (mnth m r c) : mat_scope.
 
   (** meq and mnth should satisfy this constraint *)
@@ -114,7 +114,7 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
 
   (** *** list list to mat *)
   
-  Definition l2m {r c} (dl : list (list A)) : mat r c := @l2m A A0 r c dl.
+  Definition l2m {r c} (dl : list (list A)) : mat r c := @l2m A Azero r c dl.
 
   (** l2m is a proper morphism *)
   Lemma l2m_aeq_mor : forall r c, Proper (eqlistA (eqlistA Aeq) ==> meq) (@l2m r c).
@@ -176,42 +176,42 @@ Module BasicMatrixTheorySF (E : ElementType) <: BasicMatrixTheory E.
   Lemma m2l_inj : forall {r c} (m1 m2 : mat r c),
       ~(m1 == m2) -> ~(m2l m1 == m2l m2)%dlist.
   Proof.
-    intros. apply (m2l_inj (A0:=A0)). easy.
+    intros. apply (m2l_inj (Azero:=Azero)). easy.
   Qed.
   
   Lemma m2l_surj : forall {r c} (d : list (list A)), 
       length d = r -> width d c -> 
       (exists m, @m2l r c m == d)%dlist.
   Proof.
-    intros. apply (m2l_surj (A0:=A0)); auto.
+    intros. apply (m2l_surj (Azero:=Azero)); auto.
   Qed.
   
   (* ==================================== *)
   (** ** Specific matrix *)
 
-  Definition mk_mat_1_1 (a00 : A) : mat 1 1 := mk_mat_1_1 (A0:=A0) a00.
+  Definition mk_mat_1_1 (a00 : A) : mat 1 1 := mk_mat_1_1 (Azero:=Azero) a00.
 
-  Definition mk_mat_3_1 (a00 a10 a20 : A) : mat 3 1 := mk_mat_3_1 (A0:=A0) a00 a10 a20.
+  Definition mk_mat_3_1 (a00 a10 a20 : A) : mat 3 1 := mk_mat_3_1 (Azero:=Azero) a00 a10 a20.
 
   Definition mk_mat_4_1 (a00 a10 a20 a30 : A) : mat 4 1 :=
-    mk_mat_4_1 (A0:=A0) a00 a10 a20 a30.
+    mk_mat_4_1 (Azero:=Azero) a00 a10 a20 a30.
 
   Definition mk_mat_2_2 (a00 a01 a10 a11 : A) : mat 2 2
-    := mk_mat_2_2 (A0:=A0) a00 a01 a10 a11.
+    := mk_mat_2_2 (Azero:=Azero) a00 a01 a10 a11.
   
   Definition mk_mat_3_3 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : A) : mat 3 3 
-    := mk_mat_3_3 (A0:=A0) a00 a01 a02 a10 a11 a12 a20 a21 a22.
+    := mk_mat_3_3 (Azero:=Azero) a00 a01 a02 a10 a11 a12 a20 a21 a22.
 
   Definition mk_mat_4_4 (a00 a01 a02 a03 a10 a11 a12 a13
                            a20 a21 a22 a23 a30 a31 a32 a33 : A) : mat 4 4 
-    := mk_mat_4_4 (A0:=A0) a00 a01 a02 a03 a10 a11 a12 a13
+    := mk_mat_4_4 (Azero:=Azero) a00 a01 a02 a03 a10 a11 a12 a13
          a20 a21 a22 a23 a30 a31 a32 a33.
 
   (* ==================================== *)
   (** ** Convert between tuples and matrix *)
   
   (** tuple_3x3 -> mat_3x3 *)
-  Definition t2m_3x3 (t : @T_3x3 A) : mat 3 3 := t2m_3x3 (A0:=A0) t.
+  Definition t2m_3x3 (t : @T_3x3 A) : mat 3 3 := t2m_3x3 (Azero:=Azero) t.
   
   (** mat_3x3 -> tuple_3x3 *)
   Definition m2t_3x3 (m : mat 3 3) : @T_3x3 A := m2t_3x3 m.
@@ -299,10 +299,10 @@ Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
   Add Ring ring_thy_inst : Ring_thy.
 
   (** Zero matrix *)
-  Definition mat0 r c : mat r c := @mat0 A A0 r c.
+  Definition mat0 r c : mat r c := @mat0 A Azero r c.
 
   (** Unit matrix *)
-  Definition mat1 n : mat n n := @mat1 A A0 A1 n.
+  Definition mat1 n : mat n n := @mat1 A Azero Aone n.
 
   (** *** Addition of matrix *)
 
@@ -432,13 +432,13 @@ Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
   Qed.
   
   (** 0 * m = 0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 r c.
   Proof.
     intros. apply mcmul_0_l.
   Qed.
   
   (** 1 * m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof.
     intros. apply mcmul_1_l.
   Qed.
@@ -447,7 +447,7 @@ Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
   (** *** Multiplication of matrix *)
   
   Definition mmul {r c s} (m1 : mat r c) (m2 : mat c s) : mat r s :=
-    @mmul A Aadd A0 Amul r c s m1 m2.
+    @mmul A Aadd Azero Amul r c s m1 m2.
 
   Global Infix "*" := mmul : mat_scope.
   
@@ -518,7 +518,7 @@ Module RingMatrixTheorySF (E : RingElementType) <: RingMatrixTheory E.
 
   (** Trace of a square matrix *)
   Definition trace {n : nat} (m : smat n) :=
-    seqsum (A0:=A0) (Aadd:=Aadd) (fun i => m!i!i) n.
+    seqsum (Azero:=Azero) (Aadd:=Aadd) (fun i => m!i!i) n.
   
   (** Determinant of 3x3 matrix *)
   Definition det3 (m : mat 3 3) : A :=
@@ -561,7 +561,7 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
   Section Inversion.
 
     (** Determinant of a square matrix.  *)
-    Definition det {n} (m : smat n) : A := @det A Aadd A0 Aopp Amul A1 n m.
+    Definition det {n} (m : smat n) : A := @det A Aadd Azero Aopp Amul Aone n m.
 
     (** Determinant of a matrix of 1D *)
     Definition det_1_1 (m : smat 1) := @det_1_1 A m.
@@ -575,19 +575,19 @@ Module DecidableFieldMatrixTheorySF (E : DecidableFieldElementType)
     (** Cramer rule, which can slving the equation with form of M*x=b.
       Note, the result is valid only when D is not zero *)
     Definition cramerRule {n} (M : smat n) (b : mat n 1) : mat n 1 :=
-      @cramerRule A Aadd A0 Aopp Amul A1 Ainv n M b.
+      @cramerRule A Aadd Azero Aopp Amul Aone Ainv n M b.
     
     (** Inverse matrix of a matrix *)
-    Definition minv {n} (m : smat n) := @minv A Aadd A0 Aopp Amul A1 Ainv n m.
+    Definition minv {n} (m : smat n) := @minv A Aadd Azero Aopp Amul Aone Ainv n m.
     
     (** Simplified formula of inverse matrix of 1D *)
-    Definition inv_1_1 (m : smat 1) : smat 1 := @inv_1_1 A A0 Amul A1 Ainv m.
+    Definition inv_1_1 (m : smat 1) : smat 1 := @inv_1_1 A Azero Amul Aone Ainv m.
 
     (** Simplified formula of inverse matrix of 2D *)
-    Definition inv_2_2 (m : smat 2) : smat 2 := @inv_2_2 A Aadd A0 Aopp Amul Ainv m.
+    Definition inv_2_2 (m : smat 2) : smat 2 := @inv_2_2 A Aadd Azero Aopp Amul Ainv m.
 
     (** Simplified formula of inverse matrix of 2D *)
-    Definition inv_3_3 (m : smat 3) : smat 3 := @inv_3_3 A Aadd A0 Aopp Amul Ainv m.
+    Definition inv_3_3 (m : smat 3) : smat 3 := @inv_3_3 A Aadd Azero Aopp Amul Ainv m.
 
   End Inversion.
   

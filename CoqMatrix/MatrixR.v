@@ -87,15 +87,15 @@ End test.
 (** Symbol matrix *)
 Module Exercise_Ch1_Symbol.
 
-  Notation "0" := (A0)%A.
-  Notation "1" := (A1)%A.
-  Notation "2" := (A1 + A1)%A.
-  Notation "3" := (A1 + 2)%A.
+  Notation "0" := (Azero)%A.
+  Notation "1" := (Aone)%A.
+  Notation "2" := (Aone + Aone)%A.
+  Notation "3" := (Aone + 2)%A.
   
   (** Power function on A *)
   Fixpoint Apow (a : A) (n : nat) :=
     match n with
-    | 0 => A1
+    | 0 => Aone
     | S n' => (a * (Apow a n'))%A
     end.
   Infix "^" := (Apow).

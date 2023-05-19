@@ -24,7 +24,7 @@ Require Export TupleExt HierarchySetoid SetoidListListExt.
 Require Export Sequence.
 
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
 (** Control the scope *)
 Open Scope nat_scope.
@@ -107,7 +107,7 @@ End meq.
 (** ** Get element of a matrix *)
 Section mnth.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
 
@@ -118,7 +118,7 @@ Section mnth.
   Definition mnth {r c} (m : mat r c) (i j : nat) : A :=
     if (i <? r) && (j <? c)
     then m$i$j
-    else A0.
+    else Azero.
   Notation "m ! i ! j " := (mnth m i j) : mat_scope.
 
   Lemma mnth_eq_mnth_raw : forall {r c : nat} (m : mat r c),
@@ -221,10 +221,10 @@ Global Ltac lma :=
 (** ** Get row of a matrix *)
 Section mrow.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope.
+  Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope.
 
   (** Get a row which row index is i *)
   Definition mrow {r c : nat} (i : nat) (m : mat r c) : list A :=
@@ -251,19 +251,19 @@ End mrow.
 (** Convert between list list and mat *)
 Section l2m_m2l.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  (* Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope. *)
+  (* Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope. *)
   
   (** list list to mat.
       Note: we need manually specify the dimension of the matrix. *)
   Definition l2m {r c} (dl : list (list A)) : mat r c :=
     mk_mat (fun i j =>
               if (i <? r) && (j <? c) then
-                nth j (nth i dl []) A0
-              else A0).
+                nth j (nth i dl []) Azero
+              else Azero).
   
   (** mat to list list *)
   Definition m2l {r c} (m : mat r c) : list (list A) :=
@@ -292,7 +292,7 @@ Section l2m_m2l.
       (length dl = r) -> (width dl c) -> (m2l (@l2m r c dl) == dl)%dlist.
   Proof.
     intros. unfold l2m,m2l. unfold mnth. simpl.
-    rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)); auto.
+    rewrite (dlist_eq_iff_nth_nth r c (Azero:=Azero)); auto.
     - intros. rewrite ?nth_map_seq; auto. rewrite ?Nat.add_0_r. solve_mnth.
     - rewrite map_length, seq_length; auto.
     - apply width_map. intros. rewrite map_length, seq_length; auto.
@@ -303,7 +303,7 @@ Section l2m_m2l.
       ~(d1 == d2)%dlist -> ~(@l2m r c d1 == l2m d2).
   Proof.
     intros. unfold l2m. intro. unfold meq in *. simpl in *. destruct H3.
-    rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)); auto.
+    rewrite (dlist_eq_iff_nth_nth r c (Azero:=Azero)); auto.
     intros. specialize (H4 i j H3 H5). solve_mnth.
   Qed.
   
@@ -317,7 +317,7 @@ Section l2m_m2l.
     intros. destruct m1 as [m1], m2 as [m2]. unfold meq in *; simpl in *.
     unfold m2l. unfold mnth. simpl. intro.
     destruct H. intros.
-    rewrite (dlist_eq_iff_nth_nth r c (A0:=A0)) in H0;
+    rewrite (dlist_eq_iff_nth_nth r c (Azero:=Azero)) in H0;
       autorewrite with list; auto.
     - specialize (H0 i j H H1).
       rewrite ?nth_map_seq in H0; auto. rewrite ?Nat.add_0_r in H0. solve_mnth.
@@ -343,7 +343,7 @@ End l2m_m2l.
 (* ==================================== *)
 (** ** Get column *)
 Section mcol.
-  Context {A : Type} {A0 : A}.
+  Context {A : Type} {Azero : A}.
   Definition mcol {r c : nat} (m : mat r c) (j : nat) : list A :=
     let fix f r i0 :=
       match r with
@@ -364,11 +364,11 @@ End mcol.
 (* ==================================== *)
 (** ** matrix shift *)
 Section mshift.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  (* Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope. *)
+  (* Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope. *)
   
   (** left shift column.
       [[1;2;3];[4;5;6];[7;8;9] ==1==> [[2;3;0];[5;6;0];[8;9;0] *)
@@ -378,7 +378,7 @@ Section mshift.
   (** right shift column.
       [[1;2;3];[4;5;6];[7;8;9] ==1==> [[0;1;2];[0;4;5];[0;7;8] *)
   Definition mcshr {r c} (m : @mat A r c) (k : nat) : mat r c :=
-    mk_mat (fun i j => if j <? k then A0 else (m $ i $ (j - k))).
+    mk_mat (fun i j => if j <? k then Azero else (m $ i $ (j - k))).
 
   (** left loop shift column.
       [[1;2;3];[4;5;6];[7;8;9] ==1==> [[2;3;1];[5;6;4];[8;9;7] *)
@@ -393,7 +393,7 @@ End mshift.
 
 (* Let m1 := @l2m _ 0 3 3 [[1;2;3];[4;5;6];[7;8;9]]. *)
 (* Compute m2l (mcshl m1 1). *)
-(* Compute m2l (mcshr (A0:=0) m1 1). *)
+(* Compute m2l (mcshr (Azero:=0) m1 1). *)
 (* Compute m2l (mclshl m1 1). *)
 (* Compute m2l (mclshr m1 1). *)
 
@@ -401,10 +401,10 @@ End mshift.
 (* ==================================== *)
 (** ** Build concrete matrix *)
 Section SpecifyDims.
-  Context {A : Type} {A0 : A}.
+  Context {A : Type} {Azero : A}.
 
   Notation mat := (@mat A).
-  Notation l2m := (l2m (A0:=A0)).
+  Notation l2m := (l2m (Azero:=Azero)).
   
   Definition mk_mat_0_c c : mat 0 c := l2m [].
 
@@ -430,7 +430,7 @@ Section SpecifyDims.
     l2m [[a11;a12;a13;a14]; [a21;a22;a23;a24];[a31;a32;a33;a34]; [a41;a42;a43;a44]].
   
   Definition mk_mat_r_1 r (l : list A) : mat r 1 :=
-    mk_mat (fun i j : nat => if (j =? 0)%nat then (nth i l A0) else A0).
+    mk_mat (fun i j : nat => if (j =? 0)%nat then (nth i l Azero) else Azero).
   
 End SpecifyDims.
 
@@ -439,10 +439,10 @@ End SpecifyDims.
 (** ** Mapping of matrix *)
 Section Map.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  (* Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope. *)
+  (* Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope. *)
   
   Definition mmap {r c} (f : A -> A) (m : mat r c) : mat r c :=
     mk_mat (fun i j => f (m $ i $ j)).
@@ -474,7 +474,7 @@ End Map.
 (* ==================================== *)
 (** ** Matrix transposition *)
 Section mtrans.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 A1 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero Aone : A}.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mtrans {r c} (m : @mat A r c): mat c r :=
@@ -491,13 +491,13 @@ End mtrans.
 (* ==================================== *)
 (** ** Zero matrirx and identity matrix *)
 Section mat0_mat1.
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 A1 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero Aone : A).
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   Notation "m \T" := (mtrans m) : mat_scope.
 
   (** *** Zero matrix *)
   Definition mat0 (r c : nat) : mat r c :=
-    mk_mat (fun _ _ => A0).
+    mk_mat (fun _ _ => Azero).
 
   (** mat0\T = mat0 *)
   Lemma mtrans_mat0_eq_mat0 : forall {r c : nat}, (mat0 r c)\T == mat0 c r.
@@ -506,7 +506,7 @@ Section mat0_mat1.
   
   (** *** Identity matrix *)
   Definition mat1 (n : nat) : mat n n :=
-    mk_mat (fun i j => if (i =? j)%nat then A1 else A0).
+    mk_mat (fun i j => if (i =? j)%nat then Aone else Azero).
   
   (** mat1\T = mat1 *)
   Lemma mtrans_mat1_eq_mat1 : forall {n : nat}, (mat1 n)\T == (mat1 n).
@@ -532,7 +532,7 @@ Section malg.
   Infix "==" := (eqlistA Aeq) : list_scope.
 
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope.
+  Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope.
 
   (** *** Matrix addition *)
 
@@ -555,13 +555,13 @@ Section malg.
   Qed.
 
   (** mat0 + m = m *)
-  Lemma madd_0_l : forall {r c} (m : mat r c), mat0 A0 r c + m == m. 
+  Lemma madd_0_l : forall {r c} (m : mat r c), mat0 Azero r c + m == m. 
   Proof.
     lma. monoid_simpl.
   Qed.
 
   (** m + mat0 = m *)
-  Lemma madd_0_r : forall {r c} (m : mat r c), m + mat0 A0 r c == m. 
+  Lemma madd_0_r : forall {r c} (m : mat r c), m + mat0 Azero r c == m. 
   Proof.
     lma. monoid_simpl.
   Qed.
@@ -579,11 +579,11 @@ Section malg.
       (i < r) -> (mrow i (m1 + m2)%mat == (mrow i m1) + (mrow i m2))%list.
   Proof.
     intros. unfold mrow.
-    rewrite (list_eq_iff_nth A0 c).
+    rewrite (list_eq_iff_nth Azero c).
     - intros. unfold ladd.
       pose proof (map2_nth (Aadd:=Aadd)
                     (map (fun j : nat => m1$i$j) (seq 0 c))
-                    (map (fun j : nat => m2$i$j) (seq 0 c)) i0 A0).
+                    (map (fun j : nat => m2$i$j) (seq 0 c)) i0 Azero).
       rewrite H1.
       + rewrite ?nth_map_seq; auto.
         rewrite Nat.add_0_r. solve_mnth.
@@ -625,32 +625,32 @@ Section malg.
   Qed.
 
   (** mat0 - m = - m *)
-  Lemma msub_0_l : forall {r c} (m : mat r c), (mat0 A0 r c) - m == - m.
+  Lemma msub_0_l : forall {r c} (m : mat r c), (mat0 Azero r c) - m == - m.
   Proof.
     lma. monoid_simpl.
   Qed.
 
   (** m - mat0 = m *)
-  Lemma msub_0_r : forall {r c} (m : mat r c), m - (mat0 A0 r c) == m.
+  Lemma msub_0_r : forall {r c} (m : mat r c), m - (mat0 Azero r c) == m.
   Proof.
     lma. rewrite group_opp_zero_eq_zero. monoid_simpl.
   Qed.
 
   (** m + (-m) = mat0 *)
-  Lemma madd_opp : forall r c (m : mat r c), m + (-m) == mat0 A0 r c.
+  Lemma madd_opp : forall r c (m : mat r c), m + (-m) == mat0 Azero r c.
   Proof.
     lma. group_simpl.
   Qed.
 
   (** m - m = mat0 *)
-  Lemma msub_self : forall {r c} (m : mat r c), m - m == (mat0 A0 r c).
+  Lemma msub_self : forall {r c} (m : mat r c), m - m == (mat0 Azero r c).
   Proof.
     lma. group_simpl.
   Qed.
 
 
   (** *** Below, we need a ring structure *)
-  Context `{R : Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context `{R : Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Infix "*" := Amul : A_scope.
   
   Add Ring ring_inst : make_ring_theory.
@@ -675,7 +675,7 @@ Section malg.
                 meq (Aeq:=Aeq)(r:=r)(c:=c)) mcmul.
   Proof.
     simp_proper. lma.
-    rewrite (meq_iff_mnth (A0:=A0)) in H0.
+    rewrite (meq_iff_mnth (Azero:=Azero)) in H0.
     specialize (H0 i j Hi Hj). solve_mnth. rewrite H,H0. easy.
   Qed.
 
@@ -686,20 +686,20 @@ Section malg.
   Proof. lma. Qed.
 
   (** 0 c* m = mat0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 A0 r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 Azero r c.
   Proof. lma. Qed.
 
   (** a c* mat0 = mat0 *)
-  Lemma mcmul_0_r : forall {r c} a, a c* mat0 A0 r c == mat0 A0 r c.
+  Lemma mcmul_0_r : forall {r c} a, a c* mat0 Azero r c == mat0 Azero r c.
   Proof. lma. Qed.
 
   (** 1 c* m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof. lma. Qed.
 
   (** a c* mat1 equal to a diagonal matrix which main diagonal elements all are a *)
   Lemma mcmul_1_r : forall {n} a,
-      a c* mat1 A0 A1 n == mk_mat (fun i j => if (i =? j)%nat then a else A0).
+      a c* mat1 Azero Aone n == mk_mat (fun i j => if (i =? j)%nat then a else Azero).
   Proof.
     lma. unfold mcmul,mat1. destruct (i =? j); ring.
   Qed.
@@ -726,7 +726,7 @@ Section malg.
   (** *** Matrix multiplication *)
   Definition mmul {r c t : nat} (m1 : mat r c) (m2 : mat c t) : mat r t :=
     mk_mat
-      (fun i k => seqsum (Aadd:=Aadd)(A0:=A0) (fun j => m1$i$j * m2$j$k) c).
+      (fun i k => seqsum (Aadd:=Aadd)(Azero:=Azero) (fun j => m1$i$j * m2$j$k) c).
   Infix "*" := mmul : mat_scope.
 
   (** (m1 * m2) * m3 = m1 * (m2 * m3) *)
@@ -760,19 +760,19 @@ Section malg.
   Qed.
 
   (** mat0 * m = mat0 *)
-  Lemma mmul_0_l : forall {r c s} (m : mat c s), (mat0 A0 r c) * m == mat0 A0 r s.
+  Lemma mmul_0_l : forall {r c s} (m : mat c s), (mat0 Azero r c) * m == mat0 Azero r s.
   Proof.
     lma. unfold mmul,mat0. apply seqsum_seq0. intros. ring.
   Qed.
 
   (** m * mat0 = mat0 *)
-  Lemma mmul_0_r : forall {r c s} (m : mat r c), m * (mat0 A0 c s) == mat0 A0 r s.
+  Lemma mmul_0_r : forall {r c s} (m : mat r c), m * (mat0 Azero c s) == mat0 Azero r s.
   Proof.
     lma. unfold mmul,mat0. apply seqsum_seq0. intros. ring.
   Qed.
 
   (** mat1 * m = m *)
-  Lemma mmul_1_l : forall {r c : nat} (m : mat r c), mat1 A0 A1 r * m == m.
+  Lemma mmul_1_l : forall {r c : nat} (m : mat r c), mat1 Azero Aone r * m == m.
   Proof.
     lma.
     apply (seqsum_unique _ _ _ i); auto.
@@ -781,7 +781,7 @@ Section malg.
   Qed.
 
   (** m * mat1 = m *)
-  Lemma mmul_1_r : forall {r c : nat} (m : mat r c), m * mat1 A0 A1 c == m.
+  Lemma mmul_1_r : forall {r c : nat} (m : mat r c), m * mat1 Azero Aone c == m.
   Proof.
     lma. unfold mmul,mat1.
     apply (seqsum_unique _ _ _ j); auto.
@@ -826,8 +826,8 @@ Global Hint Unfold
 
 (** Convert between tuples and matrix *)
 Section t2m_m2t.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
-  (* Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope. *)
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
+  (* Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope. *)
   
   (** Tuples 3x3 -> mat_3x3 *)
   Definition t2m_3x3 (t : @T_3x3 A) : @mat A 3 3.
@@ -836,7 +836,7 @@ Section t2m_m2t.
     destruct t1 as ((a11,a12),a13).
     destruct t2 as ((a21,a22),a23).
     destruct t3 as ((a31,a32),a33).
-    exact (mk_mat_3_3 (A0:=A0) a11 a12 a13 a21 a22 a23 a31 a32 a33).
+    exact (mk_mat_3_3 (Azero:=Azero) a11 a12 a13 a21 a22 a23 a31 a32 a33).
   Defined.
 
   (** mat_3x3 -> tuple 3x3. That is: ((a11,a12,a13),(a21,a22,a23),(a31,a32,a33)) *)
@@ -854,12 +854,12 @@ End t2m_m2t.
 (* ==================================== *)
 (** ** trace *)
 Section trace.
-  Context {A : Type} {Aadd: A -> A -> A} {A0 : A}.
-  (* Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope. *)
+  Context {A : Type} {Aadd: A -> A -> A} {Azero : A}.
+  (* Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope. *)
 
   (** Trace *)
   Definition trace {n : nat} (m : smat n) := 
-    seqsum (Aadd:=Aadd)(A0:=A0) (fun i => m$i$i) n.
+    seqsum (Aadd:=Aadd)(Azero:=Azero) (fun i => m$i$i) n.
 
 End trace.
 
@@ -879,12 +879,12 @@ Section matrix_inversion.
   Infix "*" := Amul : A_scope.
   Infix "==" := Aeq : A_scope.
 
-  Infix "*" := (@mmul A Aadd A0 Amul _ _ _) : mat_scope.
+  Infix "*" := (@mmul A Aadd Azero Amul _ _ _) : mat_scope.
   Infix "c*" := (@mcmul A Amul _ _) : mat_scope.
   Infix "==" := (@meq _ Aeq _ _) : mat_scope.
-  (* Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope. *)
-  Notation mat1 := (mat1 A0 A1).
-  Notation l2m := (@l2m A A0 _ _).
+  (* Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope. *)
+  Notation mat1 := (mat1 Azero Aone).
+  Notation l2m := (@l2m A Azero _ _).
 
   
   (** *** Definition of determinant *)
@@ -922,11 +922,11 @@ Section matrix_inversion.
      (*  : list (list nat) *) *)
 
     (* Definition item_of_det {n : nat} (m : smat n) (l : list nat) : A := *)
-    (*   fold_left Amul (map (fun i => m!i!(nth i l 0)) l) A1. *)
+    (*   fold_left Amul (map (fun i => m!i!(nth i l 0)) l) Aone. *)
 
     (* (** Definition of determinant *) *)
     (* Definition det_def {n : nat} (m : smat n) : A := *)
-    (*   fold_left Aadd (map (fun l => item_of_det m l) (perm 0 (seq 0 n))) A0. *)
+    (*   fold_left Aadd (map (fun l => item_of_det m l) (perm 0 (seq 0 n))) Azero. *)
 
     (* Compute det_orig m. *)
     
@@ -938,14 +938,14 @@ Section matrix_inversion.
     Fixpoint det {n} : smat n -> A
       :=
       match n with
-      | 0 => fun _ => A1
+      | 0 => fun _ => Aone
       | S n' =>
           fun m =>
             fold_left Aadd
               (map (fun i =>
                       let a := if Nat.even i then (m$0$i)%nat else (-(m$0$i)%nat)%A in
                       let d := det (submat m 0 i) in
-                      (a * d)%A) (seq 0 n)) A0
+                      (a * d)%A) (seq 0 n)) Azero
       end.
 
   End det_def.
@@ -958,10 +958,10 @@ Section matrix_inversion.
    *)
   Ltac det_neq0_imply_neq0 :=
     match goal with
-    | H : ~(det ?m == A0)%A |- ~(_ == A0)%A =>
+    | H : ~(det ?m == Azero)%A |- ~(_ == Azero)%A =>
         let H1 := fresh "H1" in
         intro H1; destruct H; cbv; ring_simplify; ring_simplify in H1; auto
-    | H : ~(_ == A0)%A |- ~(det ?m == A0)%A =>
+    | H : ~(_ == Azero)%A |- ~(det ?m == Azero)%A =>
         let H1 := fresh "H1" in
         intro H1; cbv in H1; destruct H; ring_simplify; ring_simplify in H1; auto
     end.
@@ -980,7 +980,7 @@ Section matrix_inversion.
     
     (** det m <> 0 <-> det_exp <> 0 *)
     Lemma det_1_1_neq0_iff : forall (m : smat 1),
-        ~ (det m == A0)%A <->  ~ (m$0$0 == A0)%A.
+        ~ (det m == Azero)%A <->  ~ (m$0$0 == Azero)%A.
     Proof.
       intros. split; intros; det_neq0_imply_neq0.
     Qed.
@@ -996,7 +996,7 @@ Section matrix_inversion.
 
     (** det m <> 0 <-> det_exp <> 0 *)
     Lemma det_2_2_neq0_iff : forall (m : smat 2),
-        ~ (det m == A0)%A <->  ~ (m$0$0 * m$1$1 - m$0$1 * m$1$0 == A0)%A.
+        ~ (det m == Azero)%A <->  ~ (m$0$0 * m$1$1 - m$0$1 * m$1$0 == Azero)%A.
     Proof.
       intros. split; intros; det_neq0_imply_neq0.
     Qed.
@@ -1015,10 +1015,10 @@ Section matrix_inversion.
     
     (** det m <> 0 <-> det_exp <> 0 *)
     Lemma det_3_3_neq0_iff : forall (m : smat 3),
-        ~ (det m == A0)%A <->
+        ~ (det m == Azero)%A <->
           ~(m$0$0 * m$1$1 * m$2$2 - m$0$0 * m$1$2 * m$2$1 - 
               m$0$1 * m$1$0 * m$2$2 + m$0$1 * m$1$2 * m$2$0 + 
-              m$0$2 * m$1$0 * m$2$1 - m$0$2 * m$1$1 * m$2$0 == A0)%A.
+              m$0$2 * m$1$0 * m$2$1 - m$0$2 * m$1$1 * m$2$0 == Azero)%A.
     Proof.
       intros. split; intros; det_neq0_imply_neq0.
     Qed.
@@ -1036,7 +1036,7 @@ Section matrix_inversion.
       | S n' =>
           fun m =>
             mk_mat (fun i j =>
-                      let s := if Nat.even (i + j) then A1 else (-A1)%A in
+                      let s := if Nat.even (i + j) then Aone else (-Aone)%A in
                       let d := det (submat m j i) in 
                       (s * d)%A)
       end.
@@ -1044,7 +1044,7 @@ Section matrix_inversion.
   End adj.
 
   (** *** We need a field structure *)
-  Context `{F:@Field A Aadd A0 Aopp Amul A1 Ainv Aeq}.
+  Context `{F:@Field A Aadd Azero Aopp Amul Aone Ainv Aeq}.
   Add Field field_thy_inst : make_field_theory.
 
   Notation "/ a" := (Ainv a) : A_scope.
@@ -1076,7 +1076,7 @@ Section matrix_inversion.
       or
       "~(xxx = 0) -> ~(det m == 0)"
      *)
-    Definition minv {n} (m : smat n) := (A1 / det m) c* (madj m).
+    Definition minv {n} (m : smat n) := (Aone / det m) c* (madj m).
 
     Lemma minv_correct_r : forall n (m : smat n), m * (minv m) == mat1 n.
     Proof.
@@ -1090,21 +1090,21 @@ Section matrix_inversion.
     (** ** Inversion matrix of dimension-1 *)
     Definition inv_1_1 (m : smat 1) : smat 1 :=
       let a := 0 in
-      l2m [[A1/(m$0$0)]].
+      l2m [[Aone/(m$0$0)]].
 
 
     (** Try to prove a proposition such as:
       "~(exp1 == 0) -> ~(exp2 = 0)" *)
     Ltac reverse_neq0_neq0 :=
       try match goal with
-        | H : ~(?e1 == A0)%A |- ~(?e2 == A0)%A =>
+        | H : ~(?e1 == Azero)%A |- ~(?e2 == Azero)%A =>
             let H1 := fresh "H1" in
             intro H1; destruct H; ring_simplify; ring_simplify in H1;
             try rewrite H1; try easy
         end.
 
     (** det m <> 0 -> inv_1_1 m = inv m *)
-    Lemma inv_1_1_eq_inv : forall m, ~(det m == A0)%A -> inv_1_1 m == minv m.
+    Lemma inv_1_1_eq_inv : forall m, ~(det m == Azero)%A -> inv_1_1 m == minv m.
     Proof.
       lma.
       (* det_neq0_imply_neq0. *)
@@ -1113,7 +1113,7 @@ Section matrix_inversion.
 
     (** inv_1_1 m * m = mat1 *)
     Lemma inv_1_1_correct_l : forall (m : smat 1),
-        ~(det m == A0)%A -> (inv_1_1 m) * m == mat1 1.
+        ~(det m == Azero)%A -> (inv_1_1 m) * m == mat1 1.
     Proof.
       lma.
       (* det_neq0_imply_neq0. *)
@@ -1122,7 +1122,7 @@ Section matrix_inversion.
 
     (** m * inv_1_1 m = mat1 *)
     Lemma inv_1_1_correct_r : forall (m : smat 1),
-        ~(det m == A0)%A -> m * (inv_1_1 m) == mat1 1.
+        ~(det m == Azero)%A -> m * (inv_1_1 m) == mat1 1.
     Proof.
       lma.
       (* det_neq0_imply_neq0. *)
@@ -1140,7 +1140,7 @@ Section matrix_inversion.
       (l2m [[a11/d; -a01/d]; [-a10/d; a00/d]])%A.
 
     (** det m <> 0 -> inv_2_2 m = inv m *)
-    Lemma inv_2_2_eq_inv : forall m, ~(det m == A0)%A -> inv_2_2 m == minv m.
+    Lemma inv_2_2_eq_inv : forall m, ~(det m == Azero)%A -> inv_2_2 m == minv m.
     Proof.
       lma;
         (* det_neq0_imply_neq0. *)
@@ -1149,7 +1149,7 @@ Section matrix_inversion.
     
     (** inv_2_2 m * m = mat1 *)
     Lemma inv_2_2_correct_l : forall (m : smat 2),
-        ~(det m == A0)%A -> (inv_2_2 m) * m == mat1 2.
+        ~(det m == Azero)%A -> (inv_2_2 m) * m == mat1 2.
     Proof.
       lma;
         (* det_neq0_imply_neq0. *)
@@ -1158,7 +1158,7 @@ Section matrix_inversion.
     
     (** m * inv_2_2 m = mat1 *)
     Lemma inv_2_2_correct_r : forall (m : smat 2),
-        ~(det m == A0)%A -> m * (inv_2_2 m) == mat1 2.
+        ~(det m == Azero)%A -> m * (inv_2_2 m) == mat1 2.
     Proof.
       lma;
         (* det_neq0_imply_neq0. *)
@@ -1185,7 +1185,7 @@ Section matrix_inversion.
           [(a10*a21 - a11*a20)/d; -(a00*a21 - a01*a20)/d; (a00*a11 - a01*a10)/d]])%A.
     
     (** det m <> 0 -> inv_3_3 m = inv m *)
-    Lemma inv_3_3_eq_inv : forall m, ~(det m == A0)%A -> inv_3_3 m == minv m.
+    Lemma inv_3_3_eq_inv : forall m, ~(det m == Azero)%A -> inv_3_3 m == minv m.
     Proof.
       (* lma; *)
       (*   (* det_neq0_imply_neq0. *) *)
@@ -1195,7 +1195,7 @@ Section matrix_inversion.
     
     (** inv_3_3 m * m = mat1 *)
     Lemma inv_3_3_correct_l : forall (m : smat 3),
-        ~(det m == A0)%A -> (inv_3_3 m) * m == mat1 3.
+        ~(det m == Azero)%A -> (inv_3_3 m) * m == mat1 3.
     Proof.
       (* lma; *)
       (*   (* det_neq0_imply_neq0. *) *)
@@ -1205,7 +1205,7 @@ Section matrix_inversion.
     
     (** m * inv_3_3 m = mat1 *)
     Lemma inv_3_3_correct_r : forall (m : smat 3),
-        ~(det m == A0)%A -> m * (inv_3_3 m) == mat1 3.
+        ~(det m == Azero)%A -> m * (inv_3_3 m) == mat1 3.
     Proof.
       (* lma; *)
       (*   (* det_neq0_imply_neq0. *) *)
@@ -1217,9 +1217,9 @@ Section matrix_inversion.
     (** ** Direct compute inversion of a symbol matrix of 1/2/3rd order. *)
     Section FindFormula.
       Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : A.
-      Let m1 := mk_mat_1_1 (A0:=A0) a11.
-      Let m2 := mk_mat_2_2 (A0:=A0) a11 a12 a21 a22.
-      Let m3 := mk_mat_3_3 (A0:=A0) a11 a12 a13 a21 a22 a23 a31 a32 a33.
+      Let m1 := mk_mat_1_1 (Azero:=Azero) a11.
+      Let m2 := mk_mat_2_2 (Azero:=Azero) a11 a12 a21 a22.
+      Let m3 := mk_mat_3_3 (Azero:=Azero) a11 a12 a13 a21 a22 a23 a31 a32 a33.
 
       (* Compute (m2l (minv m1)). *)
       (* Compute (m2l (minv m2)). *)
@@ -1240,7 +1240,7 @@ Section test.
   Import ZArith.
   Open Scope Z.
   Let m1 := @l2m _ 0 4 4 [[2;2;4;5];[5;8;9;3];[1;2;8;5];[6;6;7;1]].
-  Notation det := (det (Aadd:=Z.add) (Aopp:=Z.opp) (Amul:=Z.mul) (A0:=0) (A1:=1)).
+  Notation det := (det (Aadd:=Z.add) (Aopp:=Z.opp) (Amul:=Z.mul) (Azero:=0) (Aone:=1)).
   (* Compute det m1. *)
   (* Check det. *)
 End test.
@@ -1259,24 +1259,24 @@ Section gauss_elimination.
   Definition brt_swap {r c} (ri rj : nat) : mat r c :=
     mk_mat (fun i j =>
               if i =? ri
-              then (if j =? rj then A1 else A0)
+              then (if j =? rj then Aone else Azero)
               else (if i =? rj
-                    then (if j =? ri then A1 else A0)
-                    else (if i =? j then A1 else A0))).
+                    then (if j =? ri then Aone else Azero)
+                    else (if i =? j then Aone else Azero))).
 
   (** 数乘某一行 *)
   Definition brt_cmul {r c} (ri : nat) (k : A) : mat r c :=
     mk_mat (fun i j =>
               if i =? ri
-              then (if j =? ri then k else A0)
-              else (if i =? j then A1 else A0)).
+              then (if j =? ri then k else Azero)
+              else (if i =? j then Aone else Azero)).
 
   (** 第i行的k倍加到第j行 *)
   Definition brt_add {r c} (ri rj : nat) (k : A) : mat r c :=
     mk_mat (fun i j =>
               if (i =? ri) && (j =? rj)
               then k
-              else (if i =? j then A1 else A0)).
+              else (if i =? j then Aone else Azero)).
 
   (* Definition find_pivot *)
   (* Fixpoint  *)
@@ -1298,11 +1298,11 @@ Module Test.
 
   Coercion Q2Qc : Q >-> Qc.
 
-  Definition m1 := (mk_mat_3_3 (A0:=0) 1 2 3 4 5 6 7 8 9)%Qc.
-  (* Compute trace (Aadd:=Qcplus)(A0:=0)(n:=3) m1. *)
+  Definition m1 := (mk_mat_3_3 (Azero:=0) 1 2 3 4 5 6 7 8 9)%Qc.
+  (* Compute trace (Aadd:=Qcplus)(Azero:=0)(n:=3) m1. *)
 
   Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : Qc.
-  Definition m2 := mk_mat_3_3 (A0:=0) a11 a12 a13 a21 a22 a23 a31 a32 a33.
+  Definition m2 := mk_mat_3_3 (Azero:=0) a11 a12 a13 a21 a22 a23 a31 a32 a33.
   (* Compute mrow 1 m2. *)
 
 End Test.

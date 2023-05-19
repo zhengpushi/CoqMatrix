@@ -9,8 +9,7 @@
 *)
 
 
-Require Import HierarchySetoid.
-
+(* Require Import HierarchySetoid. *)
 Require Export QArith Qround.
 Open Scope Q.
 
@@ -18,11 +17,11 @@ Open Scope Q.
 (* ######################################################################### *)
 (** ** Mathematical structures *)
 
-Global Instance Comm_QAdd : Commutative Qplus Qeq.
-constructor. intros; ring. Qed.
+(* Global Instance Comm_QAdd : Commutative Qplus Qeq. *)
+(* constructor. intros; ring. Qed. *)
 
-Global Instance Comm_QMul : Commutative Qmult Qeq.
-constructor. intros; ring. Qed.
+(* Global Instance Comm_QMul : Commutative Qmult Qeq. *)
+(* constructor. intros; ring. Qed. *)
 
 (* ######################################################################### *)
 (** ** Convertion between Q and other types *)
@@ -132,25 +131,25 @@ Qed.
 (* ######################################################################### *)
 (** ** Instance of classes which defined in HierarchySetoid *)
 
-Global Instance Ring_Q : Ring Qplus 0 Qopp Qmult 1 Qeq.
-Proof.
-  repeat constructor; intros; try ring;
-    try apply Qplus_Qeq_proper;
-    try apply Qmult_Qeq_proper;
-    try apply Qopp_Qeq_proper;
-    try apply Qeq_equiv.
-Defined.
+(* Global Instance Ring_Q : Ring Qplus 0 Qopp Qmult 1 Qeq. *)
+(* Proof. *)
+(*   repeat constructor; intros; try ring; *)
+(*     try apply Qplus_Qeq_proper; *)
+(*     try apply Qmult_Qeq_proper; *)
+(*     try apply Qopp_Qeq_proper; *)
+(*     try apply Qeq_equiv. *)
+(* Defined. *)
 
-Global Instance Field_Q : Field Qplus 0 Qopp Qmult 1 Qinv Qeq.
-Proof.
-  repeat constructor; intros; try field; auto;
-    try apply Qplus_Qeq_proper;
-    try apply Qmult_Qeq_proper;
-    try apply Qopp_Qeq_proper;
-    try apply Qinv_Qeq_proper;
-    try apply Qeq_equiv.
-  easy.
-Defined.
+(* Global Instance Field_Q : Field Qplus 0 Qopp Qmult 1 Qinv Qeq. *)
+(* Proof. *)
+(*   repeat constructor; intros; try field; auto; *)
+(*     try apply Qplus_Qeq_proper; *)
+(*     try apply Qmult_Qeq_proper; *)
+(*     try apply Qopp_Qeq_proper; *)
+(*     try apply Qinv_Qeq_proper; *)
+(*     try apply Qeq_equiv. *)
+(*   easy. *)
+(* Defined. *)
 
 
 (* ######################################################################### *)

@@ -245,7 +245,7 @@ Module Example4SimplifyProofByTypeclass.
     
     (** 0 + l = l *)
     Let ladd_zero_l : forall l n,
-        length l = n -> ladd (Aadd:=Aadd) (lzero A0 n) l == l.
+        length l = n -> ladd (Aadd:=Aadd) (lzero Azero n) l == l.
     Proof.
       induction l; intros.
       - simpl in H. subst. easy.
@@ -259,14 +259,14 @@ Module Example4SimplifyProofByTypeclass.
   Section OLD_proof.
 
     (* first, these declarations are too long *)
-    Variable (A:Type) (A0:A) (Aeq:relation A) (Aadd:A -> A -> A).
+    Variable (A:Type) (Azero:A) (Aeq:relation A) (Aadd:A -> A -> A).
     Variable (Equiv_Aeq:Equivalence Aeq).
-    Variable (add_0_l:forall a:A, Aeq (Aadd A0 a) a).
+    Variable (add_0_l:forall a:A, Aeq (Aadd Azero a) a).
     Infix "==" := (eqlistA Aeq) : list_scope.
     
     (** 0 + l = l *)
     Let ladd_zero_l : forall l n,
-        length l = n -> ladd (Aadd:=Aadd) (lzero A0 n) l == l.
+        length l = n -> ladd (Aadd:=Aadd) (lzero Azero n) l == l.
     Proof.
       induction l; intros.
       - simpl in H. subst. easy.

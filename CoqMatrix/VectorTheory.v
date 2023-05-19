@@ -133,8 +133,8 @@ Module Type RingVectorTheory (E : RingElementType) <: BasicVectorTheory E.
       (a + b)%A c* v == (a c* v) + (b c* v).
   Axiom vcmul_add_distr_r : forall {n} a (v1 v2 : vec n),
       a c* (v1 + v2) == (a c* v1) + (a c* v2).
-  Axiom vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0 n.
-  Axiom vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Axiom vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0 n.
+  Axiom vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
 
   (** *** Vector dot product *)
   Parameter vdot : forall {n} (v1 v2 : vec n), A.
@@ -176,5 +176,5 @@ Axiom vzero_dec : forall {n} (v : vec n), {vzero v} + {vnonzero v}.
 (** If two nonzero vectors has scalar multiplcation relation, 
     then the scalar coefficient must non-zero *)
 Axiom vec_eq_vcmul_imply_coef_neq0 : forall {n} (v1 v2 : vec n) k,
-    vnonzero v1 -> vnonzero v2 -> (v1 = k c* v2) -> k <> A0.
+    vnonzero v1 -> vnonzero v2 -> (v1 = k c* v2) -> k <> Azero.
  *)

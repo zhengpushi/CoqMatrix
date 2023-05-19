@@ -80,7 +80,7 @@ End BaseTypeFun.
 Module Type ElementType <: BaseType.
   Parameter A : Type.
   Parameter Aeq : relation A.
-  Parameter A0 : A.
+  Parameter Azero : A.
 
   Global Infix "==" := Aeq : A_scope.
   
@@ -96,7 +96,7 @@ Module Type EqElementType (B : BaseType)
    with Definition Aeq := @eq B.A.
   Definition A := B.A.
   Definition Aeq := @eq B.A.
-  Parameter A0 : A.
+  Parameter Azero : A.
   Parameter Equiv_Aeq : Equivalence Aeq.
 End EqElementType.  
 
@@ -115,7 +115,7 @@ Module ElementTypeNat <: EqElementType BaseTypeNat.
 
   Definition A : Type := nat.
   Definition Aeq : relation A := eq.
-  Definition A0 : A := 0.
+  Definition Azero : A := 0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -130,7 +130,7 @@ Module ElementTypeZ <: EqElementType BaseTypeZ.
   
   Definition A : Type := Z.
   Definition Aeq : relation A := eq.
-  Definition A0 : A := 0.
+  Definition Azero : A := 0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -146,7 +146,7 @@ Module ElementTypeQ <: ElementType.
   
   Definition A : Type := Q.
   Definition Aeq : relation A := Qeq.
-  Definition A0 : A := 0.
+  Definition Azero : A := 0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -161,7 +161,7 @@ Module ElementTypeQc <: EqElementType BaseTypeQc.
   
   Definition A : Type := Qc.
   Definition Aeq : relation A := eq.
-  Definition A0 : A := 0.
+  Definition Azero : A := 0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -176,7 +176,7 @@ Module ElementTypeR <: EqElementType BaseTypeR.
 
   Definition A : Type := R.
   Definition Aeq : relation A := eq.
-  Definition A0 : A := 0%R.
+  Definition Azero : A := 0%R.
 
   Infix "==" := Aeq : A_scope.
 
@@ -191,7 +191,7 @@ Module ElementTypeA <: EqElementType BaseTypeA.
 
   Definition A : Type := A.
   Definition Aeq : relation A := eq.
-  Definition A0 : A := A0.
+  Definition Azero : A := A0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -206,7 +206,7 @@ Module ElementTypeC <: EqElementType BaseTypeC.
 
   Definition A : Type := C.
   Definition Aeq : relation A := eq.
-  Definition A0 : A := 0.
+  Definition Azero : A := 0.
 
   Infix "==" := Aeq : A_scope.
 
@@ -226,8 +226,8 @@ Module ElementTypeFun (I O : ElementType) <: ElementType.
   Infix "=O=" := O.Aeq (at level 20).
   Infix "==" := Aeq : A_scope.
   
-  Definition A0 : A.
-    refine (exist _ (fun _ => O.A0) _).
+  Definition Azero : A.
+    refine (exist _ (fun _ => O.Azero) _).
     unfold Proper, respectful. intros. destruct (O.Equiv_Aeq). reflexivity.
   Defined.
   Lemma Equiv_Aeq : Equivalence Aeq.
@@ -369,7 +369,7 @@ Module Type RingElementType <: ElementType.
   Include ElementType.
   Open Scope A_scope.
 
-  Parameter A1 : A.
+  Parameter Aone : A.
   Parameter Aadd Amul : A -> A -> A.
   Parameter Aopp : A -> A.
 
@@ -388,14 +388,14 @@ Module Type RingElementType <: ElementType.
   Global Existing Instance Aopp_aeq_mor.
   Global Existing Instance Amul_aeq_mor.
 
-  Axiom Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Axiom Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
 
   (** A Group structure can be derived from the context *)
-  Axiom AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Axiom AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Global Existing Instance AGroup_inst.
 
   (** A Ring structure can be derived from the context *)
-  Axiom Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Axiom Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Global Existing Instance Ring_inst.
 
 End RingElementType.
@@ -413,7 +413,7 @@ Module RingElementTypeZ
 <: RingElementType.
   Include ElementTypeZ.
 
-  Definition A1 : A := 1.
+  Definition Aone : A := 1.
   Definition Aadd := Zplus.
   Definition Aopp := Z.opp.
   Definition Amul := Zmult.
@@ -439,28 +439,28 @@ Module RingElementTypeZ
     unfold Proper, respectful. intros. rewrite H,H0. easy.
   Qed.
   
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     constructor; intros;
-      unfold A,Aeq,Aadd,Aopp,Amul,A0,A1;
-      unfold ElementTypeQ.Aeq,ElementTypeQ.A0,ElementTypeQ.A;
+      unfold A,Aeq,Aadd,Aopp,Amul,Azero,Aone;
+      unfold ElementTypeQ.Aeq,ElementTypeQ.Azero,ElementTypeQ.A;
       auto with zarith.
   Qed.
 
   Add Ring Ring_thy_inst : Ring_thy.
 
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq;
-    unfold Aadd,Aeq,Aopp,A0,A; ring.
+    unfold Aadd,Aeq,Aopp,Azero,A; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,Amul,A0,A1,A; ring.
+      unfold Aadd,Aeq,Aopp,Amul,Azero,Aone,A; ring.
   Qed.
   
 End RingElementTypeZ.
@@ -469,7 +469,7 @@ Module RingElementTypeQ
 <: RingElementType.
   Include ElementTypeQ.
   
-  Definition A1 : A := 1.
+  Definition Aone : A := 1.
   Definition Aadd := Qplus.
   Definition Aopp := Qopp.
   Definition Amul := Qmult.
@@ -495,28 +495,28 @@ Module RingElementTypeQ
     unfold Proper, respectful. intros. rewrite H,H0. easy.
   Qed.
   
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     constructor; intros;
-      unfold A,Aeq,Aadd,Aopp,Amul,A0,A1;
-      unfold ElementTypeQ.Aeq,ElementTypeQ.A0,ElementTypeQ.A;
+      unfold A,Aeq,Aadd,Aopp,Amul,Azero,Aone;
+      unfold ElementTypeQ.Aeq,ElementTypeQ.Azero,ElementTypeQ.A;
       try ring.
   Qed.
 
   Add Ring Ring_thy_inst : Ring_thy.
 
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq;
-    unfold Aadd,Aeq,Aopp,A0,A; ring.
+    unfold Aadd,Aeq,Aopp,Azero,A; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,Amul,A0,A1,A; ring.
+      unfold Aadd,Aeq,Aopp,Amul,Azero,Aone,A; ring.
   Qed.
   
 End RingElementTypeQ.
@@ -525,7 +525,7 @@ Module RingElementTypeQc
 <: RingElementType.
   Include ElementTypeQc.
 
-  Definition A1 : A := 1.
+  Definition Aone : A := 1.
   Definition Aadd := Qcplus.
   Definition Aopp := Qcopp.
   Definition Amul := Qcmult.
@@ -551,28 +551,28 @@ Module RingElementTypeQc
     unfold Proper, respectful. intros. rewrite H,H0. easy.
   Qed.
   
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     constructor; intros;
-      unfold A,Aeq,Aadd,Aopp,Amul,A0,A1;
-      unfold ElementTypeQc.Aeq,ElementTypeQc.A0,ElementTypeQc.A;
+      unfold A,Aeq,Aadd,Aopp,Amul,Azero,Aone;
+      unfold ElementTypeQc.Aeq,ElementTypeQc.Azero,ElementTypeQc.A;
       try ring.
   Qed.
 
   Add Ring Ring_thy_inst : Ring_thy.
 
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,A0,A; ring.
+      unfold Aadd,Aeq,Aopp,Azero,A; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,Amul,A0,A1,A; ring.
+      unfold Aadd,Aeq,Aopp,Amul,Azero,Aone,A; ring.
   Qed.
 
 End RingElementTypeQc.
@@ -581,7 +581,7 @@ Module RingElementTypeR
 <: RingElementType.
   Include ElementTypeR.
   
-  Definition A1 : A := 1.
+  Definition Aone : A := 1.
   Definition Aadd := Rplus.
   Definition Aopp := Ropp.
   Definition Amul := Rmult.
@@ -607,28 +607,28 @@ Module RingElementTypeR
     unfold Proper, respectful. intros. rewrite H,H0. easy.
   Qed.
 
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     constructor; intros;
-      unfold A,Aeq,Aadd,Aopp,Amul,A0,A1;
-      unfold ElementTypeR.Aeq,ElementTypeR.A0,ElementTypeR.A;
+      unfold A,Aeq,Aadd,Aopp,Amul,Azero,Aone;
+      unfold ElementTypeR.Aeq,ElementTypeR.Azero,ElementTypeR.A;
       try ring.
   Qed.
   
   Add Ring Ring_thy_inst : Ring_thy.
   
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,A0,A; ring.
+      unfold Aadd,Aeq,Aopp,Azero,A; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,Amul,A0,A1,A; ring.
+      unfold Aadd,Aeq,Aopp,Amul,Azero,Aone,A; ring.
   Qed.
 
 End RingElementTypeR.
@@ -637,7 +637,7 @@ Module RingElementTypeA
 <: RingElementType.
   Include ElementTypeA.
 
-  Definition A1 : A := A1.
+  Definition Aone : A := A1.
 
   (** Note that, this explicit annotation is must, 
       otherwise, the ring has no effect. (because RAST.A and A are different) *)
@@ -666,20 +666,20 @@ Module RingElementTypeA
     unfold Proper, respectful. intros. rewrite H,H0. easy.
   Qed.
 
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     apply A_ring.
   Qed.
 
   Add Ring Ring_thy_inst : Ring_thy.
 
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq; ring.
@@ -691,7 +691,7 @@ Module RingElementTypeC
 <: RingElementType.
   Include ElementTypeC.
 
-  Definition A1 : A := 1.
+  Definition Aone : A := 1.
   (** Note that, this explicit annotation is must, 
       otherwise, the ring has no effect. (because C and A are different) *)
   (* Definition Aadd := Cadd. *)
@@ -725,22 +725,22 @@ Module RingElementTypeC
   Qed.
   (* Global Existing Instance Amul_aeq_mor. *)
 
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     constructor; intros;
-      unfold A,Aeq,Aadd,Aopp,Amul,A0,A1;
-      unfold ElementTypeC.Aeq,ElementTypeC.A0,ElementTypeC.A; ring.
+      unfold A,Aeq,Aadd,Aopp,Amul,Azero,Aone;
+      unfold ElementTypeC.Aeq,ElementTypeC.Azero,ElementTypeC.A; ring.
   Qed.
 
   Add Ring Ring_thy_inst : Ring_thy.
   
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq; ring.
@@ -752,8 +752,8 @@ End RingElementTypeC.
 Module RingElementTypeFun (I O : RingElementType) <: RingElementType.
   Include (ElementTypeFun I O).
 
-  Definition A1 : A.
-    refine (exist _ (fun _ => O.A1) _).
+  Definition Aone : A.
+    refine (exist _ (fun _ => O.Aone) _).
     unfold Proper, respectful. intros. destruct (O.Equiv_Aeq). reflexivity.
   Defined.
 
@@ -799,27 +799,27 @@ Module RingElementTypeFun (I O : RingElementType) <: RingElementType.
     cbv in *. intros. apply O.Amul_aeq_mor; auto.
   Qed.
 
-  Lemma Ring_thy : ring_theory A0 A1 Aadd Amul Asub Aopp Aeq.
+  Lemma Ring_thy : ring_theory Azero Aone Aadd Amul Asub Aopp Aeq.
   Proof.
     destruct (O.Ring_thy).
     constructor; intros; cbv; intros;
       repeat match goal with | x:A |- _ => destruct x end; auto.
   Qed.
 
-  Lemma AGroup_inst : AGroup Aadd A0 Aopp Aeq.
+  Lemma AGroup_inst : AGroup Aadd Azero Aopp Aeq.
   Proof.
     Add Ring Ring_thy_inst_o : O.Ring_thy.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,A0,A;
+      unfold Aadd,Aeq,Aopp,Azero,A;
       repeat match goal with a : ?A |- _ => destruct a end; intros; simpl; ring.
   Qed.
 
-  Lemma Ring_inst : Ring Aadd A0 Aopp Amul A1 Aeq.
+  Lemma Ring_inst : Ring Aadd Azero Aopp Amul Aone Aeq.
   Proof.
     repeat constructor; intros;
       auto using Aadd_aeq_mor, Aopp_aeq_mor, Amul_aeq_mor; try apply Equiv_Aeq;
-      unfold Aadd,Aeq,Aopp,Amul,A0,A1,A;
+      unfold Aadd,Aeq,Aopp,Amul,Azero,Aone,A;
       repeat match goal with a : ?A |- _ => destruct a end; intros; simpl; ring.
   Qed.
 
@@ -872,14 +872,14 @@ Module Type FieldElementType <: RingElementType.
   Global Existing Instance Ainv_aeq_mor.
 
   (** 1 <> 0. *)
-  Axiom A1_neq_A0 : ~(A1 == A0)%A.
+  Axiom Aone_neq_Azero : ~(Aone == Azero)%A.
   
-  Axiom Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Axiom Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   (* Add Field Field_thy_inst : Field_thy. *)
 
   (** A Field structure can be derived from the context *)
 
-  Axiom Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Axiom Field_inst : Field Aadd Azero Aopp Amul Aone Ainv Aeq.
   Global Existing Instance Field_inst.
 
 End FieldElementType.
@@ -899,25 +899,25 @@ Module FieldElementTypeQ <: FieldElementType.
     unfold Proper, respectful. intros. rewrite H. easy.
   Qed.
 
-  Lemma A1_neq_A0 : ~(A1 == A0)%A.
+  Lemma Aone_neq_Azero : ~(Aone == Azero)%A.
   Proof.
     intro. cbv in *. inv H.
   Qed.
     
-  Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Lemma Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   Proof.
     constructor; intros; try easy.
     apply Ring_thy.
-    unfold Amul,Ainv,A1,Aeq. unfold ElementTypeQ.Aeq. field. auto.
+    unfold Amul,Ainv,Aone,Aeq. unfold ElementTypeQ.Aeq. field. auto.
   Qed.
 
   Add Field Field_thy_inst : Field_thy.
   
-  Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Lemma Field_inst : Field Aadd Azero Aopp Amul Aone Ainv Aeq.
   Proof.
     constructor. apply Ring_inst.
-    intros. unfold Amul,Ainv,Aeq,A1,A. field. auto.
-    apply A1_neq_A0.
+    intros. unfold Amul,Ainv,Aeq,Aone,A. field. auto.
+    apply Aone_neq_Azero.
     apply Ainv_aeq_mor.
   Qed.
 
@@ -936,25 +936,25 @@ Module FieldElementTypeQc
     unfold Proper, respectful. intros. rewrite H. easy.
   Qed.
 
-  Lemma A1_neq_A0 : ~(A1 == A0)%A.
+  Lemma Aone_neq_Azero : ~(Aone == Azero)%A.
   Proof.
     intro. cbv in *. inv H.
   Qed.
   
-  Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Lemma Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   Proof.
     constructor; intros; try easy.
     apply Ring_thy.
-    unfold Amul,Ainv,A1,Aeq. unfold ElementTypeQc.Aeq,ElementTypeQc.A. field. auto.
+    unfold Amul,Ainv,Aone,Aeq. unfold ElementTypeQc.Aeq,ElementTypeQc.A. field. auto.
   Qed.
 
   (* Bug: when publish the project to opam, CI report error in ocaml4.07.1 as follows,
 
 Error: Illegal application: 
 The term "@fieldAinvProper" of type
- "forall (A : Type) (Aadd : A -> A -> A) (A0 : A) (Aopp : A -> A) (Amul : A -> A -> A) 
-    (A1 : A) (Ainv : A -> A) (Aeq : A -> A -> Prop),
-  Field Aadd A0 Aopp Amul A1 Ainv Aeq -> Proper (Aeq ==> Aeq) Ainv"
+ "forall (A : Type) (Aadd : A -> A -> A) (Azero : A) (Aopp : A -> A) (Amul : A -> A -> A) 
+    (Aone : A) (Ainv : A -> A) (Aeq : A -> A -> Prop),
+  Field Aadd Azero Aopp Amul Aone Ainv Aeq -> Proper (Aeq ==> Aeq) Ainv"
 cannot be applied to the terms
  "A" : "Type"
  "Qcplus" : "Qc -> Qc -> Qc"
@@ -975,11 +975,11 @@ The 1st term has type "Type@{A.u0}" which should be coercible to "Type@{Field.u0
     
   (* Add Field Field_thy_inst : Field_thy. *)
   
-  Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Lemma Field_inst : Field Aadd Azero Aopp Amul Aone Ainv Aeq.
   Proof.
     constructor. apply Ring_inst.
-    intros. unfold Amul,Ainv,Aeq,A1,A. field. auto.
-    apply A1_neq_A0.
+    intros. unfold Amul,Ainv,Aeq,Aone,A. field. auto.
+    apply Aone_neq_Azero.
     apply Ainv_aeq_mor.
   Qed.
 
@@ -998,26 +998,26 @@ Module FieldElementTypeR
     unfold Proper, respectful. intros. rewrite H. easy.
   Qed.
 
-  Lemma A1_neq_A0 : ~(A1 == A0)%A.
+  Lemma Aone_neq_Azero : ~(Aone == Azero)%A.
   Proof.
     cbv in *. auto with real.
   Qed.
 
-  Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Lemma Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   Proof.
     constructor; intros; try easy.
     apply Ring_thy.
-    apply A1_neq_A0.
-    unfold Amul,Ainv,A1,Aeq. unfold ElementTypeR.Aeq,ElementTypeR.A. field. auto.
+    apply Aone_neq_Azero.
+    unfold Amul,Ainv,Aone,Aeq. unfold ElementTypeR.Aeq,ElementTypeR.A. field. auto.
   Qed.
 
   Add Field Field_thy_inst : Field_thy.
   
-  Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Lemma Field_inst : Field Aadd Azero Aopp Amul Aone Ainv Aeq.
   Proof.
     constructor. apply Ring_inst.
-    intros. unfold Amul,Ainv,Aeq,A1,A. field. auto.
-    apply A1_neq_A0.
+    intros. unfold Amul,Ainv,Aeq,Aone,A. field. auto.
+    apply Aone_neq_Azero.
     apply Ainv_aeq_mor.
   Qed.
   
@@ -1036,12 +1036,12 @@ Module FieldElementTypeA
     unfold Proper, respectful. intros. rewrite H. easy.
   Qed.
 
-  Lemma A1_neq_A0 : ~(A1 == A0)%A.
+  Lemma Aone_neq_Azero : ~(Aone == Azero)%A.
   Proof.
     cbv in *. intros. inversion H.
   Qed.
 
-  Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Lemma Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   Proof.
     constructor; intros; try easy.
     apply Ring_thy.
@@ -1050,12 +1050,12 @@ Module FieldElementTypeA
 
   Add Field Field_thy_inst : Field_thy.
   
-  Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Lemma Field_inst : Field Aadd Azero Aopp Amul Aone Ainv Aeq.
   Proof.
     constructor.
     - apply Ring_inst.
     - intros. cbv. field. auto.
-    - apply A1_neq_A0.
+    - apply Aone_neq_Azero.
     - apply Ainv_aeq_mor.
   Qed.
   
@@ -1074,12 +1074,12 @@ Module FieldElementTypeC
     unfold Proper, respectful. intros. rewrite H. easy.
   Qed.
 
-  Lemma A1_neq_A0 : ~(A1 == A0)%A.
+  Lemma Aone_neq_Azero : ~(Aone == Azero)%A.
   Proof.
     cbv in *. auto with complex.
   Qed.
 
-  Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq.
+  Lemma Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq.
   Proof.
     constructor; intros; auto with complex; try easy.
     apply Ring_thy. apply Cmul_inv_l. auto.
@@ -1087,11 +1087,11 @@ Module FieldElementTypeC
 
   (* Add Field Field_thy_inst : Field_thy. *)
   
-  Lemma Field_inst : Field Aadd A0 Aopp Amul A1 Ainv Aeq.
+  Lemma Field_inst : Field Aadd Azero Aopp Amul Aone Ainv Aeq.
   Proof.
     constructor. apply Ring_inst.
-    intros. unfold Amul,Ainv,Aeq,A1,A. field. auto.
-    apply A1_neq_A0.
+    intros. unfold Amul,Ainv,Aeq,Aone,A. field. auto.
+    apply Aone_neq_Azero.
     apply Ainv_aeq_mor.
   Qed.
   
@@ -1116,15 +1116,15 @@ End FieldElementTypeC.
   (* Qed. *)
   
 (*   (* Import FunctionalExtensionality. *) *)
-(*   Lemma A1_neq_A0 : ~(A1 == A0)%A. *)
-(*   Proof. cbv in *. intros. specialize (H I.A0). apply O.A1_neq_A0 in H. auto. Qed. *)
+(*   Lemma Aone_neq_Azero : ~(Aone == Azero)%A. *)
+(*   Proof. cbv in *. intros. specialize (H I.Azero). apply O.Aone_neq_Azero in H. auto. Qed. *)
 
-(*   Lemma Field_thy: field_theory A0 A1 Aadd Amul Asub Aopp Adiv Ainv Aeq. *)
+(*   Lemma Field_thy: field_theory Azero Aone Aadd Amul Asub Aopp Adiv Ainv Aeq. *)
 (*   Proof. *)
 (*     destruct (I.Field_thy), (O.Field_thy). *)
 (*     constructor. *)
 (*     - apply Ring_thy. *)
-(*     - apply A1_neq_A0. *)
+(*     - apply Aone_neq_Azero. *)
 (*     - intros. *)
 (*       repeat match goal with | x:A |- _ => destruct x end. *)
 (*       cbv in *; intros. *)

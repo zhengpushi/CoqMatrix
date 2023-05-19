@@ -23,7 +23,7 @@ Require Export BasicConfig SetoidListExt HierarchySetoid.
 Open Scope A_scope.
 Open Scope vec_scope.
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
 
 (** ** Definition of vector *)
@@ -194,18 +194,18 @@ Arguments vconst {A}.
 (** ** vec0, its elements is 0 *)
 Section vec0.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero : A).
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : A_scope.
   
-  Definition vec0 (n : nat) := vconst n A0.
+  Definition vec0 (n : nat) := vconst n Azero.
   
-  Lemma vec0_S : forall n, vec0 (S n) == (A0, vec0 n).
+  Lemma vec0_S : forall n, vec0 (S n) == (Azero, vec0 n).
   Proof.
     intros; simpl. easy.
   Qed.
   
-  Lemma vec0_eq_vconst0 : forall n, vec0 n = vconst n A0.
+  Lemma vec0_eq_vconst0 : forall n, vec0 n = vconst n Azero.
   Proof. auto. Qed.
   
 End vec0.
@@ -213,13 +213,13 @@ End vec0.
 (** ** head and tail of a vector *)
 Section vhd_vtl.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero : A).
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : A_scope.
 
   Definition vhd {n} : vec n -> A :=
     match n with
-    | O => fun (_ : vec O) => A0
+    | O => fun (_ : vec O) => Azero
     | S n' => fun (v : vec (S n')) => fst v
     end.
 
@@ -231,14 +231,14 @@ End vhd_vtl.
 (** ** Get last element *)
 Section vlast.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero : A).
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : A_scope.
 
   (* why fail? *)
   Fail Fixpoint vlast {n : nat} : vec n -> A :=
     match n with
-    | O => fun (_ : vec O) => A0
+    | O => fun (_ : vec O) => Azero
     | 1 => fun (v : vec 1) => fst v
     | S n' => fun (v : vec (S n')) => @vlast n' (snd v)
     end.
@@ -255,7 +255,7 @@ End vlast.
 (** Construct a vector with a function *)
 Section vmake.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero : A).
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : A_scope.
 
@@ -348,13 +348,13 @@ End vrev.
 (** Get n-th element of a vector *)
 Section vnth.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope.
   
   Fixpoint vnth {n} (i : nat) : (vec n) -> A :=
     match n with
-    | O => fun (_ : vec O) => A0
+    | O => fun (_ : vec O) => Azero
     | S n' => fun (v : vec (S n')) =>
                match i with
                | O => (fst v)
@@ -400,7 +400,7 @@ Section vnth.
     induction n; intros; simpl. lia. destruct i. easy. apply IHn. lia.
   Qed.
   
-  Lemma vnth_vec0 : forall n i, (vnth i (vec0 A0 n) == A0)%A.
+  Lemma vnth_vec0 : forall n i, (vnth i (vec0 Azero n) == Azero)%A.
   Proof.
     induction n; intros; simpl. easy. destruct i; auto. easy.
   Qed.
@@ -411,7 +411,7 @@ Section vnth.
     rewrite vmakeAux_S. unfold vmake in *. rewrite IHn. easy. lia.
   Qed.
   
-  Lemma vnth_vmake_invalid : forall {n} f i, i >= n -> (vnth i (vmake n f) == A0)%A.
+  Lemma vnth_vmake_invalid : forall {n} f i, i >= n -> (vnth i (vmake n f) == Azero)%A.
   Proof. 
     induction n; intros; simpl. easy. destruct i. easy. unfold vmake in *.
     rewrite vmakeAux_S. rewrite IHn. easy. lia.
@@ -425,7 +425,7 @@ Section vnth.
   Qed.
   
   Lemma vnth_vmakeAux_invalid : forall {n} f i j,
-      i >= n -> (vnth i (vmakeAux n j f) == A0)%A.
+      i >= n -> (vnth i (vmakeAux n j f) == Azero)%A.
   Proof. 
     induction n; intros; simpl. easy. destruct i. easy.
     rewrite vmakeAux_S. rewrite IHn. easy. lia.
@@ -435,7 +435,7 @@ End vnth.
 
 (** ** Get top or remain element of a vector *)
 Section vfirstn_vskipn.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope.
 
@@ -443,7 +443,7 @@ Section vfirstn_vskipn.
   Fixpoint vfirstn {n} (k : nat) : (vec n) -> (vec k) := 
     match n,k with
     | O, O => fun (v : vec O) => tt
-    | O, S k' => fun (v : vec O) => (A0, vfirstn k' v)
+    | O, S k' => fun (v : vec O) => (Azero, vfirstn k' v)
     | S n', O => fun (v : vec (S n')) => tt
     | S n', S k' => fun (v : vec (S n')) => (fst v, vfirstn k' (snd v))
     end.
@@ -463,7 +463,7 @@ End vfirstn_vskipn.
 
 (** ** Maping of a vector *)
 Section vmap.
-  (* Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}. *)
+  (* Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}. *)
   (* Context `{Equiv_Beq : Equivalence B Beq} {B0 : A}. *)
   Context `{Aeq : relation A} `{Beq : relation B}.
   (* Infix "==" := Aeq : A_scope. *)
@@ -558,17 +558,17 @@ Section vfold.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope.
   
   (** Fold a vector to an element from left to right *)
-  Fixpoint vfoldl {n} (Aadd : A -> A -> A) (A0 : A) : (vec n) -> A := 
+  Fixpoint vfoldl {n} (Aadd : A -> A -> A) (Azero : A) : (vec n) -> A := 
     match n with
-    | O => fun (v : vec 0) => A0
-    | S n' => fun (v : vec (S n')) => Aadd (fst v) (vfoldl Aadd A0 (snd v))
+    | O => fun (v : vec 0) => Azero
+    | S n' => fun (v : vec (S n')) => Aadd (fst v) (vfoldl Aadd Azero (snd v))
     end.
 
   (** Fold a vector to an element from right to left *)
-  Fixpoint vfoldr {n} (Aadd : A -> A -> A) (A0 : A) : (vec n) -> A := 
+  Fixpoint vfoldr {n} (Aadd : A -> A -> A) (Azero : A) : (vec n) -> A := 
     match n with
-    | O => fun (v : vec 0) => A0
-    | S n' => fun (v : vec (S n')) => Aadd (vfoldr Aadd A0 (snd v)) (fst v)
+    | O => fun (v : vec 0) => Azero
+    | S n' => fun (v : vec (S n')) => Aadd (vfoldr Aadd Azero (snd v)) (fst v)
     end.
 
   (** vfoldl is proper morphism *)
@@ -586,12 +586,12 @@ Section vfold.
   (** ToDo: A problem *)
   Section a_problem.
     
-    Variable (Aadd Amul : A -> A -> A) (A0 A1 : A).
+    Variable (Aadd Amul : A -> A -> A) (Azero Aone : A).
     Variable (AaddProper : Proper (Aeq ==> Aeq ==> Aeq) Aadd).
 
     Goal forall n (v1 v2 : vec n),
         v1 == v2 ->
-        (vfoldl Aadd A0 v1 == vfoldl Aadd A0 v2)%A.
+        (vfoldl Aadd Azero v1 == vfoldl Aadd Azero v2)%A.
     Proof.
       intros.
       (** why f_equiv here cannot reduce to a "==" relation, but a "=" relation ? *)
@@ -620,7 +620,7 @@ End vvflat.
 
 (** ** Convert between vector and list *)
 Section v2l_l2v.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope.
@@ -639,7 +639,7 @@ Section v2l_l2v.
   Fixpoint l2v (l : list A) (n : nat) {struct n} : vec n :=
     match n as n0 return (vec n0) with
     | 0 => tt
-    | S n' => (hd A0 l, l2v (tl l) n')
+    | S n' => (hd Azero l, l2v (tl l) n')
     end.
   
   Lemma v2l_l2v_id : forall (n : nat) (l : list A),
@@ -666,11 +666,11 @@ End v2l_l2v.
 Section vec_alg.
   
   (* Variable A : Type. *)
-  (* Variable A0 : A. *)
+  (* Variable Azero : A. *)
   (* Variable fadd : A -> A -> A. *)
   (* Variable fadd_comm : forall a b, fadd a b = fadd b a. *)
   (* Variable fadd_assoc : forall a b c, fadd (fadd a b) c = fadd a (fadd b c). *)
-  (* Variable fadd_0_l : forall t, fadd A0 t = t. *)
+  (* Variable fadd_0_l : forall t, fadd Azero t = t. *)
   (* Variable fmul : A -> A -> A. *)
   (* Variable fmul_add_distr_l : forall a b1 b2, *)
   (*     fmul a (fadd b1 b2) = fadd (fmul a b1) (fmul a b2). *)
@@ -722,13 +722,13 @@ Section vec_alg.
   Qed.
 
   (** vec0 + v = v *)
-  Lemma vadd_0_l : forall {n} (v : vec n), (vec0 A0 n) + v == v.
+  Lemma vadd_0_l : forall {n} (v : vec n), (vec0 Azero n) + v == v.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [group_simpl|apply IHn].
   Qed.
 
   (** v + vec0 = v *)
-  Lemma vadd_0_r : forall {n} (v : vec n), v + (vec0 A0 n) == v.
+  Lemma vadd_0_r : forall {n} (v : vec n), v + (vec0 Azero n) == v.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [group_simpl|apply IHn].
   Qed.
@@ -764,13 +764,13 @@ Section vec_alg.
   Qed.
 
   (** (-v) + v = vec0 *)
-  Lemma vadd_vopp_l : forall {n} (v : vec n), (-v) + v == vec0 A0 n.
+  Lemma vadd_vopp_l : forall {n} (v : vec n), (-v) + v == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [group_simpl|apply IHn].
   Qed.
 
   (** v + (-v) = vec0 *)
-  Lemma vadd_vopp_r : forall {n} (v : vec n), v + (-v) == vec0 A0 n.
+  Lemma vadd_vopp_r : forall {n} (v : vec n), v + (-v) == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [group_simpl|apply IHn].
   Qed.
@@ -815,20 +815,20 @@ Section vec_alg.
   Qed.
 
   (** vec0 - v = - v *)
-  Lemma vsub_0_l : forall {n} (v : vec n), (vec0 A0 n) - v == - v.
+  Lemma vsub_0_l : forall {n} (v : vec n), (vec0 Azero n) - v == - v.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [group_simpl|apply IHn].
   Qed.
 
   (** v - vec0 = v *)
-  Lemma vsub_0_r : forall {n} (v : vec n), v - (vec0 A0 n) == v.
+  Lemma vsub_0_r : forall {n} (v : vec n), v - (vec0 Azero n) == v.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [|apply IHn].
     rewrite group_opp_zero_eq_zero. group_simpl.
   Qed.
 
   (** v - v = vec0 *)
-  Lemma vsub_self : forall {n} (v : vec n), v - v == vec0 A0 n.
+  Lemma vsub_self : forall {n} (v : vec n), v - v == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [group_simpl| apply IHn].
   Qed.
@@ -837,7 +837,7 @@ Section vec_alg.
   (** *** Vector Group *)
   
   (** vec operation has a group structure *)
-  Lemma vec_AG : forall n, @AGroup (vec (A:=A) n) vadd (vec0 A0 n) vopp (veq (Aeq:=Aeq)).
+  Lemma vec_AG : forall n, @AGroup (vec (A:=A) n) vadd (vec0 Azero n) vopp (veq (Aeq:=Aeq)).
   Proof.
     intros. repeat constructor;
       try apply veq_equiv;
@@ -848,7 +848,7 @@ Section vec_alg.
 
   (** *** Below, need Ring structure *)
 
-  Context `{R : Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context `{R : Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Infix "*" := Amul : A_scope.
   Add Ring ring_inst : make_ring_theory.
 
@@ -892,19 +892,19 @@ Section vec_alg.
   Qed.
   
   (** 0 c* v = vec0 *)
-  Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0 A0 n.
+  Lemma vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [ring | apply IHn].
   Qed.
   
   (** a c* vec0 = vec0 *)
-  Lemma vcmul_0_r : forall {n} a, a c* (vec0 A0 n) == vec0 A0 n.
+  Lemma vcmul_0_r : forall {n} a, a c* (vec0 Azero n) == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [ring | apply IHn].
   Qed.
   
   (** 1 c* v = v *)
-  Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Lemma vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
   Proof.
     induction n; intros; vsimp; simpl; auto. split; [ring | apply IHn].
   Qed.
@@ -943,7 +943,7 @@ Section vec_alg.
   
   (** *** Vector Dot Product *)
   
-  Definition vdot {n} (v1 v2 : vec n) := vfoldl Aadd A0 (vmap2 Amul v1 v2).
+  Definition vdot {n} (v1 v2 : vec n) := vfoldl Aadd Azero (vmap2 Amul v1 v2).
   Infix "\o" := vdot : vec_scope.
 
   (** vdot is proper morphism *)
@@ -973,17 +973,17 @@ Section vec_alg.
   Qed.
 
   (* (** vec0 \o vec0 = 0 *) *)
-  (* Lemma vdot_vec0 (v : vec 0) : (v \o v == A0)%A. *)
+  (* Lemma vdot_vec0 (v : vec 0) : (v \o v == Azero)%A. *)
   (* Proof. unfold vdot. simpl. easy. Qed. *)
 
   (** vec0 \o v = 0 *)
-  Lemma vdot_0_l : forall {n} (v : vec n), ((vec0 A0 n) \o v == A0)%A.
+  Lemma vdot_0_l : forall {n} (v : vec n), ((vec0 Azero n) \o v == Azero)%A.
   Proof.
     unfold vdot. induction n; intros; simpl; auto. easy. rewrite IHn. ring.
   Qed.
 
   (** v \o vec0 = 0 *)
-  Lemma vdot_0_r : forall {n} (v : vec n), (v \o (vec0 A0 n) == A0)%A.
+  Lemma vdot_0_r : forall {n} (v : vec n), (v \o (vec0 Azero n) == Azero)%A.
   Proof.
     unfold vdot. induction n; intros; simpl; auto. easy. rewrite IHn. ring.
   Qed.
@@ -1035,16 +1035,16 @@ Section vec_alg.
    *)
 
   (* Context `{Equiv_Aeq : Equivalence A Aeq}. *)
-  (* Context {Aadd Amul : A -> A -> A} {A0 : A}. *)
+  (* Context {Aadd Amul : A -> A -> A} {Azero : A}. *)
 
   (** Vector multiplication implemented with method (1) *)
   Definition vmul {n1 n2} (v1 : vec n1) (v2 : vec n2) : vec n2 :=
-    vcmul (vfoldl Aadd A0 v1) v2.
+    vcmul (vfoldl Aadd Azero v1) v2.
 
   (** Vector multiplication implemented with method (2) *)
   Definition vmul' {n1 n2} (v1 : vec n1) (v2 : vec n2) : vec n2 :=
     let v' : vec n1 := vmap (fun (a:A) => (vcmul a v2)) v1 in 
-    vfoldl vadd (vec0 A0 n2) v'.
+    vfoldl vadd (vec0 Azero n2) v'.
 
   (** vmul and vmul' are equivalent *)
   Lemma vmul_eq_vmul' : forall n1 n2 (v1 : vec n1) (v2 : vec n2), vmul v1 v2 == vmul' v1 v2.
@@ -1101,13 +1101,13 @@ Section LinearSpace.
   Qed.
   
   (* (3), v + 0 = v *)
-  Lemma Vadd_0_r : forall (v : vec n), v + (vec0 A0 n) == v.
+  Lemma Vadd_0_r : forall (v : vec n), v + (vec0 Azero n) == v.
   Proof.
     intros. apply vadd_0_r.
   Qed.
   
   (* (4), forall v1 in V, (exist v2, (v1 + v2 = 0)) *)
-  Lemma Vopp_exist : forall (v1 : vec n), {v2 | v1 + v2 == vec0 A0 n}.
+  Lemma Vopp_exist : forall (v1 : vec n), {v2 | v1 + v2 == vec0 Azero n}.
   Proof.
     destruct n; intros; vsimp; simpl. exists tt; auto.
     exists (-a, vmap Aopp v). simpl. split. ring.
@@ -1115,7 +1115,7 @@ Section LinearSpace.
   Qed.
   
   (* (5) 1 . v = v *)
-  Lemma Vcmul_1_l : forall (v : vec n), A1 c* v == v.
+  Lemma Vcmul_1_l : forall (v : vec n), Aone c* v == v.
   Proof.
     intros. apply vcmul_1_l.
   Qed.

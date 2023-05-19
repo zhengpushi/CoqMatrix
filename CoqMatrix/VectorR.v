@@ -89,7 +89,7 @@ Section DimAny.
   Definition vlen {n} (v : vec n) : R := sqrt (vdot v v).
 
   (** Length of a vector u is one, iff the dot product of u and u is one *)
-  Lemma vlen_eq1_iff_vdot_eq1 : forall n (u : vec n), (vlen u == A1 <-> vdot u u == A1)%A.
+  Lemma vlen_eq1_iff_vdot_eq1 : forall n (u : vec n), (vlen u == Aone <-> vdot u u == Aone)%A.
   Proof.
     intros. unfold vlen. remember (vdot u u) as r.
     split; intros; hnf in *.
@@ -100,10 +100,10 @@ Section DimAny.
       Here, we use the square of length instead of length directly,
       but this is reasonable.
    *)
-  Definition vunit {n} (u : vec n) : Prop := (vdot u u == A1)%A.
+  Definition vunit {n} (u : vec n) : Prop := (vdot u u == Aone)%A.
 
   (** Verify the definition is reasonable *)
-  Lemma vunit_ok : forall {n} (u : vec n), vunit u <-> (vlen u == A1)%A.
+  Lemma vunit_ok : forall {n} (u : vec n), vunit u <-> (vlen u == Aone)%A.
   Proof.
     intros. split; intros; apply vlen_eq1_iff_vdot_eq1; auto.
   Qed.
@@ -120,7 +120,7 @@ Section DimAny.
   
   (** If k times a non-zero vector equal to zero vector, then k must be not zero *)
   Lemma vcmul_vnonzero_neq0_imply_neq0 : forall {n} (v : vec n) k,
-      vnonzero v -> ~(k c* v == vec0) -> k <> A0.
+      vnonzero v -> ~(k c* v == vec0) -> k <> Azero.
   Proof.
     intros. intro. subst.
     rewrite vcmul_0_l in H0. destruct H0. easy.
@@ -128,7 +128,7 @@ Section DimAny.
 
   (** Two non-zero vectors has k-times relation, then k is not zero *)
   Lemma vec_eq_vcmul_imply_coef_neq0 : forall {n} (v1 v2 : vec n) k,
-      vnonzero v1 -> vnonzero v2 -> v1 == k c* v2 -> k <> A0.
+      vnonzero v1 -> vnonzero v2 -> v1 == k c* v2 -> k <> Azero.
   Proof.
     intros. intro. subst. rewrite vcmul_0_l in H1. destruct H. easy.
   Qed.
@@ -148,7 +148,7 @@ Section DimAny.
     destruct (decidable k 0); auto.
     (* idea: from "~(∀ij(v i j = 0)" to "∃ij(v i j≠0)" *)
     (* Tips, a good practice of logic proposition *)
-    assert (exists (ij:nat*nat), let (i,j) := ij in (i<n)%nat /\ (j<1)%nat /\ ~(v i j == A0)%A).
+    assert (exists (ij:nat*nat), let (i,j) := ij in (i<n)%nat /\ (j<1)%nat /\ ~(v i j == Azero)%A).
     { clear k H0 n0.
       apply not_all_not_ex. intro.
       destruct H. intros. specialize (H0 (i,0)%nat). simpl in H0.
@@ -226,11 +226,11 @@ Section DimAny.
       + right. right. exists x. auto.
       + destruct (decidable v1 vec0); auto.
         destruct (decidable v2 (vec0)); auto.
-        right. right. exists (A1/x)%A. rewrite H.
+        right. right. exists (Aone/x)%A. rewrite H.
         lma. apply vec_eq_vcmul_imply_coef_neq0 in H; auto.
     - destruct H as [H1 | [H2 | H3]].
-      + exists A0. left. rewrite H1. rewrite vcmul_0_l. easy.
-      + exists A0. right. rewrite H2. rewrite vcmul_0_l. easy.
+      + exists Azero. left. rewrite H1. rewrite vcmul_0_l. easy.
+      + exists Azero. right. rewrite H2. rewrite vcmul_0_l. easy.
       + destruct H3. exists x. left; auto.
   Qed.
 
@@ -261,7 +261,7 @@ Section DimAny.
     - destruct H1.
       + left; auto.
       + destruct H; auto. destruct H; auto. destruct H.
-        right; right. exists (A1/x)%A. rewrite H.
+        right; right. exists (Aone/x)%A. rewrite H.
         lma. apply vec_eq_vcmul_imply_coef_neq0 in H; auto.
   Qed.
 
@@ -333,9 +333,9 @@ Section Dim3.
   Definition skew_sym_mat_of_v3 (v : vec 3) : smat 3 :=
     let '(x,y,z) := v2t_3 v in 
     (mk_mat_3_3
-      A0    (-z)  y
-      z     A0    (-x)
-      (-y)  x     A0)%A.
+      Azero    (-z)  y
+      z     Azero    (-x)
+      (-y)  x     Azero)%A.
 
   (** dot product of two 3-dim vectors *)
   Definition vdot3 (a b : vec 3) : A :=
@@ -350,7 +350,7 @@ Section Dim3.
   (* SO(n): special orthogonal group *)
   Definition so3 (m : smat 3) : Prop := 
     let so3_mul_unit : Prop := ((m \T) * m == mat1 3)%mat in
-    let so3_det : Prop := (det3 m) = A1 in
+    let so3_det : Prop := (det3 m) = Aone in
     so3_mul_unit /\ so3_det.
   
   (** Angle between two vectors *)

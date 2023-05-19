@@ -15,7 +15,7 @@
 Require Export SafeNatFun.Matrix.
 
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
 (** Control the scope *)
 Open Scope nat_scope.
@@ -28,7 +28,7 @@ Open Scope vec_scope.
 
 Section basic_vectory_theory.
   
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := (Aeq) : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
 
@@ -37,13 +37,13 @@ Section basic_vectory_theory.
 
   (** make a vector by a function *)
   Definition mk_vec {n : nat} (f : nat -> A) : vec n :=
-    mk_mat (fun i j => if j =? 0 then f i else A0).
+    mk_mat (fun i j => if j =? 0 then f i else Azero).
 
   (** matrix equality *)
   Definition veq {n} (v1 v2 : vec n) := meq (Aeq:=Aeq) v1 v2.
   Infix "==" := veq : vec_scope.
 
-  Notation "m ! i ! j " := (mnth (A0:=A0) m i j) : mat_scope.
+  Notation "m ! i ! j " := (mnth (Azero:=Azero) m i j) : mat_scope.
 
   (** veq is equivalence relation *)
   Lemma veq_equiv : forall n, Equivalence (veq (n:=n)).
@@ -71,8 +71,8 @@ Section basic_vectory_theory.
   Proof.
     unfold veq, vec, vnth.
     intros;  split; intros.
-    - rewrite (meq_iff_mnth (A0:=A0)) in H. apply H; auto.
-    - apply (meq_iff_mnth (A0:=A0)). intros.
+    - rewrite (meq_iff_mnth (Azero:=Azero)) in H. apply H; auto.
+    - apply (meq_iff_mnth (Azero:=Azero)). intros.
       assert (j = 0) by lia. rewrite H2. apply H. auto.
   Qed.
 
@@ -100,12 +100,12 @@ Section basic_vectory_theory.
   (* ==================================== *)
   (** ** Convert between list and vector *)
   (* Definition v2l {n} (v : vec n) : list A := @Matrix.mcol _ n 1 0 v. *)
-  (* Definition l2v {n} (l : list A) : vec n := l2m (A0:=A0) (row2col l). *)
+  (* Definition l2v {n} (l : list A) : vec n := l2m (Azero:=Azero) (row2col l). *)
 
   Definition v2l {n} (v : vec n) : list A := map (fun i : nat => v $ i) (seq 0 n).
 
   Definition l2v n (l : list A) : vec n :=
-    mk_mat (fun i j => if (i <? n) && (j =? 0) then nth i l A0 else A0).
+    mk_mat (fun i j => if (i <? n) && (j =? 0) then nth i l Azero else Azero).
 
   (** list of vector to dlist *)
   Definition vl2dl {n} (l : list (vec n)) : list (list A) :=
@@ -121,7 +121,7 @@ Section basic_vectory_theory.
       length l = n -> (@v2l n (@l2v n l) == l)%list.
   Proof.
     intros. unfold l2v,v2l. simpl.
-    rewrite (list_eq_iff_nth A0 n); auto.
+    rewrite (list_eq_iff_nth Azero n); auto.
     - intros. rewrite ?nth_map_seq; auto.
       rewrite ?Nat.add_0_r. apply Nat.ltb_lt in H0. rewrite H0; simpl. easy.
     - rewrite map_length, seq_length; auto.
@@ -180,7 +180,7 @@ Section basic_vectory_theory.
 
     (* Check A. *)
     (* Check Equiv_Aeq. *)
-    (* Context `{Equiv_Aeq : Equivalence A Aeq} {A0 A1 : A}. *)
+    (* Context `{Equiv_Aeq : Equivalence A Aeq} {Azero Aone : A}. *)
     (* Infix "==" := (meq (Aeq:=Aeq)) : mat_scope. *)
 
     (* (** Vector type *) *)
@@ -227,9 +227,9 @@ Arguments l2v {A}.
 Notation "v $ i " := (matf v i 0) : vec_scope.
 
 Section test.
-  Notation "v ! i " := (vnth (A0:=0) v i) : vec_scope.
+  Notation "v ! i " := (vnth (Azero:=0) v i) : vec_scope.
   Definition v1 : vec 3 := l2v 0 3 [1;2;3].
-  Definition m1 : mat 3 3 := l2m (A0:=0) [[10;11;12];[13;14;15];[16;17;18]].
+  Definition m1 : mat 3 3 := l2m (Azero:=0) [[10;11;12];[13;14;15];[16;17;18]].
   Goal v1!(v1!0) = 2. auto. Qed.
   Goal m2l (mconsr v1 m1) = [[1;2;3];[10;11;12];[13;14;15];[16;17;18]]. auto. Qed.
   Goal m2l (mconsc v1 m1) = [[1;10;11;12];[2;13;14;15];[3;16;17;18]]. auto. Qed.
@@ -252,7 +252,7 @@ Section ring_vector_theory.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope.
 
   (** ** Zero vector *)
-  Definition vec0 {n} : vec n := mat0 A0 n 1.
+  Definition vec0 {n} : vec n := mat0 Azero n 1.
 
   (** Assert that a vector is an zero vector. *)
   Definition vzero {n} (v : vec n) : Prop := v == vec0.
@@ -261,7 +261,7 @@ Section ring_vector_theory.
   Definition vnonzero {n} (v : vec n) : Prop := ~(vzero v).
   
   (** vec0 is equal to mat0 with column 1 *)
-  Lemma vec0_eq_mat0 : forall n, vec0 == mat0 A0 n 1.
+  Lemma vec0_eq_mat0 : forall n, vec0 == mat0 Azero n 1.
   Proof.
     intros. easy.
   Qed.
@@ -316,7 +316,7 @@ Section ring_vector_theory.
 
 
   (** *** Below, we need a ring structure *)
-  Context `{R : Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context `{R : Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Infix "*" := Amul : A_scope.
   
   Add Ring ring_inst : make_ring_theory.
@@ -361,13 +361,13 @@ Section ring_vector_theory.
   Qed.
 
   (** 1 c* v = v *)
-  Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Lemma vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
   Proof.
     intros. apply mcmul_1_l.
   Qed.
 
   (** 0 c* v = vec0 *)
-  Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0.
+  Lemma vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0.
   Proof.
     intros. apply mcmul_0_l.
   Qed.
@@ -377,7 +377,7 @@ Section ring_vector_theory.
   
   (** dot production of two vectors. *)
   Definition vdot {n : nat} (v1 v2 : vec n) : A :=
-    fold_left Aadd (map (fun i => v1$i * v2$i) (seq 0 n)) A0.
+    fold_left Aadd (map (fun i => v1$i * v2$i) (seq 0 n)) Azero.
   
   Infix "⋅" := vdot : vec_scope.
 
@@ -387,10 +387,10 @@ Section ring_vector_theory.
   Proof.
     repeat (hnf; intros).
     apply fold_left_aeq_mor; try easy.
-    rewrite (veq_iff_vnth (A0:=A0)) in H,H0.
-    rewrite (list_eq_iff_nth A0 n); auto.
+    rewrite (veq_iff_vnth (Azero:=Azero)) in H,H0.
+    rewrite (list_eq_iff_nth Azero n); auto.
     - intros. rewrite !nth_map_seq; auto.
-      rewrite Nat.add_0_r. rewrite <- ?(vnth_eq_vnth_raw (A0:=A0)); auto.
+      rewrite Nat.add_0_r. rewrite <- ?(vnth_eq_vnth_raw (Azero:=Azero)); auto.
       rewrite H,H0; auto. easy.
     - rewrite map_length, seq_length; auto.
     - rewrite map_length, seq_length; auto.
@@ -406,12 +406,12 @@ Section ring_vector_theory.
   Qed.
 
   (** 0 * v = 0 *)
-  Lemma vdot_0_l : forall {n} (v : vec n), (vec0 ⋅ v == A0)%A.
+  Lemma vdot_0_l : forall {n} (v : vec n), (vec0 ⋅ v == Azero)%A.
   Proof.
     intros.
     unfold vdot. cbn.
     destruct v as [v]; simpl.
-    assert (map (fun i => A0 * v i 0) (seq 0 n) == map (fun i => A0) (seq 0 n))%list.
+    assert (map (fun i => Azero * v i 0) (seq 0 n) == map (fun i => Azero) (seq 0 n))%list.
     { apply SetoidListExt.map_ext. intros. ring. }
     rewrite H. clear H.
     induction n; simpl; try easy.
@@ -419,7 +419,7 @@ Section ring_vector_theory.
   Qed.
 
   (** v * 0 = 0 *)
-  Lemma vdot_0_r : forall {n} (v : vec n), (v ⋅ vec0 == A0)%A.
+  Lemma vdot_0_r : forall {n} (v : vec n), (v ⋅ vec0 == Azero)%A.
   Proof. intros. rewrite vdot_comm, vdot_0_l. easy. Qed.
 
 End ring_vector_theory.
@@ -433,7 +433,7 @@ Section test.
   Notation "- v" := (vopp (Aopp:=Z.opp) v) : vec_scope.
   Infix "-" := (vsub (Aadd:=Z.add)(Aopp:=Z.opp)) : vec_scope.
   Infix "c*" := (vcmul (Amul:=Z.mul)) : vec_scope.
-  Infix "⋅" := (vdot (A0:=0) (Aadd:=Z.add) (Amul:=Z.mul)) : vec_scope.
+  Infix "⋅" := (vdot (Azero:=0) (Aadd:=Z.add) (Amul:=Z.mul)) : vec_scope.
 
   Let v1 := l2v 0 3 [1;2;3].
   Let v2 := l2v 0 3 [4;5;6].
@@ -452,7 +452,7 @@ End test.
 
 Section decidable_vector_theory.
 
-  Context `{Dec_Aeq : @Decidable A Aeq} {A0:A}.
+  Context `{Dec_Aeq : @Decidable A Aeq} {Azero:A}.
   
   Open Scope mat_scope.
   Open Scope vec_scope.
@@ -465,7 +465,7 @@ Section decidable_vector_theory.
 
   (** It is decidable that if a vector is zero vector. *)
   Lemma vzero_dec : forall {n} (v : vec n),
-      {vzero (A0:=A0)(Aeq:=Aeq) v} + {vnonzero (A0:=A0)(Aeq:=Aeq) v}.
+      {vzero (Azero:=Azero)(Aeq:=Aeq) v} + {vnonzero (Azero:=Azero)(Aeq:=Aeq) v}.
   Proof.
     intros. apply veq_dec.
   Qed.

@@ -198,8 +198,8 @@ Module Type RingMatrixTheory (E : RingElementType) <: BasicMatrixTheory E.
       a c* (m1 + m2) == (a c* m1) + (a c* m2).
   Axiom mcmul_add_distr_r : forall {r c} (a b : A) (m : mat r c),
       (a + b)%A c* m == (a c* m) + (b c* m).
-  Axiom mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
-  Axiom mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 r c.
+  Axiom mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
+  Axiom mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 r c.
 
   (** *** Matrix multiplication *)
   Parameter mmul : forall {r c s}, mat r c -> mat c s -> mat r s.
@@ -234,21 +234,21 @@ Module Type DecidableFieldMatrixTheory (E : DecidableFieldElementType)
   (* (** k * m = 0 -> (m = 0) \/ (k = 0) *) *)
   (* Axiom mcmul_eq0_imply_m0_or_k0 : forall {r c} (m : mat r c) k, *)
   (*     let m0 := mat0 r c in *)
-  (*     (k c* m == m0) -> (m == m0) \/ (k == A0)%A. *)
+  (*     (k c* m == m0) -> (m == m0) \/ (k == Azero)%A. *)
 
   (* (** (m <> 0 \/ k * m = 0) -> k = 0 *) *)
   (* Axiom mcmul_mnonzero_eq0_imply_k0 : forall {r c} (m : mat r c) k, *)
   (*     let m0 := mat0 r c in *)
-  (*     ~(m == m0) -> k c* m == m0 -> (k == A0)%A. *)
+  (*     ~(m == m0) -> k c* m == m0 -> (k == Azero)%A. *)
 
   (* (** k * m = m -> k = 1 \/ m = 0 *) *)
   (* Axiom mcmul_same_imply_coef1_or_mzero : forall {r c} k (m : mat r c), *)
-  (*     k c* m == m -> (k == A1)%A \/ (m == mat0 r c). *)
+  (*     k c* m == m -> (k == Aone)%A \/ (m == mat0 r c). *)
 
   (* (** (m1 <> 0 /\ m2 <> 0 /\ k * m1 = m2) -> k <> 0 *) *)
   (* Axiom mcmul_eq_mat_implfy_not_k0 : forall {r c} (m1 m2 : mat r c) k, *)
   (*     let m0 := mat0 r c in *)
-  (*     ~(m1 == m0) -> ~(m2 == m0) -> k c* m1 == m2 -> ~(k == A0)%A. *)
+  (*     ~(m1 == m0) -> ~(m2 == m0) -> k c* m1 == m2 -> ~(k == Azero)%A. *)
   
 End DecidableFieldMatrixTheory.
 

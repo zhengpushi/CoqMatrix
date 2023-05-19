@@ -25,6 +25,7 @@ Require Export Coq.Classes.Morphisms.     (* respectful, ==> *)
 Require Export Coq.Setoids.Setoid.        (*  *)
 Require Export Coq.Classes.SetoidTactics. (* add_morphism_tactic *)
 Require Export Coq.Relations.Relations.   (* equivalence *)
+Require Export Coq.Bool.Sumbool.          (* sumbool_not *)
 Require Export Coq.Bool.Bool.             (* reflect *)
 Require Export Ring.                      (* ring *)
 Require Export Field.                     (* field *)
@@ -32,12 +33,16 @@ Require Export Field.                     (* field *)
 Require Export Coq.Logic.Classical.
 Require Export Coq.Logic.FunctionalExtensionality.
 
+Require Arith ZArith QArith Qcanon Reals List SetoidList.
+
 
 (* ######################################################################### *)
 (** * Reserved Notations *)
 
 (** Reserved Notations, to keep same precedence and associativity *)
-Reserved Infix    "=="      (at level 70, no associativity).
+Reserved Infix    "=="      (at level 70, no associativity).      (* equiv *)
+Reserved Infix    "==?"     (at level 65, no associativity).      (* decidable *)
+Reserved Infix    "<>?"     (at level 65, no associativity).      (* decidable right *)
 Reserved Notation "a != b"  (at level 70, no associativity).
 Reserved Infix    "=?"      (at level 70, no associativity).
 Reserved Infix    "+"       (at level 50, left associativity).
@@ -119,18 +124,89 @@ Qed.
 
 
 (* ######################################################################### *)
-(** * General propeties of algebraic structures *)
+(** * A relation is decidable *)
 
-(* Section general_props. *)
+(** ** Class *)
 
-(*   Context {A B : Type}. *)
-(*   Variable fa ga : A -> A -> A. *)
-(*   Infix "+" := fa. *)
-(*   Infix "*" := ga. *)
-(*   Variable fb : B -> B -> B. *)
-(*   Infix "⊕" := fb (at level 50). *)
+Class Dec {A : Type} (Aeq : relation A) := {
+    dec : forall (a b : A), {Aeq a b} + {~(Aeq a b)};
+  }.
+Infix "==?" := (dec).
+Infix "<>?" := (fun a b => sumbool_not _ _ (a ==? b)).
 
-(* End general_props. *)
+(** ** Instances *)
+
+Section Instances.
+  Import Nat Arith ZArith QArith Qcanon Reals SetoidList.
+  
+  Global Instance Dec_NatEq : Dec (@eq nat).
+  Proof. constructor. apply Nat.eq_dec. Defined.
+
+  Global Instance Dec_Z : Dec (@eq Z).
+  Proof. constructor. apply Z.eq_dec. Defined.
+
+  Global Instance Dec_Q_Qeq : Dec Qeq.
+  Proof. constructor. apply Qeq_dec. Defined.
+
+  Global Instance Dec_Qc : Dec (@eq Qc).
+  Proof. constructor. apply Qc_eq_dec. Defined.
+
+  Global Instance Dec_R : Dec (@eq R).
+  Proof. constructor. apply Req_EM_T. Defined.
+
+  Global Instance Dec_list `{D:Dec} : Dec (eqlistA Aeq).
+  Proof.
+  constructor. intros l1. induction l1.
+    - intros l2. destruct l2; auto.
+      right. intro. easy.
+    - intros l2. destruct l2.
+      + right. intro. easy.
+      + destruct (dec a a0), (IHl1 l2); auto.
+        * right. intro. inversion H. easy.
+        * right. intro. inversion H. easy.
+        * right. intro. inversion H. easy.
+  Defined.
+
+  Global Instance Dec_dlist `{D:Dec} : Dec (eqlistA (eqlistA Aeq)).
+  Proof. constructor. intros. apply dec. Defined.
+
+End Instances.
+
+(** ** Extra Theories *)
+Section Dec_theory.
+
+  Context `{D : Dec}.
+  Infix "==" := Aeq.
+
+  (** Tips: these theories are useful for R type *)
+  
+  (** Calculate equality to boolean, with the help of equality decidability *)
+  Definition Aeqb (a b : A) : bool := if a ==? b then true else false.
+  Infix "=?" := Aeqb.
+
+  (** Aeqb is true iff equal. *)
+  Lemma Aeqb_true : forall a b, a =? b = true <-> a == b.
+  Proof.
+    intros. unfold Aeqb. destruct dec; split; intros; easy.
+  Qed.
+
+  (** Aeqb is false iff not equal *)
+  Lemma Aeqb_false : forall a b, a =? b = false <-> ~(a == b).
+  Proof.
+    intros. unfold Aeqb. destruct dec; split; intros; easy.
+  Qed.
+
+  Lemma Aeq_reflect : forall a b : A, reflect (a == b) (a =? b).
+  Proof.
+    intros. unfold Aeqb. destruct (dec a b); constructor; auto.
+  Qed.
+
+End Dec_theory.
+
+(** ** Examples *)
+Goal forall a b : nat, {a = b} + {a <> b}.
+  apply dec. Qed.
+
 
 (* ######################################################################### *)
 (** * Usually used scopes *)

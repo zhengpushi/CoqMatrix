@@ -51,7 +51,7 @@ Module BasicMatrixTheoryDP (E : ElementType) <: BasicMatrixTheory E.
 
   (** Get n-th element of a matrix *)  
   Definition mnth {r c} (m : mat r c) (ri ci : nat) :=
-    @mnth A A0 r c m ri ci.
+    @mnth A Azero r c m ri ci.
 
   (** meq and mnth should satisfy this constraint *)
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
@@ -71,7 +71,7 @@ Module BasicMatrixTheoryDP (E : ElementType) <: BasicMatrixTheory E.
   (** *** list list to mat *)
   
   Definition l2m {r c} (dl : list (list A)) : mat r c :=
-    l2m A0 dl r c.
+    l2m Azero dl r c.
 
   (** l2m is a proper morphism *)
   Lemma l2m_aeq_mor : forall r c, Proper (eqlistA (eqlistA Aeq) ==> meq) (@l2m r c).
@@ -82,7 +82,7 @@ Module BasicMatrixTheoryDP (E : ElementType) <: BasicMatrixTheory E.
 
   (* Another definition *)
   Definition l2m_old {r c} (dl : list (list A)) : mat r c :=
-    mmake r c (fun x y => nth y (nth x dl []) A0).
+    mmake r c (fun x y => nth y (nth x dl []) Azero).
   
   Lemma l2m_inj : forall {r c} (d1 d2 : list (list A)),
       length d1 = r -> width d1 c -> 
@@ -176,9 +176,9 @@ Module BasicMatrixTheoryDP (E : ElementType) <: BasicMatrixTheory E.
     remember (hd [] dl) as l1.
     remember (hd [] (tl dl)) as l2.
     remember (hd [] (tl (tl dl))) as l3.
-    remember (hd A0 l1, hd A0 (tl l1), hd A0 (tl (tl l1))) as t1.
-    remember (hd A0 l2, hd A0 (tl l2), hd A0 (tl (tl l2))) as t2.
-    remember (hd A0 l3, hd A0 (tl l3), hd A0 (tl (tl l3))) as t3.
+    remember (hd Azero l1, hd Azero (tl l1), hd Azero (tl (tl l1))) as t1.
+    remember (hd Azero l2, hd Azero (tl l2), hd Azero (tl (tl l2))) as t2.
+    remember (hd Azero l3, hd Azero (tl l3), hd Azero (tl (tl l3))) as t3.
     exact (t1, t2, t3).
   Defined.
   
@@ -253,10 +253,10 @@ Module RingMatrixTheoryDP (E : RingElementType) <: RingMatrixTheory E.
   Add Ring ring_thy_inst : Ring_thy.
 
   (** Zero matrix *)
-  Definition mat0 r c : mat r c := @mat0 A A0 r c.
+  Definition mat0 r c : mat r c := @mat0 A Azero r c.
 
   (** Unit matrix *)
-  Definition mat1 n : mat n n := @mat1 A A0 A1 n.
+  Definition mat1 n : mat n n := @mat1 A Azero Aone n.
   
   (** *** Addition of matrix *)
   
@@ -289,7 +289,7 @@ Module RingMatrixTheoryDP (E : RingElementType) <: RingMatrixTheory E.
 
   
   (** l2v is a homomorphic mapping with respect to vadd *)
-  Notation l2v := (l2v (A0:=A0)).
+  Notation l2v := (l2v (Azero:=Azero)).
   Notation vadd := (vadd (Aadd:=Aadd)).
   
   Lemma l2v_vadd_homo : forall (n : nat) (l1 l2 : list A)
@@ -431,13 +431,13 @@ Module RingMatrixTheoryDP (E : RingElementType) <: RingMatrixTheory E.
   Qed.
   
   (** 0 * m = 0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 r c.
   Proof.
     intros. apply mcmul_0_l.
   Qed.
   
   (** 1 * m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof.
     intros. apply mcmul_1_l.
   Qed.
@@ -445,7 +445,7 @@ Module RingMatrixTheoryDP (E : RingElementType) <: RingMatrixTheory E.
   
   (** *** Multiplication of matrix *)
   Definition mmul {r c s} (m1 : mat r c) (m2 : mat c s) : mat r s :=
-    @mmul A Aadd A0 Amul r c s m1 m2.
+    @mmul A Aadd Azero Amul r c s m1 m2.
   Global Infix "*" := mmul : mat_scope.
 
   (** m1 * (m2 + m3) = (m1 * m2) + (m1 * m3) *)

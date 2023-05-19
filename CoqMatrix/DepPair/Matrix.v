@@ -24,7 +24,7 @@ Open Scope A_scope.
 Open Scope vec_scope.
 Open Scope mat_scope.
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
 
 (** ** Definitions of matrix module, it is implemented as a Vector 2 *)
@@ -91,12 +91,12 @@ End mmake.
 
 (** ** Get (ir,rc) element of a matrix *)
 Section mnth.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mnth {r c} (m : mat r c) (ir ic : nat) : A := 
-    vnth (A0:=A0) ic (vnth (A0:=vconst c A0) ir m).
+    vnth (Azero:=Azero) ic (vnth (Azero:=vconst c Azero) ir m).
 
   (** meq and mnth should satisfy this constraint *)
   Lemma meq_iff_mnth : forall {r c : nat} (m1 m2 : mat r c),
@@ -104,8 +104,8 @@ Section mnth.
   Proof.
     unfold meq, mnth. intros. split; intros.
     - rewrite H. easy.
-    - apply (veq_iff_vnth (A0:=vconst c A0)). intros.
-      apply (veq_iff_vnth (A0:=A0)). intros. auto.
+    - apply (veq_iff_vnth (Azero:=vconst c Azero)). intros.
+      apply (veq_iff_vnth (Azero:=Azero)). intros. auto.
   Qed.
 
   Lemma mnth_mmake : forall {r c} f i j,
@@ -118,13 +118,13 @@ Section mnth.
 
 End mnth.
 
-Arguments mnth {A} A0 {r c}.
+Arguments mnth {A} Azero {r c}.
 
 
 (** Convert between matrix and list list *)
 Section m2l_l2m.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
@@ -139,7 +139,7 @@ Section m2l_l2m.
   Fixpoint l2m (dl : list (list A)) (r c : nat) {struct r} : @mat A r c :=
     match r as r0 return (@vec (@vec A c) r0) with
     | 0 => tt
-    | S n' => (l2v (A0:=A0) (hd nil dl) c, l2m (tl dl) n' c)
+    | S n' => (l2v (Azero:=Azero) (hd nil dl) c, l2m (tl dl) n' c)
     end.
 
   Lemma m2l_l2m_id : forall {r c} (dl : list (list A)) (H1 : length dl = r)
@@ -160,7 +160,7 @@ Section m2l_l2m.
 End m2l_l2m.
 
 Arguments m2l {A r c}.
-Arguments l2m {A} A0 dl r c.
+Arguments l2m {A} Azero dl r c.
 
 
 (** ** Construct a matrix with same element *)
@@ -257,18 +257,18 @@ Section mcons.
 
   (** Get a row vector of the matrix build by mconsc with v and m, equal to 
       build the vector with two parts which are the n-th element of v and m *)
-  Lemma vnth_mconsc : forall r c {A0:A} (v: vec (A:=A) r) (m: mat (A:=A) r c) i,
-      (vnth (A0:=vec0 A0 (S c)) i (v @ m) ==
-         (vnth (A0:=A0) i v, vnth (A0:=vec0 A0 c) i m))%vec.
+  Lemma vnth_mconsc : forall r c {Azero:A} (v: vec (A:=A) r) (m: mat (A:=A) r c) i,
+      (vnth (Azero:=vec0 Azero (S c)) i (v @ m) ==
+         (vnth (Azero:=Azero) i v, vnth (Azero:=vec0 Azero c) i m))%vec.
   Proof.
     unfold mat; induction r; intros; vsimp; simpl. easy.
     destruct i. easy.
-    specialize (IHr c A0 v v1 i).
+    specialize (IHr c Azero v v1 i).
     (** Tips: We need to handle type conversion manually *)
     (* Set Printing Implicit. *)
-    assert (((vnth (A0:=(A0, vec0 A0 c)) i (v @ v1)):(vec (S c)))
-            == (vnth (A0:=A0) i v, vnth (A0:=vec0 A0 c) i v1))%vec by auto.
-    destruct (vnth (A0:=(A0, vec0 A0 c)) i (v @ v1)). easy.
+    assert (((vnth (Azero:=(Azero, vec0 Azero c)) i (v @ v1)):(vec (S c)))
+            == (vnth (Azero:=Azero) i v, vnth (Azero:=vec0 Azero c) i v1))%vec by auto.
+    destruct (vnth (Azero:=(Azero, vec0 Azero c)) i (v @ v1)). easy.
   Qed.
   
 End mcons.
@@ -377,8 +377,8 @@ Section mhd_mtl.
   Qed.
 
   (** The n-th of a vector constructed by mhdc, equal to mnth element. *)
-  Lemma vnth_mhdc : forall r c {A0 : A} (m : mat (A:=A) r (S c)) i,
-      (vnth (A0:=A0) i (mhdc m) == mnth A0 m i 0)%A.
+  Lemma vnth_mhdc : forall r c {Azero : A} (m : mat (A:=A) r (S c)) i,
+      (vnth (Azero:=Azero) i (mhdc m) == mnth Azero m i 0)%A.
   Proof.
     unfold mat; induction r; intros; vsimp; simpl. easy.
     destruct i. easy.
@@ -688,34 +688,34 @@ End mmap.
 (** ** Zero matrix *)
 Section mat0.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero : A).
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope. 
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   Notation "m \T" := (mtrans m) : mat_scope.
   
-  Definition mat0 r c : @mat A r c := mmake r c (fun i j => A0).
+  Definition mat0 r c : @mat A r c := mmake r c (fun i j => Azero).
   
-  Lemma mat0_eq_vec0 {r c} : mat0 r c == vec0 (vec0 A0 c) r.
+  Lemma mat0_eq_vec0 {r c} : mat0 r c == vec0 (vec0 Azero c) r.
   Proof.
     unfold mat0. unfold mmake.
     rewrite vmake_const_eq_vconst. unfold vec0. f_equiv.
     apply vmake_const_eq_vconst.
   Qed.
   
-  Lemma mat0_S : forall {r c}, mat0 (S r) c == ((vec0 A0 c, mat0 r c) : mat (S r) c).
+  Lemma mat0_S : forall {r c}, mat0 (S r) c == ((vec0 Azero c, mat0 r c) : mat (S r) c).
   Proof.
     intros. rewrite mat0_eq_vec0. simpl. split; try easy.
     rewrite mat0_eq_vec0. easy.
   Qed.
 
   (** mhdr (mat0) = vec0 *)
-  Lemma mhdr_mat0 : forall {r c}, (mhdr (mat0 (S r) c) == vec0 A0 c)%vec.
+  Lemma mhdr_mat0 : forall {r c}, (mhdr (mat0 (S r) c) == vec0 Azero c)%vec.
   Proof.
     intros. simpl. apply vmake_const_eq_vconst.
   Qed.
   
   (** mhdc (mat0) = vec0 *)
-  Lemma mhdc_mat0 : forall {r c}, (mhdc (mat0 r (S c)) == vec0 A0 r)%vec.
+  Lemma mhdc_mat0 : forall {r c}, (mhdc (mat0 r (S c)) == vec0 Azero r)%vec.
   Proof.
     induction r; intros; simpl; auto. split; try easy. rewrite <- IHr.
     f_equiv. cbn. apply vmakeAux_S.
@@ -733,13 +733,13 @@ Section mat0.
     induction r; intros; simpl; auto. split.
     - apply vmakeAux_S.
     - cbn. unfold mat0,mmake,vmake in *.
-      rewrite (vmakeAux_S r 0 (fun _ => vmakeAux c 0 (fun _ => A0))).
+      rewrite (vmakeAux_S r 0 (fun _ => vmakeAux c 0 (fun _ => Azero))).
       rewrite <- IHr. f_equiv.
       simpl. apply vmakeAux_S.
   Qed.
   
   (** v2cm (vec0) = mat0 *)
-  Lemma v2cm_vec0_eq_mat0 : forall {n}, v2cm (vec0 A0 n) == mat0 n 1.
+  Lemma v2cm_vec0_eq_mat0 : forall {n}, v2cm (vec0 Azero n) == mat0 n 1.
   Proof.
     unfold mat. induction n; intros; vsimp; simpl; auto. split; try easy.
     rewrite IHn. cbn. unfold mat0, mmake, vmake.
@@ -747,7 +747,7 @@ Section mat0.
   Qed.
   
   (** v2rm (vec0) = mat0 *)
-  Lemma v2rm_vec0_eq_mat0 : forall {n}, v2rm (vec0 A0 n) == mat0 1 n.
+  Lemma v2rm_vec0_eq_mat0 : forall {n}, v2rm (vec0 Azero n) == mat0 1 n.
   Proof.
     intros. unfold v2rm. unfold mat0,mmake. simpl.
     rewrite vmake_const_eq_vconst. easy.
@@ -768,7 +768,7 @@ End mat0.
 (** ** Unit matrix *)
 Section mat1.
   
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 A1 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero Aone : A).
   Infix "==" := Aeq : A_scope. 
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope. 
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope. 
@@ -778,8 +778,8 @@ Section mat1.
     match n with
     | O => tt
     | S n' =>
-        let v1 := vconst n' A0 in
-        mconsr ((A1, v1) : vec (S n')) (mconsc v1 (mat1 n'))
+        let v1 := vconst n' Azero in
+        mconsr ((Aone, v1) : vec (S n')) (mconsc v1 (mat1 n'))
     end.
   
   (** mat1\T = mat1 *)
@@ -794,13 +794,13 @@ Section mat1.
   (** Another definition of mat1, function style instead of structure style,
       similiar to mat0 *)
   Definition mat1f n : mat n n := 
-    mmake n n (fun ri ci => if ri =? ci then A1 else A0) .
+    mmake n n (fun ri ci => if ri =? ci then Aone else Azero) .
 
   Lemma mat1_eq_mat1f : forall n, mat1 n == mat1f n.
   Proof.
     induction n; simpl; auto. split; auto.
     - split; auto. easy. rewrite vmakeAux_S. rewrite vmakeAux_const_eq_vconst. easy.
-    - apply (veq_iff_vnth (A0:=vec0 A0 (S n))). intros.
+    - apply (veq_iff_vnth (Azero:=vec0 Azero (S n))). intros.
       rewrite IHn. rewrite vmakeAux_S.
       rewrite vnth_mconsc.
       rewrite vnth_vmakeAux_valid by lia. simpl. split; auto.
@@ -815,7 +815,7 @@ End mat1.
 
 (** ** Get row or column of a matrix as a vector *)
 Section mrow_mcol.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope. 
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope. 
 
@@ -823,13 +823,13 @@ Section mrow_mcol.
      type. Here, mrow and mcol are designed for "mat r c" type. *)
   
   Definition mrow {r c} ir (m : @mat A r c) : vec c :=
-    vnth (A0:=vec0 A0 c) ir m.
+    vnth (Azero:=vec0 Azero c) ir m.
 
   Fixpoint mcol {r c} (ic : nat) : @mat A r c -> vec r :=
     match r with
     | O => fun (m : mat 0 _) => tt
     | S r' => fun (m : mat (S r') c) => 
-                (vnth (A0:=A0) ic (fst m), mcol ic (snd m))
+                (vnth (Azero:=Azero) ic (fst m), mcol ic (snd m))
     end.
 
   Lemma mrow_0 {r c} (m : @mat A (S r) c) : (mrow 0 m == mhdr m)%vec.
@@ -878,14 +878,14 @@ End mapp.
 
 (** ** Split a matrix to two parts by row or column *)
 Section msplit.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := (veq (Aeq:=Aeq)) : vec_scope. 
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope. 
 
   (** Split a matrix to two parts by row *)
   Definition msplitr r1 r2 {c} (m: @mat A (r1+r2) c) 
     : (@mat A r1 c) * (@mat A (r1+r2-r1) c) :=
-    (vfirstn (A0:=vconst c A0) r1 m, vskipn r1 m).
+    (vfirstn (Azero:=vconst c Azero) r1 m, vskipn r1 m).
   
   (** I can't write this lemma, because of type issue. Fix it below *)
   (* Lemma mappr_msplitr r1 r2 {c} def (m : @mat A (r1+r2) c) : *)
@@ -902,7 +902,7 @@ Section msplit.
 
   Definition msplitr' r1 r2 {c} (m: @mat A (r1+r2) c) 
     : (@mat A r1 c) * (@mat A r2 c) :=
-    (vfirstn (A0:=vconst c A0) r1 m, cvtMatShape r1 r2 (vskipn r1 m)).
+    (vfirstn (Azero:=vconst c Azero) r1 m, cvtMatShape r1 r2 (vskipn r1 m)).
   
   Lemma mappr_msplitr' r1 r2 {c} (m : @mat A (r1+r2) c) :
     let '(m1,m2) := msplitr' r1 r2 m in
@@ -921,9 +921,9 @@ Section msplit.
     match r with
     | O => fun (_ : mat 0 (c1+c2)) => (tt, tt)
     | S r' => fun (m : mat (S r') (c1+c2)) =>
-                let defV : vec (c1+c2) := vconst (c1+c2) A0 in
+                let defV : vec (c1+c2) := vconst (c1+c2) Azero in
                 let (m1, m2) := msplitc c1 c2 (vtl m) in
-                ((vfirstn (A0:=A0) c1 (vhd defV m), m1), (vskipn c1 (vhd defV m), m2))
+                ((vfirstn (Azero:=Azero) c1 (vhd defV m), m1), (vskipn c1 (vhd defV m), m2))
     end.
   
 End msplit.
@@ -933,7 +933,7 @@ End msplit.
 (** matrix addition, opposition, subtraction, scalar multiplication, multiplication *)
 Section mat_alg.
   (* Variable A : Type. *)
-  (* Variable A0 : A. *)
+  (* Variable Azero : A. *)
   (* Variable fadd fmul : A -> A -> A. *)
   (* Variable fadd_comm : forall a b, fadd a b = fadd b a. *)
   (* Variable fmul_comm : forall a b, fmul a b = fmul b a. *)
@@ -941,9 +941,9 @@ Section mat_alg.
   (* Variable fmul_assoc : forall a b c, fmul (fmul a b) c = fmul a (fmul b c). *)
   (* Variable fmul_fadd_dist_l : forall a b c,  *)
   (*     fmul a (fadd b c) = fadd (fmul a b) (fmul a c). *)
-  (* Variable fmul_0_l : forall a, fmul A0 a = A0. *)
-  (* Variable fadd_0_l : forall a, fadd A0 a = a. *)
-  (* Variable fadd_0_r : forall a, fadd a A0 = a. *)
+  (* Variable fmul_0_l : forall a, fmul Azero a = Azero. *)
+  (* Variable fadd_0_l : forall a, fadd Azero a = a. *)
+  (* Variable fadd_0_r : forall a, fadd a Azero = a. *)
 
   Context `{AG : AGroup}.
 
@@ -996,14 +996,14 @@ Section mat_alg.
   Qed.
 
   (** mat0 + m = m *)
-  Lemma madd_0_l : forall {r c} (m : @mat A r c), (mat0 A0 r c) + m == m.
+  Lemma madd_0_l : forall {r c} (m : @mat A r c), (mat0 Azero r c) + m == m.
   Proof.
     (* Tips: reuse group and vector theory, good example *)
     intros. rewrite mat0_eq_vec0. apply (vadd_0_l (AG:=vec_AG c)).
   Qed.
 
   (** m + mat0 = m *)
-  Lemma madd_0_r : forall {r c} (m : @mat A r c), m + (mat0 A0 r c) == m.
+  Lemma madd_0_r : forall {r c} (m : @mat A r c), m + (mat0 Azero r c) == m.
   Proof.
     intros. rewrite mat0_eq_vec0. apply (vadd_0_r (AG:=vec_AG c)).
   Qed.
@@ -1072,32 +1072,32 @@ Section mat_alg.
   Qed.
 
   (** mat0 - m = - m *)
-  Lemma msub_0_l : forall {r c} (m : mat r c), (mat0 A0 r c) - m == - m.
+  Lemma msub_0_l : forall {r c} (m : mat r c), (mat0 Azero r c) - m == - m.
   Proof.
     intros. rewrite mat0_eq_vec0. apply (vsub_0_l (AG:=vec_AG c)).
   Qed.
   
   (** m - mat0 = - m *)
-  Lemma msub_0_r : forall {r c} (m : mat r c), m - (mat0 A0 r c) == m.
+  Lemma msub_0_r : forall {r c} (m : mat r c), m - (mat0 Azero r c) == m.
   Proof.
     intros. rewrite mat0_eq_vec0. apply (vsub_0_r (AG:=vec_AG c)).
   Qed.
 
   (** m - m = mat0 *)
-  Lemma msub_self : forall {r c} (m : mat r c), m - m == mat0 A0 r c.
+  Lemma msub_self : forall {r c} (m : mat r c), m - m == mat0 Azero r c.
   Proof.
     intros. rewrite mat0_eq_vec0. apply (vsub_self (AG:=vec_AG c)).
   Qed.
 
   
   (** *** Below, we need Ring structure *)
-  Context `{R : Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context `{R : Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Add Ring ring_inst : make_ring_theory.
 
   Infix "*" := Amul : A_scope.
   Infix "c*" := (vcmul (Amul:=Amul)) : vec_scope.
   Infix "*c" := (vmulc (Amul:=Amul)) : vec_scope.
-  Notation vdot := (vdot (Aadd:=Aadd)(A0:=A0)(Amul:=Amul)).
+  Notation vdot := (vdot (Aadd:=Aadd)(Azero:=Azero)(Amul:=Amul)).
 
   
   (** *** Scalar multiplication *)
@@ -1151,7 +1151,7 @@ Section mat_alg.
   Qed.
 
   (** 0 c* m = mat0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 A0 r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 Azero r c.
   Proof.
     induction r; intros; simpl; auto. destruct m. simpl. split.
     - pose proof (vcmul_0_l (n:=c)).
@@ -1160,8 +1160,8 @@ Section mat_alg.
       rewrite vmakeAux_S. easy.
   Qed.
 
-  (** A1 c* m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  (** Aone c* m = m *)
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof.
     induction r; intros; simpl; auto. destruct m. split; [|apply IHr].
     simpl. apply (vcmul_1_l v).
@@ -1190,7 +1190,7 @@ Section mat_alg.
 
   Global Existing Instance vdotm_aeq_mor.
   
-  Lemma vdotm_c0 : forall {n} (v : vec 0) (m : mat n 0), (vdotm v m == (vec0 A0 n))%vec.
+  Lemma vdotm_c0 : forall {n} (v : vec 0) (m : mat n 0), (vdotm v m == (vec0 Azero n))%vec.
   Proof.
     induction n; intros; destruct v; simpl; auto. split; auto.
     destruct m. simpl. cbn. easy.
@@ -1240,14 +1240,14 @@ Section mat_alg.
   
   (** 0 . m = 0 *)
   Lemma vdotm_0_l : forall {r c} (m : @mat A r c),
-      (vdotm (vec0 A0 c) m == vec0 A0 r)%vec.
+      (vdotm (vec0 Azero c) m == vec0 Azero r)%vec.
   Proof.
     induction r; intros; simpl; auto. split; [|easy].
     apply vdot_0_l.
   Qed.
   
   (** v . 0 = 0 *)
-  Lemma vdotm_0_r : forall {r c} (v : vec c), (vdotm v (mat0 A0 r c) == vec0 A0 r)%vec.
+  Lemma vdotm_0_r : forall {r c} (v : vec c), (vdotm v (mat0 Azero r c) == vec0 Azero r)%vec.
   Proof.
     induction r; intros; simpl; auto. split.
     - rewrite vmake_const_eq_vconst. rewrite vdot_0_r. easy.
@@ -1259,7 +1259,7 @@ Section mat_alg.
   Qed.
   
   (** v . 1 = v *)
-  Lemma vdotm_1_r : forall {n} (v : vec n), (vdotm v (mat1 A0 A1 n) == v)%vec.
+  Lemma vdotm_1_r : forall {n} (v : vec n), (vdotm v (mat1 Azero Aone n) == v)%vec.
   Proof.
     induction n; intros; destruct v; simpl; auto. split.
     - rewrite vdot_S. rewrite vdot_0_r; auto. ring.
@@ -1340,8 +1340,8 @@ Section mat_alg.
 
   (** m1[r,0] . m2[c,0] = mat0 *)
   Lemma mdot_c0_c0_eq_mat0 : forall {r c} (m1 : mat r 0) (m2 : mat c 0),
-      mdot m1 m2 == mat0 A0 r c.
-      (* mdot m1 m2 = vconst r (vec0 A0 c). *)
+      mdot m1 m2 == mat0 Azero r c.
+      (* mdot m1 m2 = vconst r (vec0 Azero c). *)
   Proof.
     induction r; intros; destruct m1; simpl; auto. split.
     - rewrite vdotm_c0. rewrite vmake_const_eq_vconst. easy.
@@ -1403,7 +1403,7 @@ Section mat_alg.
   Qed.
 
   (** m . mat0 = mat0 *)
-  Lemma mdot_0_r : forall {r c t} (m : @mat A r c), mdot m (mat0 A0 t c) == mat0 A0 r t.
+  Lemma mdot_0_r : forall {r c t} (m : @mat A r c), mdot m (mat0 Azero t c) == mat0 Azero r t.
   Proof.
     induction r; intros; destruct m; simpl; auto. split.
     - rewrite vdotm_0_r. rewrite vmake_const_eq_vconst. easy.
@@ -1412,7 +1412,7 @@ Section mat_alg.
   Qed.
 
   (** mat0 . m = mat0 *)
-  Lemma mdot_0_l : forall {r c t} (m : @mat A t c), mdot (mat0 A0 r c) m == mat0 A0 r t.
+  Lemma mdot_0_l : forall {r c t} (m : @mat A t c), mdot (mat0 Azero r c) m == mat0 Azero r t.
   Proof.
     intros. rewrite mdot_comm. rewrite mdot_0_r.
     rewrite mtrans_mat0. easy.
@@ -1420,7 +1420,7 @@ Section mat_alg.
 
   (** mat1 . m = m\T *)
   Lemma mdot_1_l : forall {r c} (m : @mat A r c),
-    mdot (mat1 A0 A1 c) m == m\T.
+    mdot (mat1 Azero Aone c) m == m\T.
   Proof.
   Abort.
 
@@ -1433,8 +1433,8 @@ Section mat_alg.
          [a2b1 a2b2 a2b3]]
    *)
   Definition vmul {r c} (v1 : @vec A r) (v2 : @vec A c) : @mat A r c :=
-    (* mmake r c (fun ri ci => Amul (vnth (A0:=A0) ri v1) (vnth (A0:=A0) ci v2)). *)
-    vmake r (fun ri => vcmul (Amul:=Amul) (vnth (A0:=A0) ri v1) v2).
+    (* mmake r c (fun ri ci => Amul (vnth (Azero:=Azero) ri v1) (vnth (Azero:=Azero) ci v2)). *)
+    vmake r (fun ri => vcmul (Amul:=Amul) (vnth (Azero:=Azero) ri v1) v2).
 
   (* Lemma vmul_aeq_mor : forall (r c:nat), *)
   (*     Proper (veq (Aeq:=Aeq) ==> veq (Aeq:=Aeq) ==> meq (Aeq:=Aeq)) *)
@@ -1457,16 +1457,16 @@ Section mat_alg.
       assert (vmakeAux r 1
                 (fun ri : nat => (match ri with
                               | 0 => a0
-                              | S i' => vnth (A0:=A0) i' v
+                              | S i' => vnth (Azero:=Azero) i' v
                               end c* v2)%vec) ==
-                vmakeAux r 0 (fun ri => (vnth (A0:=A0) ri v) c* v2)%vec)
+                vmakeAux r 0 (fun ri => (vnth (Azero:=Azero) ri v) c* v2)%vec)
         by apply vmakeAux_S. rewrite H; clear H.
       assert (vmakeAux r 1
                 (fun ri : nat => (match ri with
                               | 0 => a0
-                              | S i' => vnth (A0:=A0) i' v
+                              | S i' => vnth (Azero:=Azero) i' v
                               end c* ((a, v2):vec (S c)))%vec) ==
-                vmakeAux r 0 (fun ri => (vnth (A0:=A0) ri v) c* ((a, v2):vec (S c)))%vec)
+                vmakeAux r 0 (fun ri => (vnth (Azero:=Azero) ri v) c* ((a, v2):vec (S c)))%vec)
         by apply vmakeAux_S. rewrite H; clear H.
       rewrite IHr. easy.
   Qed.
@@ -1503,19 +1503,19 @@ Section mat_alg.
   Qed.
 
   (** vmul vec0 v = mat0 *)
-  Lemma vmul_0_l : forall r c (v : vec c), vmul (vec0 A0 r) v == mat0 A0 r c.
+  Lemma vmul_0_l : forall r c (v : vec c), vmul (vec0 Azero r) v == mat0 Azero r c.
   Proof.
     induction r; intros; vsimp; simpl; auto. split; auto.
     - rewrite vcmul_0_l. rewrite vmake_const_eq_vconst. easy.
     - rewrite ?vmakeAux_S.
-      apply (veq_iff_vnth (A0:=vec0 A0 c)). intros.
+      apply (veq_iff_vnth (Azero:=vec0 Azero c)). intros.
       rewrite ?vnth_vmakeAux_valid by lia.
       unfold vec0. rewrite vnth_const by lia. rewrite vcmul_0_l.
       rewrite vmake_const_eq_vconst. easy.
   Qed.
 
   (** vmul v vec0 = mat0 *)
-  Lemma vmul_0_r : forall r c (v : vec r), vmul v (vec0 A0 c) == mat0 A0 r c.
+  Lemma vmul_0_r : forall r c (v : vec r), vmul v (vec0 Azero c) == mat0 Azero r c.
   Proof.
     intros. rewrite vmul_comm_eq_trans_comm. rewrite vmul_0_l.
     rewrite mtrans_mat0. easy.
@@ -1597,8 +1597,8 @@ Section mat_alg.
         * rewrite IHr. rewrite mdot_c0_c0_eq_mat0.
           rewrite ?madd_0_r.
           (* Tips: manually type conversion *)
-          assert (vmap2 (vadd (Aadd:=Aadd)) (mdot (v2cm v) (v2rm v2 \T)) (mat0 A0 r s)
-                  == madd (mdot (v2cm v) (v2rm v2 \T)) (mat0 A0 r s)).
+          assert (vmap2 (vadd (Aadd:=Aadd)) (mdot (v2cm v) (v2rm v2 \T)) (mat0 Azero r s)
+                  == madd (mdot (v2cm v) (v2rm v2 \T)) (mat0 Azero r s)).
           { easy. }
           rewrite H. rewrite madd_0_r. easy.
       + destruct v1,m1,m2. destruct v0. simpl. split; try apply IHr.
@@ -1612,19 +1612,19 @@ Section mat_alg.
   Qed.
 
   (** mat0 * m = mat0 *)
-  Lemma mmul_0_l : forall {r c t} (m : mat c t), (mat0 A0 r c) * m == mat0 A0 r t.
+  Lemma mmul_0_l : forall {r c t} (m : mat c t), (mat0 Azero r c) * m == mat0 Azero r t.
   Proof.
     intros. unfold mmul. rewrite mdot_0_l. easy.
   Qed.
 
   (** m * mat0 = mat0 *)
-  Lemma mmul_0_r : forall {r c t} (m : mat r c), m * (mat0 A0 c t) == mat0 A0 r t.
+  Lemma mmul_0_r : forall {r c t} (m : mat r c), m * (mat0 Azero c t) == mat0 Azero r t.
   Proof.
     intros. unfold mmul. rewrite mtrans_mat0. rewrite mdot_0_r. easy.
   Qed.
 
   (** m * mat1 = m *)
-  Lemma mmul_1_r : forall {r c} (m : mat r c), m * (mat1 A0 A1 c) == m.
+  Lemma mmul_1_r : forall {r c} (m : mat r c), m * (mat1 Azero Aone c) == m.
   Proof.
     induction r; intros; destruct m; simpl; auto. split.
     - rewrite mtrans_mat1. rewrite vdotm_1_r. easy.
@@ -1632,7 +1632,7 @@ Section mat_alg.
   Qed.
 
   (** mat1 * m = m *)
-  Lemma mmul_1_l : forall {r c} (m : mat r c), (mat1 A0 A1 r) * m == m.
+  Lemma mmul_1_l : forall {r c} (m : mat r c), (mat1 Azero Aone r) * m == m.
   Proof.
     induction r; intros; destruct m; simpl; auto. split.
     - rewrite vdotm_cons. rewrite vdotm_0_l. rewrite vadd_0_r.

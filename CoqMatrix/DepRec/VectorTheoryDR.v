@@ -62,7 +62,7 @@ Module BasicVectorTheoryDR (E : ElementType).
   (* ==================================== *)
   (** ** Convert between list and vector *)
 
-  Definition v2l {n} (v : vec n) : list A := hdc A0 (m2l v).
+  Definition v2l {n} (v : vec n) : list A := hdc Azero (m2l v).
 
   Definition l2v {n} (l : list A) : vec n := l2m (row2col l).
   
@@ -92,21 +92,21 @@ Module BasicVectorTheoryDR (E : ElementType).
   Definition t2v_4 t := let '(a,b,c,d) := t in @l2m 4 1 [[a];[b];[c];[d]].
   
   Definition v2t_2 v := let d := @m2l 2 1 v in (
-    hd A0 (hd [] d), 
-    hd A0 (hd [] (tl d))
+    hd Azero (hd [] d), 
+    hd Azero (hd [] (tl d))
     ).
     
   Definition v2t_3 v := let d := @m2l 3 1 v in (
-    hd A0 (hd [] d), 
-    hd A0 (hd [] (tl d)), 
-    hd A0 (hd [] (tl (tl d)))
+    hd Azero (hd [] d), 
+    hd Azero (hd [] (tl d)), 
+    hd Azero (hd [] (tl (tl d)))
     ).
     
   Definition v2t_4 v := let d := @m2l 4 1 v in (
-    hd A0 (hd [] d), 
-    hd A0 (hd [] (tl d)), 
-    hd A0 (hd [] (tl (tl d))), 
-    hd A0 (hd [] (tl (tl (tl d))))
+    hd Azero (hd [] d), 
+    hd Azero (hd [] (tl d)), 
+    hd Azero (hd [] (tl (tl d))), 
+    hd Azero (hd [] (tl (tl (tl d))))
     ).
   
   Lemma t2v_v2t_id_2 : forall (v : vec 2), t2v_2 (v2t_2 v) == v.
@@ -252,12 +252,12 @@ Module RingVectorTheoryDR (E : RingElementType) <: RingVectorTheory E.
     intros. apply mcmul_add_distr_l.
   Qed.
 
-  Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Lemma vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
   Proof.
     intros. apply mcmul_1_l.
   Qed.
 
-  Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0.
+  Lemma vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0.
   Proof.
     intros. apply mcmul_0_l.
   Qed.
@@ -336,7 +336,7 @@ Definition vdot3 (v0 v1 : vec 3) : A :=
 
 (** v1 <> 0 -> v2 <> 0 -> v1 = c c* v2 -> k <> 0 *)
 Lemma vec_eq_vcmul_imply_coef_neq0 : forall {n} (v1 v2 : vec n) k,
-    vnonzero v1 -> vnonzero v2 -> v1 = k c* v2 -> k <> A0.
+    vnonzero v1 -> vnonzero v2 -> v1 = k c* v2 -> k <> Azero.
 Proof.
   intros. intro. subst. rewrite vcmul_0_l in H. destruct H. easy.
 Qed.

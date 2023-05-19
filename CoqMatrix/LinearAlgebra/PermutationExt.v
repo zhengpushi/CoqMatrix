@@ -67,15 +67,15 @@ Module Perm_with_list.
 
   (** ** Permutation of a list of n elements *)
   Section perm.
-    Context {A : Type} {A0 : A}.
+    Context {A : Type} {Azero : A}.
 
     (** Get k-th element and remaining elements from a list *)
     Fixpoint pick (l : list A) (k : nat) : A * list A :=
       match k with
-      | 0 => (hd A0 l, tl l)
+      | 0 => (hd Azero l, tl l)
       | S k' =>
           match l with
-          | [] => (A0, [])
+          | [] => (Azero, [])
           | x :: l' =>
               let (a,l0) := pick l' k' in
               (a, [x] ++ l0)
@@ -88,7 +88,7 @@ Module Perm_with_list.
       (* Compute pick l 0.     (* = (a, [b; c]) *) *)
       (* Compute pick l 1.     (* = (b, [a; c]) *) *)
       (* Compute pick l 2.     (* = (c, [a; b]) *) *)
-      (* Compute pick l 3.     (* = (A0, [a; b; c]) *) *)
+      (* Compute pick l 3.     (* = (Azero, [a; b; c]) *) *)
     End test.
 
     (** Get permutation of a list with a special level number *)
@@ -160,16 +160,16 @@ End Perm_with_list.
 (** * Permutation of a vector *)
 Module Perm_with_vector.
 
-  Context {A : Type} {A0 : A}.
+  Context {A : Type} {Azero : A}.
   Context {Altb : A -> A -> bool}.
-  Infix "!" := (vnth (A0:=A0)) : vec_scope.
+  Infix "!" := (vnth (Azero:=Azero)) : vec_scope.
   
   (** ** Permutation of a list of n elements *)
   Section perm.
     
     (** Get k-th element and remaining elements from a vector *)
     Definition pick {n : nat} (v : @vec A (S n)) (k : nat) : A * (vec n) :=
-      (v ! k, vremove (A0:=A0) v k).
+      (v ! k, vremove (Azero:=Azero) v k).
 
     Section test.
       Variable a0 a b c : A.
@@ -177,21 +177,21 @@ Module Perm_with_vector.
       (* Compute pick l 0.     (* = (a, [b; c]) *) *)
       (* Compute pick l 1.     (* = (b, [a; c]) *) *)
       (* Compute pick l 2.     (* = (c, [a; b]) *) *)
-      (* Compute pick l 3.     (* = (A0, [a; b; c]) *) *)
+      (* Compute pick l 3.     (* = (Azero, [a; b; c]) *) *)
       (* Compute v2l (vremove l 4). *)
     End test.
 
     (** Get permutation of a vector *)
     Fixpoint perm {n : nat} : @vec A n -> list (@vec A n) :=
       match n with
-      | 0 => fun _ => [vec0 (A0:=A0)]
+      | 0 => fun _ => [vec0 (Azero:=Azero)]
       | S n' => fun (v : vec (S n')) =>
           let d1 := map (fun i => pick v i) (seq 0 n) in
           let d2 :=
             map (fun k : A * @vec A n' =>
                    let (x, v') := k in
                    let d3 := perm v' in
-                   map (fun v0 => vcons (A0:=A0) x v') d3) d1 in
+                   map (fun v0 => vcons (Azero:=Azero) x v') d3) d1 in
           concat d2
       end.
 
@@ -245,7 +245,7 @@ Module Perm_with_vector.
   Section exchange.
     
     Definition vexchg {n} (v : @vec A n) (i0 i1 : nat) : @vec A n :=
-      mk_vec (A0:=A0) (fun i =>
+      mk_vec (Azero:=Azero) (fun i =>
                 if i =? i0
                 then v!i1
                 else (if i =? i1 then v!i0 else v!i)).

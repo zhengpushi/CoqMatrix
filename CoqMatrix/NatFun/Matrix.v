@@ -12,7 +12,7 @@
 Require Import NatExt TupleExt HierarchySetoid SetoidListListExt.
 Require Import Sequence.
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Azero Aone Aeq Beq Ceq Aadd Aopp Amul Ainv.
 
 (** Control the scope *)
 Open Scope nat_scope.
@@ -155,7 +155,7 @@ End mrow.
 (** Convert between list list and mat *)
 Section l2m_m2l.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
@@ -163,13 +163,13 @@ Section l2m_m2l.
   (** list list to mat.
       Note: we need manually specify the dimension of the matrix. *)
   Definition l2m {r c} (dl : list (list A)) : mat r c := 
-    fun x y => nth y (nth x dl []) A0.
+    fun x y => nth y (nth x dl []) Azero.
   
   (** list list to mat.
       Note: the row number of the matrix is the length of dl, 
             and the column number of the matrix is the length of first list *)
   Definition l2m_auto (dl : @list (list A)) : mat (length dl) (length (hd [] dl)) :=
-    fun x y => nth y (nth x dl []) A0.
+    fun x y => nth y (nth x dl []) Azero.
 
   (** mat to list list. (Auxiliary function, manually store the row index counter) *)
   Fixpoint m2lAux {r c : nat} (ri : nat) (m : mat r c) : list (list A) := 
@@ -204,7 +204,7 @@ Section l2m_m2l.
   
   Lemma nth_nth_m2lAux : forall {r c} (m : mat r c) (ri ci r_init : nat),
       (ri < r) -> (ci < c) -> (ri + r_init < r) ->
-      (nth ci (nth ri (m2lAux r_init m) []) A0 == m (ri + r_init)%nat ci)%A.
+      (nth ci (nth ri (m2lAux r_init m) []) Azero == m (ri + r_init)%nat ci)%A.
   Proof.
     induction r; intros. lia.
     destruct ri; simpl. apply nth_mrow; auto.
@@ -221,7 +221,7 @@ Section l2m_m2l.
   
   Lemma m2lAux_nth_nth : forall {r c} (dl : list (list A))
                            (H1 : length dl = r) (H2 : width dl c),
-      (@m2lAux r c 0 (fun x y : nat => nth y (nth x dl []) A0) 
+      (@m2lAux r c 0 (fun x y : nat => nth y (nth x dl []) Azero) 
       == dl)%dlist.
   Proof.
     intros. gd dl. gd c.
@@ -287,11 +287,11 @@ End mcol.
 (* ==================================== *)
 (** ** Right shift columns *)
 Section mshift.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 A1 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero Aone : A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  Context {A1_neq_A0 : ~(A1 == A0)%A}.
+  Context {Aone_neq_Azero : ~(Aone == Azero)%A}.
   
   (** Right shift columns *)
   Definition mshiftc {r c} (m : @mat A r c) (k : nat) : mat r c :=
@@ -301,8 +301,8 @@ Section mshift.
   Lemma mshiftc_neq : exists r c (m1 m2 : mat r c) (k : nat),
       m1 == m2 /\ ~(mshiftc m1 k == mshiftc m2 k). 
   Proof.
-    set (m1 := fun (i j : nat) => if (j <? 2)%nat then A1 else A0).
-    set (m2 := fun (i j : nat) => if (j <? 3)%nat then A1 else A0).
+    set (m1 := fun (i j : nat) => if (j <? 2)%nat then Aone else Azero).
+    set (m2 := fun (i j : nat) => if (j <? 3)%nat then Aone else Azero).
     exists 2, 2, m1, m2, (1%nat). split.
     - apply meq_iff_mnth. unfold m1, m2. intros i j Hi Hj. unfold mnth.
       destruct j as [|[|]]; destruct i as [|[|]]; simpl; try easy; lia.
@@ -312,7 +312,7 @@ Section mshift.
       specialize (F _ _ H H).
       unfold m1, m2, mshiftc in F.
       simpl in F.
-      apply A1_neq_A0. easy.
+      apply Aone_neq_Azero. easy.
   Qed.
   
 End mshift.
@@ -363,10 +363,10 @@ Global Ltac lma :=
 (** ** Build concrete matrix *)
 Section SpecifyDims.
 
-  Context {A : Type} {A0 : A}.
+  Context {A : Type} {Azero : A}.
 
   Notation mat := (@mat A).
-  Notation l2m := (l2m (A0:=A0)).
+  Notation l2m := (l2m (Azero:=Azero)).
   
   Definition mk_mat_0_c c : mat 0 c := l2m [].
 
@@ -392,7 +392,7 @@ Section SpecifyDims.
     l2m [[a11;a12;a13;a14]; [a21;a22;a23;a24];[a31;a32;a33;a34]; [a41;a42;a43;a44]].
   
   Definition mk_mat_r_1 r (l : list A) : mat r 1 :=
-    (fun ri ci : nat => if (ci =? 0)%nat then (nth ri l A0) else A0).
+    (fun ri ci : nat => if (ci =? 0)%nat then (nth ri l Azero) else Azero).
   
 End SpecifyDims.
 
@@ -435,7 +435,7 @@ End Map.
 (* ==================================== *)
 (** ** Matrix transposition *)
 Section mtrans.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 A1 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero Aone : A}.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mtrans {r c} (m : @mat A r c): mat c r := fun x y => m y x.
@@ -452,12 +452,12 @@ End mtrans.
 (* ==================================== *)
 (** ** Zero matrirx and identity matrix *)
 Section mat0_mat1.
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0 A1 : A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero Aone : A).
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   Notation "m \T" := (mtrans m) : mat_scope.
 
   (** *** Zero matrix *)
-  Definition mat0 (r c : nat) : mat r c := fun _ _ => A0.
+  Definition mat0 (r c : nat) : mat r c := fun _ _ => Azero.
 
   (** mat0\T = mat0 *)
   Lemma mtrans_mat0_eq_mat0 : forall {r c : nat}, (mat0 r c)\T == mat0 c r.
@@ -465,7 +465,7 @@ Section mat0_mat1.
 
   
   (** *** Identity matrix *)
-  Definition mat1 (n : nat) : mat n n := fun i j => if (i =? j)%nat then A1 else A0.
+  Definition mat1 (n : nat) : mat n n := fun i j => if (i =? j)%nat then Aone else Azero.
     
   (** mat1\T = mat1 *)
   Lemma mtrans_mat1_eq_mat1 : forall {n : nat}, (mat1 n)\T == (mat1 n).
@@ -510,13 +510,13 @@ Section malg.
   Qed.
 
   (** mat0 + m = m *)
-  Lemma madd_0_l : forall {r c} (m : mat r c), mat0 A0 r c + m == m. 
+  Lemma madd_0_l : forall {r c} (m : mat r c), mat0 Azero r c + m == m. 
   Proof.
     lma. unfold madd. monoid_simpl.
   Qed.
 
   (** m + mat0 = m *)
-  Lemma madd_0_r : forall {r c} (m : mat r c), m + mat0 A0 r c == m. 
+  Lemma madd_0_r : forall {r c} (m : mat r c), m + mat0 Azero r c == m. 
   Proof.
     lma. unfold madd. monoid_simpl.
   Qed.
@@ -579,32 +579,32 @@ Section malg.
   Qed.
 
   (** mat0 - m = - m *)
-  Lemma msub_0_l : forall {r c} (m : mat r c), (mat0 A0 r c) - m == - m.
+  Lemma msub_0_l : forall {r c} (m : mat r c), (mat0 Azero r c) - m == - m.
   Proof.
     lma. unfold msub,mopp,mat0. monoid_simpl.
   Qed.
 
   (** m - mat0 = m *)
-  Lemma msub_0_r : forall {r c} (m : mat r c), m - (mat0 A0 r c) == m.
+  Lemma msub_0_r : forall {r c} (m : mat r c), m - (mat0 Azero r c) == m.
   Proof.
     lma. unfold msub,mat0. rewrite group_opp_zero_eq_zero. monoid_simpl.
   Qed.
 
   (** m + (-m) = mat0 *)
-  Lemma madd_opp : forall r c (m : mat r c), m + (-m) == mat0 A0 r c.
+  Lemma madd_opp : forall r c (m : mat r c), m + (-m) == mat0 Azero r c.
   Proof.
     lma. unfold madd,mopp,mat0. group_simpl.
   Qed.
 
   (** m - m = mat0 *)
-  Lemma msub_self : forall {r c} (m : mat r c), m - m == (mat0 A0 r c).
+  Lemma msub_self : forall {r c} (m : mat r c), m - m == (mat0 Azero r c).
   Proof.
     lma. unfold msub,mat0. group_simpl.
   Qed.
 
 
   (** *** Below, we need a ring structure *)
-  Context `{R : Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context `{R : Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Infix "*" := Amul : A_scope.
   
   Add Ring ring_inst : make_ring_theory.
@@ -625,20 +625,20 @@ Section malg.
   Proof. lma. Qed.
 
   (** 0 c* m = mat0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 A0 r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 Azero r c.
   Proof. lma. Qed.
 
   (** a c* mat0 = mat0 *)
-  Lemma mcmul_0_r : forall {r c} a, a c* mat0 A0 r c == mat0 A0 r c.
+  Lemma mcmul_0_r : forall {r c} a, a c* mat0 Azero r c == mat0 Azero r c.
   Proof. lma. Qed.
 
   (** 1 c* m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof. lma. Qed.
 
   (** a c* mat1 equal to a diagonal matrix which main diagonal elements all are a *)
   Lemma mcmul_1_r : forall {n} a,
-      a c* mat1 A0 A1 n == fun ri ci => if (ri =? ci)%nat then a else A0.
+      a c* mat1 Azero Aone n == fun ri ci => if (ri =? ci)%nat then a else Azero.
   Proof.
     lma. unfold mcmul,mat1. destruct (i =? j); ring.
   Qed.
@@ -664,7 +664,7 @@ Section malg.
 
   (** *** Matrix multiplication *)
   Definition mmul {r c t : nat} (m1 : mat r c) (m2 : mat c t) : mat r t :=
-    fun x z => seqsum (Aadd:=Aadd)(A0:=A0) (fun y => m1 x y * m2 y z) c.
+    fun x z => seqsum (Aadd:=Aadd)(Azero:=Azero) (fun y => m1 x y * m2 y z) c.
   Infix "*" := mmul : mat_scope.
 
   (** (m1 * m2) * m3 = m1 * (m2 * m3) *)
@@ -698,19 +698,19 @@ Section malg.
   Qed.
 
   (** mat0 * m = mat0 *)
-  Lemma mmul_0_l : forall {r c s} (m : mat c s), (mat0 A0 r c) * m == mat0 A0 r s.
+  Lemma mmul_0_l : forall {r c s} (m : mat c s), (mat0 Azero r c) * m == mat0 Azero r s.
   Proof.
     lma. unfold mmul,mat0. apply seqsum_seq0. intros. ring.
   Qed.
 
   (** m * mat0 = mat0 *)
-  Lemma mmul_0_r : forall {r c s} (m : mat r c), m * (mat0 A0 c s) == mat0 A0 r s.
+  Lemma mmul_0_r : forall {r c s} (m : mat r c), m * (mat0 Azero c s) == mat0 Azero r s.
   Proof.
     lma. unfold mmul,mat0. apply seqsum_seq0. intros. ring.
   Qed.
 
   (** mat1 * m = m *)
-  Lemma mmul_1_l : forall {r c : nat} (m : mat r c), mat1 A0 A1 r * m == m.
+  Lemma mmul_1_l : forall {r c : nat} (m : mat r c), mat1 Azero Aone r * m == m.
   Proof.
     lma. unfold mmul,mat1.
     apply (seqsum_unique _ _ _ i); auto.
@@ -719,7 +719,7 @@ Section malg.
   Qed.
 
   (** m * mat1 = m *)
-  Lemma mmul_1_r : forall {r c : nat} (m : mat r c), m * mat1 A0 A1 c == m.
+  Lemma mmul_1_r : forall {r c : nat} (m : mat r c), m * mat1 Azero Aone c == m.
   Proof.
     lma. unfold mmul,mat1.
     apply (seqsum_unique _ _ _ j); auto.
@@ -755,7 +755,7 @@ Global Hint Unfold
 
 (** Convert between tuples and matrix *)
 Section t2m_m2t.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   
   (** Tuples 3x3 -> mat_3x3 *)
   Definition t2m_3x3 (t : @T_3x3 A) : @mat A 3 3.
@@ -764,7 +764,7 @@ Section t2m_m2t.
     destruct t1 as ((a11,a12),a13).
     destruct t2 as ((a21,a22),a23).
     destruct t3 as ((a31,a32),a33).
-    exact (mk_mat_3_3 (A0:=A0) a11 a12 a13 a21 a22 a23 a31 a32 a33).
+    exact (mk_mat_3_3 (Azero:=Azero) a11 a12 a13 a21 a22 a23 a31 a32 a33).
   Defined.
 
   (** mat_3x3 -> tuple 3x3. That is: ((a11,a12,a13),(a21,a22,a23),(a31,a32,a33)) *)
@@ -781,13 +781,13 @@ End t2m_m2t.
 (** ** Square matrix *)
 Section smat.
 
-  Context {A : Type} {Aadd: A -> A -> A} {A0 : A}.
+  Context {A : Type} {Aadd: A -> A -> A} {Azero : A}.
   
   Notation smat n := (@mat A n n).
 
   (** Trace *)
   Definition trace {n : nat} (m : smat n) := 
-    seqsum (Aadd:=Aadd)(A0:=A0) (fun x => m x x) n.
+    seqsum (Aadd:=Aadd)(Azero:=Azero) (fun x => m x x) n.
 
 End smat.
 
@@ -800,11 +800,11 @@ Module Test.
 
   Coercion Q2Qc : Q >-> Qc.
 
-  Definition m1 := (mk_mat_3_3 (A0:=0) 1 2 3 4 5 6 7 8 9)%Qc.
-  (* Compute trace (Aadd:=Qplus)(A0:=0)(n:=3) m1. *)
+  Definition m1 := (mk_mat_3_3 (Azero:=0) 1 2 3 4 5 6 7 8 9)%Qc.
+  (* Compute trace (Aadd:=Qplus)(Azero:=0)(n:=3) m1. *)
 
   Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : Qc.
-  Definition m2 := mk_mat_3_3 (A0:=0) a11 a12 a13 a21 a22 a23 a31 a32 a33.
+  Definition m2 := mk_mat_3_3 (Azero:=0) a11 a12 a13 a21 a22 a23 a31 a32 a33.
   (* Compute mrow 1 m2. *)
 
 End Test.

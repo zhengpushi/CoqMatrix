@@ -61,16 +61,33 @@ psatz D n: non-linear
  *)
 
 
-Require Export BasicConfig.
-Require Import HierarchySetoid.
-
+Require Export Lia Lra Reals.
 Require Export ZExt.
-Require Export Reals.
+Require Export BasicConfig.
+
 Open Scope R_scope.
 
-Require Export Psatz.
-Require Export Lra.
 
+(* ######################################################################### *)
+(** ** Well-defined (or compatible, or proper morphism) of operations on R. *)
+
+Lemma Rplus_wd : Proper (eq ==> eq ==> eq) Rplus.
+Proof. simp_proper. intros; subst; ring. Qed.
+
+Lemma Ropp_wd : Proper (eq ==> eq) Ropp.
+Proof. simp_proper. intros; subst; ring. Qed.
+
+Lemma Rminus_wd : Proper (eq ==> eq ==> eq) Rminus.
+Proof. simp_proper. intros; subst; ring. Qed.
+
+Lemma Rmult_wd : Proper (eq ==> eq ==> eq) Rmult.
+Proof. simp_proper. intros; subst; ring. Qed.
+
+Lemma Rinv_wd : Proper (eq ==> eq) Rinv.
+Proof. simp_proper. intros; subst; ring. Qed.
+
+Lemma Rdiv_wd : Proper (eq ==> eq ==> eq) Rdiv.
+Proof. simp_proper. intros; subst; ring. Qed.
 
 
 (* ######################################################################### *)
@@ -1290,7 +1307,7 @@ Definition R2nat_ceiling (r : R) : nat := Z2nat (R2Z_ceiling r).
 (* ######################################################################### *)
 (** * Reqb,Rleb,Rltb: Boolean comparison of R *)
 
-Definition Reqb (r1 r2 : R) : bool := HierarchySetoid.Aeqb r1 r2.
+Definition Reqb (r1 r2 : R) : bool := BasicConfig.Aeqb r1 r2.
 Definition Rleb (r1 r2 : R) : bool := if Rle_lt_dec r1 r2 then true else false.
 Definition Rltb (r1 r2 : R) : bool := if Rlt_le_dec r1 r2 then true else false.
 Infix "=?"  := Reqb : R_scope.
@@ -1311,7 +1328,7 @@ Infix ">=?" := (fun x y => y <=? x) : R_scope.
 (* Qed. *)
 Lemma Reqb_reflect : forall x y, reflect (x = y) (x =? y).
 Proof.
-  intros. unfold Reqb,Aeqb. destruct (decidable); constructor; auto.
+  intros. unfold Reqb,Aeqb. destruct (dec); constructor; auto.
 Qed.
 
 Lemma Reqb_refl : forall r, r =? r = true.

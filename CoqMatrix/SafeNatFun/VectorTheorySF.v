@@ -50,7 +50,7 @@ Module BasicVectorTheorySF (E : ElementType).
   Proof. apply veq_equiv. Qed.
 
   (** Get element of vector *)
-  Definition vnth {n} (v : vec n) i : A := vnth (A0:=A0) v i.
+  Definition vnth {n} (v : vec n) i : A := vnth (Azero:=Azero) v i.
   Global Notation "v ! i " := (vnth v i) : vec_scope.
 
   (** veq and mnth should satisfy this constraint *)
@@ -62,7 +62,7 @@ Module BasicVectorTheorySF (E : ElementType).
   (* ==================================== *)
   (** ** Convert between list and vector *)
   Definition v2l {n} (v : vec n) : list A := v2l v.
-  Definition l2v {n} (l : list A) : vec n := l2v A0 n l.
+  Definition l2v {n} (l : list A) : vec n := l2v Azero n l.
   
   Lemma v2l_length : forall {n} (v : vec n), length (v2l v) = n.
   Proof. intros. apply v2l_length. Qed.
@@ -76,15 +76,15 @@ Module BasicVectorTheorySF (E : ElementType).
   
   (* ==================================== *)
   (** ** Make concrete vector *)
-  Definition mk_vec2 (a0 a1 : A) : vec 2 := mk_vec2 (A0:=A0) a0 a1.
-  Definition mk_vec3 (a0 a1 a2 : A) : vec 3 := mk_vec3 (A0:=A0) a0 a1 a2.
-  Definition mk_vec4 (a0 a1 a2 a3 : A) : vec 4 := mk_vec4 (A0:=A0) a0 a1 a2 a3.
+  Definition mk_vec2 (a0 a1 : A) : vec 2 := mk_vec2 (Azero:=Azero) a0 a1.
+  Definition mk_vec3 (a0 a1 a2 : A) : vec 3 := mk_vec3 (Azero:=Azero) a0 a1 a2.
+  Definition mk_vec4 (a0 a1 a2 a3 : A) : vec 4 := mk_vec4 (Azero:=Azero) a0 a1 a2 a3.
 
   (* ==================================== *)
   (** ** Convert between tuples and vector *)
-  Definition t2v_2 (t : @T2 A) : vec 2 := t2v_2 (A0:=A0) t.
-  Definition t2v_3 (t : @T3 A) : vec 3 := t2v_3 (A0:=A0) t.
-  Definition t2v_4 (t : @T4 A) : vec 4 := t2v_4 (A0:=A0) t.
+  Definition t2v_2 (t : @T2 A) : vec 2 := t2v_2 (Azero:=Azero) t.
+  Definition t2v_3 (t : @T3 A) : vec 3 := t2v_3 (Azero:=Azero) t.
+  Definition t2v_4 (t : @T4 A) : vec 4 := t2v_4 (Azero:=Azero) t.
 
   Definition v2t_2 (v : vec 2) : @T2 A := v2t_2 v.
   Definition v2t_3 (v : vec 3) : @T3 A := v2t_3 v.
@@ -139,16 +139,16 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   Open Scope vec_scope.
 
   (** ** Zero vector *)
-  Definition vec0 {n} : vec n := vec0 (A0:=A0).
+  Definition vec0 {n} : vec n := vec0 (Azero:=Azero).
 
   (** Assert that a vector is an zero vector. *)
-  Definition vzero {n} (v : vec n) : Prop := vzero (A0:=A0) (Aeq:=Aeq) v.
+  Definition vzero {n} (v : vec n) : Prop := vzero (Azero:=Azero) (Aeq:=Aeq) v.
 
   (** Assert that a vector is an non-zero vector. *)
-  Definition vnonzero {n} (v : vec n) : Prop := vnonzero (A0:=A0) (Aeq:=Aeq) v.
+  Definition vnonzero {n} (v : vec n) : Prop := vnonzero (Azero:=Azero) (Aeq:=Aeq) v.
   
   (** vec0 is equal to mat0 with column 1 *)
-  Lemma vec0_eq_mat0 : forall n, vec0 == mat0 A0 n 1.
+  Lemma vec0_eq_mat0 : forall n, vec0 == mat0 Azero n 1.
   Proof. apply vec0_eq_mat0. Qed.
   
   
@@ -224,11 +224,11 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   Proof. intros. apply vcmul_add_distr_r. Qed.
 
   (** 1 c* v = v *)
-  Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Lemma vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
   Proof. intros. apply vcmul_1_l. Qed.
 
   (** 0 c* v = vec0 *)
-  Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0.
+  Lemma vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0.
   Proof. intros. apply vcmul_0_l. Qed.
   
   
@@ -236,7 +236,7 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   
   (** dot production of two vectors. *)
   Definition vdot {n : nat} (v1 v2 : vec n) :=
-    vdot (A0:=A0) (Aadd:=Aadd) (Amul:=Amul) v1 v2.
+    vdot (Azero:=Azero) (Aadd:=Aadd) (Amul:=Amul) v1 v2.
   Infix "⋅" := vdot : vec_scope.
 
   (** dot production is commutative *)
@@ -244,11 +244,11 @@ Module RingVectorTheorySF (E : RingElementType) <: RingVectorTheory E.
   Proof. intros. apply vdot_comm. Qed.
 
   (** 0 * v = 0 *)
-  Lemma vdot_0_l : forall {n} (v : vec n), (vec0 ⋅ v == A0)%A.
+  Lemma vdot_0_l : forall {n} (v : vec n), (vec0 ⋅ v == Azero)%A.
   Proof. intros. apply vdot_0_l. Qed.
 
   (** v * 0 = 0 *)
-  Lemma vdot_0_r : forall {n} (v : vec n), (v ⋅ vec0 == A0)%A.
+  Lemma vdot_0_r : forall {n} (v : vec n), (v ⋅ vec0 == Azero)%A.
   Proof. intros. apply vdot_0_r. Qed.
   
 End RingVectorTheorySF.

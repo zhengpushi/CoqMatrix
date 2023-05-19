@@ -68,7 +68,7 @@ Module BasicVectorTheoryDL (E : ElementType).
 
   (* ==================================== *)
   (** ** Convert between list and vector *)
-  Definition v2l {n} (v : vec n) : list A := hdc A0 (m2l v).
+  Definition v2l {n} (v : vec n) : list A := hdc Azero (m2l v).
   (* Definition v2l' {n} (v : vec n) : list A := to_list (mcoli v F1). *)
   
   Definition l2v {n} (l : list A) : vec n := l2m (row2col l).
@@ -267,13 +267,13 @@ Module RingVectorTheoryDL (E : RingElementType) <: RingVectorTheory E.
   Qed.
 
   (** 1 c* v = v *)
-  Lemma vcmul_1_l : forall {n} (v : vec n), A1 c* v == v.
+  Lemma vcmul_1_l : forall {n} (v : vec n), Aone c* v == v.
   Proof.
     intros. apply mcmul_1_l.
   Qed.
 
   (** 0 c* v = vec0 *)
-  Lemma vcmul_0_l : forall {n} (v : vec n), A0 c* v == vec0.
+  Lemma vcmul_0_l : forall {n} (v : vec n), Azero c* v == vec0.
   Proof.
     intros. apply mcmul_0_l.
   Qed.
@@ -356,7 +356,7 @@ End Test.
 
   (** v1 <> 0 -> v2 <> 0 -> v1 = k c* v2 -> k <> 0 *)
   Lemma vec_eq_vcmul_imply_coef_neq0 : forall {n} (v1 v2 : vec n) k,
-    vnonzero v1 -> vnonzero v2 -> v1 = k c* v2 -> k <> A0.
+    vnonzero v1 -> vnonzero v2 -> v1 = k c* v2 -> k <> Azero.
   Proof.
     intros. intro. subst. apply vcmul_0_l in H. destruct H. easy.
   Qed.

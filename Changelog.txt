@@ -1,0 +1,34 @@
+2023.01.20
+v1.0.0
+1. initial version
+
+2023.01.20
+v1.0.1
+1.remove the dependency for CoqExt library, which is charged by myself.
+2.add dependency of coq-mathcomp-algebra, >=8.15.0
+	
+2023.01.21
+v1.0.2
+1. fix a bug under OCaml 4.07.1, thus Coq (>= 8.13) could use this library.
+
+2023.02.28
+v1.0.3
+1. Add a new matrix model naming SF (SafeNatFun), which is a safe version of NF (NatFun).
+   Meanwhile, added conversions between SF and DL/DP/DR/NF/SF, see MatrixAll.v
+2. Add a unified tactic "lma" (means Linear Matrix Arithmetic) to solve matrix equations
+   such as "A == B", and it is available in all models.
+   This tactic also worked for vector equations.
+3. Add several concrete modules, including MatrixNat, MatrixZ, MatrixQ, MatrixQc, MatrixR,
+   VectorNat, VectorZ, VectorQ, VectorQc, VectorR.
+   These modules are convenient for final developers.
+   The demo usage can be found in each file, such as MatrixR, or can be quickly found in README.md
+4. Add usage demo in README.md
+
+2023.05.20
+v1.0.4
+1. update module SafeNatFun, and additionally, determinant of generic matrix and inversion matrix
+   by adjoint matrix.
+2. Preliminary calculus theory.
+3. Better notation for mnth function, with "m!i!j" instead of "m$i$j".
+4. change A0,A1 to Azero,Aone, because A1 is conflict to the name in Reals.
+5. Temporarily block the "FinFun" model, because the upgrade of math-comp library to 2.0.

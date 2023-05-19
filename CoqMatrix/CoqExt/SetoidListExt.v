@@ -33,7 +33,7 @@ Open Scope A.
 Open Scope list.
 
 Generalizable Variables A B C Aeq Beq Ceq.
-Generalizable Variables Aadd Aopp Amul Ainv.
+Generalizable Variables Azero Aone Aadd Aopp Amul Ainv.
 
 
 (* ======================================================================= *)
@@ -187,9 +187,9 @@ Section nth.
   Qed.
 
   (** Two list equal iff all nth visit equal *)
-  Lemma list_eq_iff_nth (A0 : A) : forall n (l1 l2 : list A)
+  Lemma list_eq_iff_nth (Azero : A) : forall n (l1 l2 : list A)
                                      (H1 : length l1 = n) (H2 : length l2 = n),
-      l1 == l2 <-> (forall (i : nat), i < n -> (nth i l1 A0 == nth i l2 A0)%A).
+      l1 == l2 <-> (forall (i : nat), i < n -> (nth i l1 Azero == nth i l2 Azero)%A).
   Proof.
     intros n l1. revert n. induction l1; intros; simpl in *; subst.
     - split; intros; try easy. apply List.length_zero_iff_nil in H2. rewrite H2. easy.
@@ -405,7 +405,7 @@ Section repeat.
   Global Existing Instance repeat_aeq_mor.
 
   (** repeat S n times equal to another form *)
-  Lemma list_repeat_Sn (A0 : A) : forall n, repeat A0 (S n) == A0 :: repeat A0 n.
+  Lemma list_repeat_Sn (Azero : A) : forall n, repeat Azero (S n) == Azero :: repeat Azero n.
   Proof.
     intros. simpl. easy.
   Qed.
@@ -423,17 +423,17 @@ Section lzero.
   Infix "==" := (eqlistA Aeq).
   
   (** A friendly name for zero list *)
-  Definition lzero (A0 : A) n := repeat A0 n.
+  Definition lzero (Azero : A) n := repeat Azero n.
 
   (** lzero's length law *)
-  Lemma lzero_length (A0 : A) : forall n, length (lzero A0 n) = n.
+  Lemma lzero_length (Azero : A) : forall n, length (lzero Azero n) = n.
   Proof.
     intros. apply repeat_length.
   Qed.
 
   (** append two zero list to a zero list satisfy length relation *)
-  Lemma lzero_app (A0 : A) : forall n1 n2,
-      lzero A0 n1 ++ lzero A0 n2 == lzero A0 (n1 + n2).
+  Lemma lzero_app (Azero : A) : forall n1 n2,
+      lzero Azero n1 ++ lzero Azero n2 == lzero Azero (n1 + n2).
   Proof.
     unfold lzero. intros. rewrite repeat_app. easy.
   Qed.
@@ -541,8 +541,8 @@ Section map_A.
   Qed.
 
   (** lzero equal to map to_zero *)
-  Lemma map_eq_zero : forall l (A0 : A) (f : A -> A) n,
-      (forall x : A, (f x == A0)%A) -> length l = n -> map f l == lzero A0 n.
+  Lemma map_eq_zero : forall l (Azero : A) (f : A -> A) n,
+      (forall x : A, (f x == Azero)%A) -> length l = n -> map f l == lzero Azero n.
   Proof.
     induction l; intros; simpl in *. subst. simpl. easy.
     destruct n. easy. inv H0. simpl.
@@ -574,8 +574,8 @@ Section map_A.
 
   (** Simplify of map+nth+seq *)
   (* Note: the lower index of seq is 0, it could extend to any nat number later *)
-  Lemma map_nth_seq  : forall n (l : list A) A0,
-      length l = n -> map (fun i => nth i l A0) (seq 0 n) == l.
+  Lemma map_nth_seq  : forall n (l : list A) Azero,
+      length l = n -> map (fun i => nth i l Azero) (seq 0 n) == l.
   Proof.
     induction n.
     - intros. simpl. apply List.length_zero_iff_nil in H; subst. easy.
@@ -738,16 +738,16 @@ Section map2_sametype.
   
   (** *** The properties below, need a monoid structure *)
 
-  Context `{M:Monoid A Aadd A0 Aeq}.
+  Context `{M:Monoid A Aadd Azero Aeq}.
 
   (** map2 lzero l = l *)
-  Lemma map2_zero_l : forall l, map2 Aadd (lzero A0 (length l)) l == l.
+  Lemma map2_zero_l : forall l, map2 Aadd (lzero Azero (length l)) l == l.
   Proof.
     induction l; intros; simpl. easy. rewrite IHl. monoid_simpl.
   Qed.
 
   (** map2 l lzero = l *)
-  Lemma map2_zero_r : forall l, map2 Aadd l (lzero A0 (length l)) == l.
+  Lemma map2_zero_r : forall l, map2 Aadd l (lzero Azero (length l)) == l.
   Proof.
     induction l; intros; simpl. easy. rewrite IHl. monoid_simpl.
   Qed.
@@ -755,7 +755,7 @@ Section map2_sametype.
   
   (** *** The properties below, need a group structure *)
 
-  Context `{G:Group A Aadd A0 Aopp Aeq}.
+  Context `{G:Group A Aadd Azero Aopp Aeq}.
 
   (* l1 - l2 = - (l2 - l1) *)
   (* Context {Invo_Aopp : Involution Aopp Aeq}. *)
@@ -788,7 +788,7 @@ Section map2_sametype.
 
   (** 0 - l = - l *)
   Lemma map2_sub_zero_l : forall l n, 
-      length l = n -> map2 Asub (lzero A0 n) l == map Aopp l.
+      length l = n -> map2 Asub (lzero Azero n) l == map Aopp l.
   Proof.
     induction l; simpl; intros. apply map2_nil_r.
     induction n ; simpl. inversion H. apply cons_aeq_mor; auto.
@@ -797,7 +797,7 @@ Section map2_sametype.
   
   (** l - 0 = l *)
   Lemma map2_sub_zero_r : forall l n, 
-      length l = n -> map2 Asub l (lzero A0 n) == l.
+      length l = n -> map2 Asub l (lzero Azero n) == l.
   Proof.
     induction l; simpl; intros; auto. destruct n; simpl. inversion H.
     apply cons_aeq_mor; auto.
@@ -806,7 +806,7 @@ Section map2_sametype.
   
   (** l - l = 0 *)
   Lemma map2_sub_self : forall l n, 
-      length l = n -> map2 Asub l l == (lzero A0 n).
+      length l = n -> map2 Asub l l == (lzero Azero n).
   Proof.
     induction l; simpl; intros; subst; try easy.
     apply cons_aeq_mor; auto. group_simpl.
@@ -891,7 +891,7 @@ End concat.
 (** ** Convert between list and function *)
 Section f2l_l2f.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
   Infix "==" := (Aeq) : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -899,7 +899,7 @@ Section f2l_l2f.
     map f (seq 0 n).
 
   Definition l2f {n : nat} (l : list A) : nat -> A :=
-    fun i => nth i l A0.
+    fun i => nth i l Azero.
 
   Lemma f2l_length : forall n f, length (@f2l n f) = n.
   Proof.
@@ -925,20 +925,20 @@ Section ladd_opp_sub.
 
   (* Tips: these old codes are replaced with Typeclass. *)
   (* Variable A : Type. *)
-  (* Variable A0 : A. *)
+  (* Variable Azero : A. *)
   (* Variable add : A -> A -> A. *)
   (* Variable add_comm : forall a b, add a b = add b a. *)
-  (* Variable add_0_l : forall a, add A0 a = a. *)
+  (* Variable add_0_l : forall a, add Azero a = a. *)
   (* Variable opp : A -> A. *)
   (* Variable sub : A -> A -> A. *)
   (* Variable sub_comm : forall a b, sub a b = opp (sub b a). *)
   (* Variable sub_assoc1 : forall a b c, sub (sub a b) c = sub a (sub c b). *)
   (* Variable sub_assoc2 : forall a b c, sub (sub a b) c = sub a (add b c). *)
-  (* Variable sub_0_l : forall a, sub A0 a = opp a. *)
-  (* Variable sub_0_r : forall a, sub a A0 = a. *)
-  (* Variable sub_self : forall a, sub a a = A0. *)
+  (* Variable sub_0_l : forall a, sub Azero a = opp a. *)
+  (* Variable sub_0_r : forall a, sub a Azero = a. *)
+  (* Variable sub_self : forall a, sub a a = Azero. *)
   
-  Context `{AG:AGroup A Aadd A0 Aopp Aeq}.
+  Context `{AG:AGroup A Aadd Azero Aopp Aeq}.
   Notation Asub := (fun a b => Aadd a (Aopp b)).
   Infix "==" := (Aeq) : A_scope.
   Infix "==" := (eqlistA Aeq).
@@ -980,7 +980,7 @@ Section ladd_opp_sub.
   
   (** 0 + l = l *)
   Lemma ladd_zero_l : forall l n, 
-    length l = n -> ladd (lzero A0 n) l == l.
+    length l = n -> ladd (lzero Azero n) l == l.
   Proof.
     induction l; simpl; intros. apply map2_nil_r.
     induction n ; simpl. inversion H.
@@ -989,7 +989,7 @@ Section ladd_opp_sub.
   Qed.
   
   (** l + 0 = l *)
-  Lemma ladd_zero_r : forall l n, length l = n -> ladd l (lzero A0 n) == l.
+  Lemma ladd_zero_r : forall l n, length l = n -> ladd l (lzero Azero n) == l.
   Proof.
     intros. unfold ladd. rewrite map2_comm; auto.
     apply ladd_zero_l; auto.
@@ -1039,19 +1039,19 @@ Section ladd_opp_sub.
   Qed.
   
   (** 0 - l = - l *)
-  Lemma lsub_zero_l : forall l n, length l = n -> lsub (lzero A0 n) l == lopp l.
+  Lemma lsub_zero_l : forall l n, length l = n -> lsub (lzero Azero n) l == lopp l.
   Proof.
     apply map2_sub_zero_l.
   Qed.
   
   (** l - 0 = l *)
-  Lemma lsub_zero_r : forall l n, length l = n -> lsub l (lzero A0 n) == l.
+  Lemma lsub_zero_r : forall l n, length l = n -> lsub l (lzero Azero n) == l.
   Proof.
     apply map2_sub_zero_r.
   Qed.
   
   (** l - l = 0 *)
-  Lemma lsub_self : forall l n, length l = n -> lsub l l == (lzero A0 n).
+  Lemma lsub_self : forall l n, length l = n -> lsub l l == (lzero Azero n).
   Proof.
     apply map2_sub_self.
   Qed.
@@ -1064,15 +1064,15 @@ End ladd_opp_sub.
 Section lcmul_lmulc.
   
   (* Variable A : Type. *)
-  (* Variable A0 A1 : A. *)
+  (* Variable Azero Aone : A. *)
   (* Variable mul : A -> A -> A. *)
   (* Infix "*" := mul. *)
   (* Variable mul_comm : forall a b, a * b = b * a. *)
-  (* Variable mul_0_l : forall a, A0 * a = A0. *)
+  (* Variable mul_0_l : forall a, Azero * a = Azero. *)
   (* Variable Aeqdec : forall a1 a2 : A, {a1 = a2} + {a1 <> a2}. *)
-  (* Variable mul_1_l : forall a : A, A1 * a = a. *)
+  (* Variable mul_1_l : forall a : A, Aone * a = a. *)
   (* Variable mul_cancel_r : forall r1 r2 r : A,  *)
-  (*     r <> A0 -> r1 * r = r2 * r -> r1 = r2.  *)
+  (*     r <> Azero -> r1 * r = r2 * r -> r1 = r2.  *)
 
   Context `{R:Ring}.
 
@@ -1115,22 +1115,22 @@ Section lcmul_lmulc.
     intros. easy.
   Qed.
   
-  Context `{F:Field A Aadd A0 Aopp Amul A1 Ainv Aeq}.
+  Context `{F:Field A Aadd Azero Aopp Amul Aone Ainv Aeq}.
 
   (** mul k x = x -> k = 1 \/ x = 0 *)
   Lemma fcmul_fixpoint_imply_k1_or_zero :
-    forall (k x : A), (k * x == x)%A -> (k == A1)%A \/ (x == A0)%A.
+    forall (k x : A), (k * x == x)%A -> (k == Aone)%A \/ (x == Azero)%A.
   Proof.
-    intros. destruct (decidable x A0); auto. left.
+    intros. destruct (decidable x Azero); auto. left.
     apply symmetry in H.
-    rewrite <- (@identityLeft _ Amul A1 Aeq) in H at 1.
+    rewrite <- (@identityLeft _ Amul Aone Aeq) in H at 1.
     - apply field_mul_cancel_r in H; auto. easy.
     - apply monoidIdL.
   Qed.
   
   (** mul x k = x -> k = 1 \/ x = 0 *)
   Lemma fmulc_fixpoint_imply_k1_or_zero :
-    forall (k x : A), (x * k == x)%A -> (k == A1)%A \/ (x == A0)%A.
+    forall (k x : A), (x * k == x)%A -> (k == Aone)%A \/ (x == Azero)%A.
   Proof.
     intros. rewrite commutative in H.
     apply fcmul_fixpoint_imply_k1_or_zero; auto.
@@ -1139,12 +1139,12 @@ Section lcmul_lmulc.
   (** k * l = l -> k = 1 \/ l = 0 *)
   Lemma lcmul_fixpoint_imply_k1_or_lzero : 
     forall (l : list A) {n} (Hl : length l = n) (k : A),
-      lcmul k l == l -> ((k == A1)%A \/ l == lzero A0 n).
+      lcmul k l == l -> ((k == Aone)%A \/ l == lzero Azero n).
   Proof.
     induction l; intros. subst; auto.
     destruct n. easy. simpl in *. inversion H. inversion Hl. subst.
     apply fcmul_fixpoint_imply_k1_or_zero in H3.
-    destruct (decidable k A1).
+    destruct (decidable k Aone).
     - left; auto.
     - right.
       apply cons_aeq_mor.
@@ -1155,7 +1155,7 @@ Section lcmul_lmulc.
   (** lmulc is fixpoint, iff k1 or lzero *)
   Lemma lmulc_fixpoint_imply_k1_or_lzero : 
     forall (l : list A) {n} (Hl : length l = n) (k : A),
-      lmulc l k == l -> ((k == A1)%A \/ l == lzero A0 n).
+      lmulc l k == l -> ((k == Aone)%A \/ l == lzero Azero n).
   Proof.
     intros.
     apply lcmul_fixpoint_imply_k1_or_lzero; auto.
@@ -1165,7 +1165,7 @@ Section lcmul_lmulc.
   (** k * l = 0 -> k = 0 \/ l = 0 *)
   Lemma lcmul_eq0_imply_k0_or_lzero : 
     forall (l : list A) {n} (Hl : length l = n) (k : A),
-      lcmul k l == lzero A0 n -> ((k == A0)%A \/ l == lzero A0 n).
+      lcmul k l == lzero Azero n -> ((k == Azero)%A \/ l == lzero Azero n).
   Proof.
     induction l; intros. subst; auto.
     destruct n. easy. simpl in *. inv H.
@@ -1182,7 +1182,7 @@ End lcmul_lmulc.
 Section ldot.
   
   (* Variable A : Type. *)
-  (* Variable A0 : A. *)
+  (* Variable Azero : A. *)
   (* Variable add mul : A -> A -> A. *)
   (* Infix "+" := add. *)
   (* Infix "*" := mul. *)
@@ -1192,8 +1192,8 @@ Section ldot.
   (* Variable mul_comm : forall a b, a * b = b * a. *)
   (* Variable mul_add_distr_l : forall a b1 b2, a * (b1 + b2) = a * b1 + a * b2. *)
   (* Variable mul_add_distr_r : forall a1 a2 b, (a1 + a2) * b = a1 * b + a2 * b. *)
-  (* Variable add_0_l : forall a, A0 + a = a. *)
-  (* Variable mul_0_l : forall a, A0 * a = A0. *)
+  (* Variable add_0_l : forall a, Azero + a = a. *)
+  (* Variable mul_0_l : forall a, Azero * a = Azero. *)
 
   Context `{R:Ring}.
   Add Ring ring_inst : make_ring_theory.
@@ -1205,7 +1205,7 @@ Section ldot.
   
   (** dot product, marked as l1 . l2 *)
   Definition ldot (l1 l2 : list A) : A :=
-    fold_right Aadd A0 (map2 Amul l1 l2).
+    fold_right Aadd Azero (map2 Amul l1 l2).
 
   (** map is respect to aeq *)
   Lemma ldot_aeq_mor : Proper (eqlistA Aeq ==> eqlistA Aeq ==> Aeq) ldot.
@@ -1225,13 +1225,13 @@ Section ldot.
   Qed.
   
   (** [] . l = 0 *)
-  Lemma ldot_nil_l : forall (l : list A), (ldot nil l == A0)%A.
+  Lemma ldot_nil_l : forall (l : list A), (ldot nil l == Azero)%A.
   Proof.
     intros. destruct l; simpl; try easy.
   Qed.
   
   (** l . [] = 0 *)
-  Lemma ldot_nil_r : forall (l : list A), (ldot l nil == A0)%A.
+  Lemma ldot_nil_r : forall (l : list A), (ldot l nil == Azero)%A.
   Proof.
     intros. destruct l; simpl; try easy.
   Qed.
@@ -1244,14 +1244,14 @@ Section ldot.
   Qed.
   
   (** lzero . l = 0 *)
-  Lemma ldot_zero_l : forall l n, (ldot (lzero A0 n) l == A0)%A.
+  Lemma ldot_zero_l : forall l n, (ldot (lzero Azero n) l == Azero)%A.
   Proof.
     induction l,n; simpl; intros; try easy. rewrite ldot_cons.
     rewrite IHl. ring.
   Qed.
   
   (** l . lzero = 0 *)
-  Lemma ldot_zero_r : forall l n, (ldot l (lzero A0 n) == A0)%A.
+  Lemma ldot_zero_r : forall l n, (ldot l (lzero Azero n) == Azero)%A.
   Proof.
     intros. rewrite ldot_comm. apply ldot_zero_l.
   Qed.
@@ -1331,12 +1331,12 @@ Section GenerateSpecialList.
   Infix "==" := (eqlistA Aeq).
   
   (** create a list for matrix unit, which length is n and almost all elements 
-    are A0 excepts i-th is A1. *)
+    are Azero excepts i-th is Aone. *)
   Fixpoint list_unit (n i : nat) : list A :=
     match n, i with
     | 0, _ => []
-    | S n, 0 => A1 :: (repeat A0 n)
-    | S n, S i => A0 :: (list_unit n i)
+    | S n, 0 => Aone :: (repeat Azero n)
+    | S n, S i => Azero :: (list_unit n i)
     end.
 
   (* Compute list_unit 0 2. (* [] *) *)
@@ -1350,9 +1350,9 @@ Section GenerateSpecialList.
     induction n; auto. destruct i; simpl; auto. rewrite repeat_length. auto.
   Qed.
   
-  (** list_unit(n,i) [i] = A1, when i < n *)
-  Lemma list_unit_A1 : forall n i, i < n -> 
-    (nth i (list_unit n i) A0 == A1)%A.
+  (** list_unit(n,i) [i] = Aone, when i < n *)
+  Lemma list_unit_Aone : forall n i, i < n -> 
+    (nth i (list_unit n i) Azero == Aone)%A.
   Proof.
     induction n; try easy. destruct i; simpl; try easy.
     intros; apply IHn.
@@ -1361,18 +1361,18 @@ Section GenerateSpecialList.
     apply Nat.succ_lt_mono. auto.
   Qed.
   
-  (** list_unit(n,i) [j] = A0, when i < n /\ j <> i *)
+  (** list_unit(n,i) [j] = Azero, when i < n /\ j <> i *)
   Fact list_unit_spec1 : forall n i j, i < n -> j <> i ->
-    (nth j (list_unit n i) A0 == A0)%A.
+    (nth j (list_unit n i) Azero == Azero)%A.
   Proof.
     induction n; try easy. intros. destruct i,j; simpl; try easy.
     - apply nth_repeat_same.
     - apply IHn; lia.
   Qed.
   
-  (** list_unit(n,i) [j] = A0, j <> i *)
-  Lemma list_unit_A0 : forall n i j, j <> i -> 
-    (nth j (list_unit n i) A0 == A0)%A.
+  (** list_unit(n,i) [j] = Azero, j <> i *)
+  Lemma list_unit_Azero : forall n i j, j <> i -> 
+    (nth j (list_unit n i) Azero == Azero)%A.
   Proof.
     induction n; try easy; simpl; intros.
     - destruct j; easy.
@@ -1396,7 +1396,7 @@ Section List2FixedlengthList.
   Fixpoint list_to_listN (l : list A) (n : nat) : list A :=
     match n with
     | 0 => []
-    | S n' => (hd A0 l) :: (list_to_listN (tl l) n')
+    | S n' => (hd Azero l) :: (list_to_listN (tl l) n')
     end.
   
   Lemma list_to_listN_length : forall (l : list A) (n : nat),
@@ -1416,4 +1416,4 @@ Section List2FixedlengthList.
 End List2FixedlengthList.
 
 (* Arguments list_to_listN. *)
-Arguments list_to_listN_length {A A0 l n}.
+Arguments list_to_listN_length {A Azero l n}.

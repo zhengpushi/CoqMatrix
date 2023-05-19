@@ -40,7 +40,7 @@ Open Scope A_scope.
 Open Scope vector_scope.
 Open Scope mat_scope.
 
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Azero Aone Aeq Beq Ceq Aadd Aopp Amul Ainv.
 
 (** Example shows the definition of matrix *)
 Module Demo_matrix_def.
@@ -224,17 +224,17 @@ End Demo_matrix_def_improve.
 
 (*   Section mat_mul. *)
 (*     Variable A : Type. *)
-(*     Variable A0 A1 : A. *)
+(*     Variable Azero Aone : A. *)
 (*     Variable fopp : A -> A. *)
 (*     Variable fadd fmul : A -> A -> A. *)
 (*     Variable fadd_comm : forall x y, fadd x y = fadd y x. *)
 (*     Variable fadd_assoc : forall x y z, fadd (fadd x y) z = fadd x (fadd y z). *)
 (*     Variable fmul_comm : forall x y, fmul x y = fmul y x. *)
 (*     Variable fmul_assoc : forall x y z, fmul (fmul x y) z = fmul x (fmul y z). *)
-(*     Variable fadd_0_l : forall x, fadd A0 x = x. *)
-(*     Variable fadd_0_r : forall x, fadd x A0 = x. *)
-(*     Variable fmul_0_r : forall x, fmul x A0 = A0. *)
-(*     Variable fmul_0_l : forall x, fmul A0 x = A0. *)
+(*     Variable fadd_0_l : forall x, fadd Azero x = x. *)
+(*     Variable fadd_0_r : forall x, fadd x Azero = x. *)
+(*     Variable fmul_0_r : forall x, fmul x Azero = Azero. *)
+(*     Variable fmul_0_l : forall x, fmul Azero x = Azero. *)
 (*     Variable fmul_add_distl : forall x y z, *)
 (*         fmul x (fadd y z) = fadd (fmul x y) (fmul x z). *)
 (*     Variable fmul_add_distr : forall x y z, *)
@@ -268,7 +268,7 @@ End Demo_matrix_def_improve.
 (*     Definition mcol {r c} (m : mat r c) := *)
 (*       fun fc : fin c => vmake (fun fr : fin r => nth (nth m fr) fc). *)
 
-(*     Definition vdot {n} (v1 v2 : vec n) := fold_left fadd A0 (map2 fmul v1 v2). *)
+(*     Definition vdot {n} (v1 v2 : vec n) := fold_left fadd Azero (map2 fmul v1 v2). *)
 
     
 (*     Lemma mat_build_spec : forall {r c}  *)
@@ -599,9 +599,9 @@ Arguments veq_dec {A} _ _ {n}.
 (** ** vec0 *)
 Section vec0.
 
-  Context {A:Type} (A0:A).
+  Context {A:Type} (Azero:A).
 
-  Definition vec0 n : vec n := vconst A0 n.
+  Definition vec0 n : vec n := vconst Azero n.
 
 End vec0.
 (* Hint Unfold vec0 : core. *)
@@ -686,7 +686,7 @@ End vcons.
 
 (** Properties for vhd and vtl *)
 Section vhd_vtl.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
@@ -713,7 +713,7 @@ End vhd_vtl.
 (** ** Get n-th element with index of fin type *)
 Section vnth.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
@@ -762,7 +762,7 @@ End vnth.
 (** Get i-th element with index of nat type *)
 Section vnthNat.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
@@ -770,7 +770,7 @@ Section vnthNat.
   Definition vnthNat {n} (v : vec n) (i : nat) :=
     match (fin_gen n i) with
     | Some fi => vnth v fi
-    | _ => A0
+    | _ => Azero
     end.
 
   (** vnthNat is a proper morphism *)
@@ -876,7 +876,7 @@ End vmap2.
 (** ** Build vector with a function *)
 Section vmake.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
@@ -911,8 +911,8 @@ Section vmake.
     apply veq_iff_nth. intros; subst. rewrite vnth_tail, !vmake_nth. easy.
   Qed.
 
-  (** A vector build with A0 equal to vec0 *)
-  Lemma vmake_0_eq_vec0 : forall n, vmake (fun _ : fin n => A0) == vec0 A0 n.
+  (** A vector build with Azero equal to vec0 *)
+  Lemma vmake_0_eq_vec0 : forall n, vmake (fun _ : fin n => Azero) == vec0 Azero n.
   Proof.
     intros. apply veq_iff_nth. intros ? p ->. rewrite vmake_nth, const_nth. easy.
   Qed.
@@ -1050,22 +1050,22 @@ Section vfold_props_advanced.
   Qed.
 
   (** vfoldl a vec0 = a *)
-  Lemma vfoldl_vec0 : forall n (a : A), (vfoldl Aadd a (vec0 A0 n) == a)%A.
+  Lemma vfoldl_vec0 : forall n (a : A), (vfoldl Aadd a (vec0 Azero n) == a)%A.
   Proof.
     intros. induction n; simpl. easy.
-    rewrite vfoldl_ext_samef with (a2:=a) (v2:=vec0 A0 n); try easy.
+    rewrite vfoldl_ext_samef with (a2:=a) (v2:=vec0 Azero n); try easy.
     apply monoidAaddProper. monoid_simpl.
   Qed.
 
   (** *** Properties on AMonoid *)
-  Context `{AM:AMonoid A Aadd A0 Aeq}.
+  Context `{AM:AMonoid A Aadd Azero Aeq}.
   (* Context `{AG:AGroup}. *)
   (* Variable A : Type. *)
-  (* Variable A0 : A. *)
+  (* Variable Azero : A. *)
   (* Variable fadd : A -> A -> A. *)
   (* Variable fadd_comm : forall x y, fadd x y = fadd y x. *)
   (* Variable fadd_assoc : forall x y z, fadd (fadd x y) z = fadd x (fadd y z). *)
-  (* Variable fadd_0_r : forall x, fadd x A0 = x. *)
+  (* Variable fadd_0_r : forall x, fadd x Azero = x. *)
 
   (** vfoldr v (a + b) v = a + (vfoldr b v) *)
   Lemma vfoldr_Aadd : forall n (a b : A) (v : @vec A n),
@@ -1080,7 +1080,7 @@ Section vfold_props_advanced.
   Qed.
 
   (** vfoldr vec0 a = a *)
-  Lemma vfoldr_vec0 : forall n (a : A), (vfoldr Aadd (vec0 A0 n) a == a)%A.
+  Lemma vfoldr_vec0 : forall n (a : A), (vfoldr Aadd (vec0 Azero n) a == a)%A.
   Proof.
     intros. induction n; simpl. easy. monoid_simpl.
   Qed.
@@ -1104,12 +1104,12 @@ Arguments vfoldl_Aadd {A}.
 
 (** get / set an element of a vector *)
 Section vget_vset.
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
   Fixpoint vget {n} (v:vec n) (i:nat) : A :=
     match v, i with
-    | [], _ => A0
+    | [], _ => Azero
     | a :: v', 0 => a
     | a :: v', S i' => vget v' i'
     end.
@@ -1131,13 +1131,13 @@ End vget_vset.
 Section varith.
 
   (* Variable A : Type. *)
-  (* Variable A0 A1 : A. *)
+  (* Variable Azero Aone : A. *)
   (* Variable fopp : A -> A. *)
   (* Variable fadd : A -> A -> A. *)
   (* Variable fadd_comm : forall x y, fadd x y = fadd y x. *)
   (* Variable fadd_assoc : forall x y z, fadd (fadd x y) z = fadd x (fadd y z). *)
-  (* Variable fadd_0_l : forall x, fadd A0 x = x. *)
-  (* Variable fadd_0_r : forall x, fadd x A0 = x. *)
+  (* Variable fadd_0_l : forall x, fadd Azero x = x. *)
+  (* Variable fadd_0_r : forall x, fadd x Azero = x. *)
 
   Context `{G:AGroup}.
   Infix "+" := Aadd : A_scope.
@@ -1150,7 +1150,7 @@ Section varith.
   Lemma vfold_Aadd : forall n a b (v : @vec A n),
     (vfold Aadd (a + b) v == a + (vfold Aadd b v))%A.
   Proof.
-    apply (vfoldl_Aadd _ A0). apply groupMonoid.
+    apply (vfoldl_Aadd _ Azero). apply groupMonoid.
   Qed.
   
   (** vfold (a + b) v = b + (fold a v) *)
@@ -1185,7 +1185,7 @@ Section varith.
   Qed.
 
   (** vfold a vec0 = a *)
-  Lemma vfold_vec0 : forall n (a : A), (vfold Aadd a (vec0 A0 n) == a)%A.
+  Lemma vfold_vec0 : forall n (a : A), (vfold Aadd a (vec0 Azero n) == a)%A.
   Proof.
     apply vfoldl_vec0.
   Qed.
@@ -1201,17 +1201,17 @@ Section varith.
     rewrite <- ?associative; f_equiv. apply commutative.
   Qed.
   
-  (** vfold a (vmap2 f v1 v2) = f (vfold a v1) (vfold A0 v2) *)
+  (** vfold a (vmap2 f v1 v2) = f (vfold a v1) (vfold Azero v2) *)
   Lemma vfold_vmap2_eq_left : forall n (a : A) (v1 v2 : @vec A n),
-    (vfold Aadd a (vmap2 Aadd v1 v2) == (vfold Aadd a v1) + (vfold Aadd A0 v2))%A.
+    (vfold Aadd a (vmap2 Aadd v1 v2) == (vfold Aadd a v1) + (vfold Aadd Azero v2))%A.
   Proof.
     intros. rewrite <- vfold_Aadd_vmap2. apply vfoldl_ext; try easy.
     intros; f_equiv; easy. monoid_simpl.
   Qed.
 
-  (** vfold a (vmap2 f v1 v2) = f (vfold A0 v1) (vfold a v2) *)
+  (** vfold a (vmap2 f v1 v2) = f (vfold Azero v1) (vfold a v2) *)
   Lemma vfold_vmap2_eq_right : forall n (a : A) (v1 v2 : @vec A n),
-    (vfold Aadd a (vmap2 Aadd v1 v2) == (vfold Aadd A0 v1) + (vfold Aadd a v2))%A.
+    (vfold Aadd a (vmap2 Aadd v1 v2) == (vfold Aadd Azero v1) + (vfold Aadd a v2))%A.
   Proof.
     intros. rewrite <- vfold_Aadd_vmap2. apply vfoldl_ext; try easy.
     intros; f_equiv; easy. monoid_simpl.
@@ -1279,28 +1279,28 @@ Section varith.
   (* Proof. intros. rewrite (vec_0 v). simpl. easy. Qed. *)
   
   (** vec0 + v = v *)
-  Lemma vadd_vec0_l : forall {n} (v : vec n), (vec0 A0 n) + v == v.
+  Lemma vadd_vec0_l : forall {n} (v : vec n), (vec0 Azero n) + v == v.
   Proof.
     induction n; intros; vsimp; simpl. easy.
     apply vcons_eq_iff; split; auto. monoid_simpl.
   Qed.
 
   (** v + vec0 = v *)
-  Lemma vadd_vec0_r : forall {n} (v : vec n), v + (vec0 A0 n) == v.
+  Lemma vadd_vec0_r : forall {n} (v : vec n), v + (vec0 Azero n) == v.
   Proof.
     induction n; intros; vsimp; simpl. easy.
     apply vcons_eq_iff; split; auto. monoid_simpl.
   Qed.
 
   (** (-v) + v = vec0 *)
-  Lemma vadd_vopp_l : forall {n} (v : vec n), (-v) + v == vec0 A0 n.
+  Lemma vadd_vopp_l : forall {n} (v : vec n), (-v) + v == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl. easy.
     apply vcons_eq_iff; split; auto. group_simpl.
   Qed.
 
   (** v + (-v) = vec0 *)
-  Lemma vadd_vopp_r : forall {n} (v : vec n), v + (-v) == vec0 A0 n.
+  Lemma vadd_vopp_r : forall {n} (v : vec n), v + (-v) == vec0 Azero n.
   Proof.
     induction n; intros; vsimp; simpl. easy.
     apply vcons_eq_iff; split; auto. group_simpl.
@@ -1350,7 +1350,7 @@ Section vec_AG.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
-  Lemma vec_AG : forall n, @AGroup (vec n) (vadd Aadd) (vconst A0 n) (vopp Aopp)
+  Lemma vec_AG : forall n, @AGroup (vec n) (vadd Aadd) (vconst Azero n) (vopp Aopp)
                     (veq (Aeq:=Aeq)).
   Proof.
     induction n; repeat constructor; intros
@@ -1376,9 +1376,9 @@ End vec_AG.
 Section vsum.
 
   Context `{Equiv_Aeq : Equivalence A Aeq}.
-  Context (A0:A) (Aadd : A -> A -> A). 
+  Context (Azero:A) (Aadd : A -> A -> A). 
 
-  Definition vsum {n} (v : @vec A n) := vfold Aadd A0 v.
+  Definition vsum {n} (v : @vec A n) := vfold Aadd Azero v.
   
 End vsum.
 
@@ -1387,7 +1387,7 @@ End vsum.
 
 Section MatrixDefinition.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0:A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
 
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
@@ -1451,7 +1451,7 @@ Section MatrixDefinition.
     
     (** Get n-th element of a matrix *)  
     Definition mnthNat {r c} (m : mat r c) (ri ci : nat) :=
-      vnthNat (vnthNat m ri (A0:=vec0 A0 c)) ci (A0:=A0).
+      vnthNat (vnthNat m ri (Azero:=vec0 Azero c)) ci (Azero:=Azero).
     
     (** meq and mnthNat should satisfy this constraint *)
     Lemma meq_iff_mnthNat : forall {r c : nat} (m1 m2 : mat r c),
@@ -1460,13 +1460,13 @@ Section MatrixDefinition.
     Proof.
       intros. split; intros.
       - apply veq_iff_vnthNat; auto.
-        apply (veq_iff_vnthNat (A0:=vec0 A0 c)); auto.
-      - apply (veq_iff_vnthNat (A0:=vec0 A0 c)).
+        apply (veq_iff_vnthNat (Azero:=vec0 Azero c)); auto.
+      - apply (veq_iff_vnthNat (Azero:=vec0 Azero c)).
         intros. specialize (H i).
         unfold mnthNat in H.
         assert (forall ci, ci < c ->
-                      (vnthNat (vnthNat m1 i (A0:=vec0 A0 c)) ci (A0:=A0) ==
-                         vnthNat (vnthNat m2 i (A0:=vec0 A0 c)) ci (A0:=A0))%A).
+                      (vnthNat (vnthNat m1 i (Azero:=vec0 Azero c)) ci (Azero:=Azero) ==
+                         vnthNat (vnthNat m2 i (Azero:=vec0 Azero c)) ci (Azero:=Azero))%A).
         { intros. apply H; auto. }
         apply (veq_iff_vnthNat) in H1. auto.
     Qed.
@@ -1495,9 +1495,9 @@ Section MatrixDefinition.
 
   (** get / set an element of a matrix *)
   Definition mget {r c} (m:mat r c) (i j:nat) : A :=
-    vget (A0:=A0) (vget (A0:=vec0 A0 c) m i) j.
+    vget (Azero:=Azero) (vget (Azero:=vec0 Azero c) m i) j.
   Definition mset {r c} (m:mat r c) (i j : nat) (x:A) : mat r c :=
-    @vset _ r m i (@vset _ c (@vget _ (vec0 A0 c) _ m i) j x).
+    @vset _ r m i (@vset _ c (@vget _ (vec0 Azero c) _ m i) j x).
   
 End MatrixDefinition.
 
@@ -1506,8 +1506,8 @@ End MatrixDefinition.
 (* Arguments mrow {A r c}. *)
 (* Arguments mcol {A r c}. *)
 (* Arguments mnth {A r c}. *)
-(* Arguments mget {A} A0 {r c}. *)
-(* Arguments mset {A} A0 {r c}. *)
+(* Arguments mget {A} Azero {r c}. *)
+(* Arguments mset {A} Azero {r c}. *)
 
 
 
@@ -1515,7 +1515,7 @@ End MatrixDefinition.
 Section msum.
 
   (* Context `{Equiv_Aeq : Equivalence A Aeq}. *)
-  (* Context (A0:A) (Aadd : A -> A -> A).  *)
+  (* Context (Azero:A) (Aadd : A -> A -> A).  *)
   Context `{G:AGroup}.
   Infix "+" := Aadd : A_scope.
   Infix "==" := Aeq : A_scope.
@@ -1524,24 +1524,24 @@ Section msum.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
 
   (* Variable A : Type. *)
-  (* Variable A0 : A. *)
+  (* Variable Azero : A. *)
   (* Variable fadd : A -> A -> A. *)
   (* Variable fadd_comm : forall x y, fadd x y = fadd y x. *)
   (* Variable fadd_assoc : forall x y z, fadd (fadd x y) z = fadd x (fadd y z). *)
-  (* Variable fadd_0_r : forall x, fadd x A0 = x. *)
+  (* Variable fadd_0_r : forall x, fadd x Azero = x. *)
   
   (** Sum of a matrix: sum the result of sums of every row *)
   Definition msum {r c} (m : @mat A r c) : A :=
-    vsum A0 Aadd (vsum (vec0 A0 c) (fun v1 v2 => v1 + v2) m).
+    vsum Azero Aadd (vsum (vec0 Azero c) (fun v1 v2 => v1 + v2) m).
   
   (** Sum of matrix generated by the generating function first column then row *)
   Definition msumrc {r c} (gen : fin r -> fin c -> A) :=
-    vsum A0 Aadd (vsum (vec0 A0 c) (vadd Aadd) 
+    vsum Azero Aadd (vsum (vec0 Azero c) (vadd Aadd) 
       (vmake (fun fr : fin r => (vmake (fun fc : fin c => gen fr fc))))).
   
   (** Sum of matrix generated by the generating function first row then column *)
   Definition msumcr {r c} (gen : fin r -> fin c -> A) :=
-    vsum A0 Aadd (vsum (vec0 A0 r) (vadd Aadd) 
+    vsum Azero Aadd (vsum (vec0 Azero r) (vadd Aadd) 
       (vmake (fun fc : fin c => (vmake (fun fr : fin r => gen fr fc))))).
   
   (** The matrices generated by the generating function first row then
@@ -1574,7 +1574,7 @@ Section msum.
 (*     induction r; intros. *)
 (*     - simpl. rewrite (vec_0 m). simpl. *)
 (*       rewrite vmake_nil_eq_vconstnil. *)
-(*       rewrite ?vfold_constA0; auto. *)
+(*       rewrite ?vfold_constAzero; auto. *)
 (*       apply vadd_nil_r. *)
 (*     - pose proof vec_S m as [x [v ->]]. simpl. *)
 (*       Check (fun v1 v2 : vec c => vadd fadd v1 v2). *)
@@ -1591,16 +1591,16 @@ Section msum.
 
 End msum.
 
-(* Arguments msum {A} A0 fadd {r c}. *)
-(* Arguments msumrc {A} A0 fadd {r c}. *)
-(* Arguments msumcr {A} A0 fadd {r c}. *)
+(* Arguments msum {A} Azero fadd {r c}. *)
+(* Arguments msumrc {A} Azero fadd {r c}. *)
+(* Arguments msumcr {A} Azero fadd {r c}. *)
 
 
 
 (** ** Get row or column of a matrix *)
 Section mrow_mcol.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} (A0:A).
+  Context `{Equiv_Aeq : Equivalence A Aeq} (Azero:A).
   Infix "==" := Aeq : A_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
   
@@ -1653,7 +1653,7 @@ Section mrow_mcol.
   
   (** mcol vec0 i = vec0 *)
   Lemma mcol_vec0_eq_vec0 : forall r c fr,
-    (mcol (vec0 (vec0 A0 c) r) fr == vec0 A0 r)%vector.
+    (mcol (vec0 (vec0 Azero c) r) fr == vec0 Azero r)%vector.
   Proof.
     intros. unfold mcol.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -1665,21 +1665,21 @@ End mrow_mcol.
 
 (** ** mat0, mat1 *)
 Section mat0_mat1.
-  Context {A:Type} (A0 A1 : A).
+  Context {A:Type} (Azero Aone : A).
 
   (** mat0 *)
   Definition mat0 {r c} : @mat A r c :=
-    vmake (fun (fr : fin r) => (vmake (fun (fc : fin c) => A0))).
+    vmake (fun (fr : fin r) => (vmake (fun (fc : fin c) => Azero))).
 
   (** mat1 *)
   Definition mat1 {n} : @mat A n n :=
     vmake (fun (fr : fin n) => (vmake (fun (fc : fin n) =>
-      if Fin.eq_dec fr fc then A1 else A0))).
+      if Fin.eq_dec fr fc then Aone else Azero))).
     
 End mat0_mat1.
 
-Arguments mat0 {A A0}.
-Arguments mat1 {A A0 A1}.
+Arguments mat0 {A Azero}.
+Arguments mat1 {A Azero Aone}.
 
 
 (* =============================================================== *)
@@ -1827,29 +1827,29 @@ End mmap2.
 Section MatArith.
 
   (* Variable A : Type. *)
-  (* Variable A0 A1 : A. *)
+  (* Variable Azero Aone : A. *)
   (* Variable fopp : A -> A. *)
   (* Variable fadd fsub fmul : A -> A -> A. *)
   (* Variable fadd_comm : forall x y, fadd x y = fadd y x. *)
   (* Variable fadd_assoc : forall x y z, fadd (fadd x y) z = fadd x (fadd y z). *)
   (* Variable fmul_comm : forall x y, fmul x y = fmul y x. *)
   (* Variable fmul_assoc : forall x y z, fmul (fmul x y) z = fmul x (fmul y z). *)
-  (* Variable fadd_0_l : forall x, fadd A0 x = x. *)
-  (* Variable fadd_0_r : forall x, fadd x A0 = x. *)
-  (* Variable fmul_0_l : forall x, fmul A0 x = A0. *)
-  (* Variable fmul_0_r : forall x, fmul x A0 = A0. *)
+  (* Variable fadd_0_l : forall x, fadd Azero x = x. *)
+  (* Variable fadd_0_r : forall x, fadd x Azero = x. *)
+  (* Variable fmul_0_l : forall x, fmul Azero x = Azero. *)
+  (* Variable fmul_0_r : forall x, fmul x Azero = Azero. *)
   (* Variable fmul_add_distl : forall x y z, *)
   (*   fmul x (fadd y z) = fadd (fmul xnnn y) (fmul x z). *)
   (* Variable fmul_add_distr : forall x y z, *)
   (*   fmul (fadd x y) z = fadd (fmul x z) (fmul y z). *)
   (* Variable fopp_opp : forall a, fopp (fopp a) = a. *)
-  (* Variable fadd_opp : forall a, fadd a (fopp a) = A0. *)
+  (* Variable fadd_opp : forall a, fadd a (fopp a) = Azero. *)
   (* Variable fsub_comm : forall a b, fsub a b = fopp (fsub b a). *)
   (* Variable fsub_assoc : forall a b c, fsub (fsub a b) c = fsub a (fadd b c). *)
-  (* Variable fsub_0_l : forall t, fsub A0 t = fopp t. *)
-  (* Variable fsub_0_r : forall t, fsub t A0 = t. *)
-  (* Variable fsub_self : forall t, fsub t t = A0. *)
-  (* Variable fmul_1_l : forall a, fmul A1 a = a. *)
+  (* Variable fsub_0_l : forall t, fsub Azero t = fopp t. *)
+  (* Variable fsub_0_r : forall t, fsub t Azero = t. *)
+  (* Variable fsub_self : forall t, fsub t t = Azero. *)
+  (* Variable fmul_1_l : forall a, fmul Aone a = a. *)
 
   Context `{R:Ring}.
   Add Ring ring_inst : make_ring_theory.
@@ -1870,7 +1870,7 @@ Section MatArith.
   (** *** Operations *)
   
   (** vdot : vec n -> vec n -> A *)
-  Definition vdot {n} (v1 v2 : vec n) := vfold Aadd A0 (map2 Amul v1 v2).
+  Definition vdot {n} (v1 v2 : vec n) := vfold Aadd Azero (map2 Amul v1 v2).
 
   (** vdotm : vec r -> mat r c -> vec c *)
   Definition vdotm {r c} (v : vec r) (m : mat r c) : vec c :=
@@ -1964,26 +1964,26 @@ Section MatArith.
   Qed.
 
   (** [] . v = 0 *)
-  Lemma vdot_nil_l : forall (v : vec 0), (vdot nil v == A0)%A.
+  Lemma vdot_nil_l : forall (v : vec 0), (vdot nil v == Azero)%A.
   Proof.
     intros. rewrite (vec_0 v). unfold vdot. simpl. easy.
   Qed.
 
   (** v . [] = 0 *)
-  Lemma vdot_nil_r : forall (v : vec 0), (vdot v nil == A0)%A.
+  Lemma vdot_nil_r : forall (v : vec 0), (vdot v nil == Azero)%A.
   Proof.
     intros. rewrite (vec_0 v). unfold vdot. simpl. easy.
   Qed.
 
   (** vec0 . v = 0 *)
-  Lemma vdot_vec0_l : forall {n} (v : vec n), (vdot (vec0 A0 n) v == A0)%A.
+  Lemma vdot_vec0_l : forall {n} (v : vec n), (vdot (vec0 Azero n) v == Azero)%A.
   Proof.
     induction n; intros; vsimp; simpl. cbv. easy.
     rewrite vdot_cons. rewrite IHn. ring.
   Qed.
 
   (** v . vec0 = 0 *)
-  Lemma vdot_vec0_r : forall {n} (v : vec n), (vdot v (vec0 A0 n) == A0)%A.
+  Lemma vdot_vec0_r : forall {n} (v : vec n), (vdot v (vec0 Azero n) == Azero)%A.
   Proof.
     induction n; intros; vsimp; simpl. cbv. easy.
     rewrite vdot_cons. rewrite IHn. ring.
@@ -2024,7 +2024,7 @@ Section MatArith.
     unfold mat. induction r; intros.
     - (* base case *)
       vsimp. simpl. rewrite vdot_nil_l.
-      assert (vmake (fun fc : fin c => vdot vnil (mcol m fc)) == vec0 A0 c)%vector.
+      assert (vmake (fun fc : fin c => vdot vnil (mcol m fc)) == vec0 Azero c)%vector.
       { apply veq_iff_nth. intros; subst. rewrite vmake_nth.
         rewrite vdot_nil_l. rewrite const_nth. easy. apply monoidEquiv. }
       rewrite H. rewrite vdot_vec0_l. easy.
@@ -2086,7 +2086,7 @@ Section MatArith.
   Qed.
 
   (** mat0 + m = m *)
-  Lemma madd_0_l : forall {r c} (m : @mat A r c), mat0 (A0:=A0) r c + m == m.
+  Lemma madd_0_l : forall {r c} (m : @mat A r c), mat0 (Azero:=Azero) r c + m == m.
   Proof.
     unfold madd, mnth, mat0. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2095,7 +2095,7 @@ Section MatArith.
   Qed.
 
   (** m + mat0 = m *)
-  Lemma madd_0_r : forall {r c} (m : @mat A r c), m + mat0 (A0:=A0) r c == m.
+  Lemma madd_0_r : forall {r c} (m : @mat A r c), m + mat0 (Azero:=Azero) r c == m.
   Proof.
     unfold madd, mnth, mat0. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2122,7 +2122,7 @@ Section MatArith.
   Qed.
 
   (** mat0 - m = - m *)
-  Lemma msub_0_l : forall {r c} (m : mat r c), mat0 (A0:=A0) r c - m == - m.
+  Lemma msub_0_l : forall {r c} (m : mat r c), mat0 (Azero:=Azero) r c - m == - m.
   Proof.
     unfold msub, mopp, mat0, mnth. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2131,7 +2131,7 @@ Section MatArith.
   Qed.
 
   (** m - mat0 = m *)
-  Lemma msub_0_r : forall {r c} (m : mat r c), m - mat0 (A0:=A0) r c == m.
+  Lemma msub_0_r : forall {r c} (m : mat r c), m - mat0 (Azero:=Azero) r c == m.
   Proof.
     unfold msub, mat0, mnth. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2140,7 +2140,7 @@ Section MatArith.
   Qed.
 
   (** m - m = mat0 *)
-  Lemma msub_self : forall {r c} (m : mat r c), m - m == mat0 (A0:=A0) r c.
+  Lemma msub_self : forall {r c} (m : mat r c), m - m == mat0 (Azero:=Azero) r c.
   Proof.
     unfold msub, mat0, mnth. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2149,7 +2149,7 @@ Section MatArith.
   Qed.
 
   (** m + (- m) = mat0 *)
-  Lemma madd_mopp : forall {r c} (m : mat r c), m + (- m) == mat0 (A0:=A0) r c.
+  Lemma madd_mopp : forall {r c} (m : mat r c), m + (- m) == mat0 (Azero:=Azero) r c.
   Proof.
     unfold madd, mopp, mat0, mnth. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2236,7 +2236,7 @@ Section MatArith.
   Qed.
 
   (** 1 c* m = m *)
-  Lemma mcmul_1_l : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1_l : forall {r c} (m : mat r c), Aone c* m == m.
   Proof.
     unfold mcmul, mnth. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2245,7 +2245,7 @@ Section MatArith.
   Qed.
 
   (** 0 c* m = mat0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 (A0:=A0) r c.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 (Azero:=Azero) r c.
   Proof.
     unfold mcmul, mnth, mat0. intros.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth; auto.
@@ -2324,7 +2324,7 @@ Section MatArith.
   
   (** mat0 * m = mat0 *)
   Lemma mmul_0_l : forall {r c t} (m : mat c t), 
-    (mat0 (A0:=A0) r c) * m == mat0 (A0:=A0) r t.
+    (mat0 (Azero:=Azero) r c) * m == mat0 (Azero:=Azero) r t.
   Proof.
     intros. unfold mmul. unfold mat0. 
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth.
@@ -2335,7 +2335,7 @@ Section MatArith.
   
   (** m * mat0 = mat0 *)
   Lemma mmul_0_r : forall {r c t} (m : mat r c),
-      m * (mat0 (A0:=A0) c t) == mat0 (A0:=A0) r t.
+      m * (mat0 (Azero:=Azero) c t) == mat0 (Azero:=Azero) r t.
   Proof.
     intros. unfold mmul. unfold mat0. 
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth.
@@ -2365,7 +2365,7 @@ Section MatArith.
   (** v . (col_of_mat1 fc) = v[fc] *)
   Lemma vdot_mat1col_r : forall n (fn : fin n) v,
     (vdot v 
-      (vmake (fun fn' : fin n => if Fin.eq_dec fn' fn then A1 else A0)) == 
+      (vmake (fun fn' : fin n => if Fin.eq_dec fn' fn then Aone else Azero)) == 
     vnth v fn)%A.
   Proof.
     induction n; intros; finsimp; vsimp; simpl.
@@ -2381,7 +2381,7 @@ Section MatArith.
   Qed.
   
   (** mat1\T = mat1 *)  
-  Lemma mtrans_mat1 : forall n, (@mat1 A A0 A1 n)\T == (@mat1 A A0 A1 n).
+  Lemma mtrans_mat1 : forall n, (@mat1 A Azero Aone n)\T == (@mat1 A Azero Aone n).
   Proof.
     intros. unfold mtrans, mat1.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth.
@@ -2391,7 +2391,7 @@ Section MatArith.
   Qed.
   
   (** m * mat1 = m *)
-  Lemma mmul_1_r : forall {r c} (m : mat r c), m * (@mat1 A A0 A1 c) == m.
+  Lemma mmul_1_r : forall {r c} (m : mat r c), m * (@mat1 A Azero Aone c) == m.
   Proof.
     intros. unfold mmul,mat1.
     apply veq_iff_nth; intros; subst; rewrite ?vmake_nth.
@@ -2401,7 +2401,7 @@ Section MatArith.
   Qed.
   
   (** mat1 * m = m *)
-  Lemma mmul_1_l : forall {r c} (m : mat r c), (@mat1 A A0 A1 r) * m == m.
+  Lemma mmul_1_l : forall {r c} (m : mat r c), (@mat1 A Azero Aone r) * m == m.
   Proof.
     (** mat1 * m = m
         (mat1 * m)\T\T = m
@@ -2420,7 +2420,7 @@ End MatArith.
 (** Convert between vector and list *)
 Section v2l_l2v.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
 
   Infix "==" := (eqlistA Aeq) : list_scope.
   Infix "==" := (veq (Aeq:=Aeq)) : vector_scope.
@@ -2434,7 +2434,7 @@ Section v2l_l2v.
   Fixpoint l2v (l : list A) (n : nat) : vec n :=
     match n with
     | 0 => []%vector
-    | S n' => (List.hd A0 l) :: (l2v (List.tl l) n')
+    | S n' => (List.hd Azero l) :: (l2v (List.tl l) n')
     end.
   
   Lemma v2l_length : forall n (v : @vec A n), length (v2l v) = n.
@@ -2514,7 +2514,7 @@ Arguments l2v {A}.
 (** Convert between matrix and list list *)
 Section m2l_l2m.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {A0 : A}.
+  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
 
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
@@ -2528,7 +2528,7 @@ Section m2l_l2m.
   Fixpoint l2m (dl : list (list A)) (r c : nat) : @mat A r c :=
     match r with
     | 0 => Vector.nil
-    | S n' => Vector.cons (l2v A0 (List.hd List.nil dl) c) 
+    | S n' => Vector.cons (l2v Azero (List.hd List.nil dl) c) 
       (l2m (List.tl dl) n' c)
     end.
 
@@ -2554,7 +2554,7 @@ Section m2l_l2m.
       apply vcons_eq_iff in H3 as [].
       inv H. inv H0. inv H1. inv H2.
       simpl in *. f_equiv; auto.
-      + apply (l2v_eq_imply_list_eq (n:=length l) (A0:=A0)); auto.
+      + apply (l2v_eq_imply_list_eq (n:=length l) (Azero:=Azero)); auto.
       + apply IHr with (c:=length l); auto.
   Qed.
 
@@ -2617,11 +2617,11 @@ Section m2l_l2m.
     - apply List.length_zero_iff_nil in H. subst. exists []. simpl. easy.
     - destruct d. easy. inv H. inv H0.
       destruct (IHr (length l) d eq_refl H3).
-      exists ((l2v A0 l (length l)) :: x). simpl. f_equiv; auto.
+      exists ((l2v Azero l (length l)) :: x). simpl. f_equiv; auto.
       apply v2l_l2v_id. auto.
   Qed.
   
 End m2l_l2m.
 
 Arguments m2l {A r c}.
-Arguments l2m {A} A0 dl r c.
+Arguments l2m {A} Azero dl r c.

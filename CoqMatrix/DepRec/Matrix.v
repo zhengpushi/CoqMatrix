@@ -19,7 +19,7 @@ Require Export Lia.
 Require Export BasicConfig SetoidListListExt.
 
 (* also contain "A*" which * is number, e.g. A0 A1 ... *)
-Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
+Generalizable Variable A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
 Open Scope nat_scope.
 Open Scope list_scope.
@@ -104,12 +104,12 @@ End meq.
 (** ** Get Matrix Element *)
 Section mnth.
 
-  Context `{Aeq:relation A} (A0:A) {r c:nat}.
+  Context `{Aeq:relation A} (Azero:A) {r c:nat}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
   
   Definition mnth (m : mat r c) (ri ci : nat) : A :=
-    nth ci (nth ri (mdata m) []) A0.
+    nth ci (nth ri (mdata m) []) Azero.
 
   Notation "m @ i # j" :=
     (mnth m i j) (at level 20, i at next level, j at next level).
@@ -124,7 +124,7 @@ Section mnth.
       apply nth_aeq_mor; try easy.
       apply nth_aeq_mor; try easy.
     - intros.
-      rewrite (dlist_eq_iff_nth_nth (A0:=A0) r c); auto.
+      rewrite (dlist_eq_iff_nth_nth (Azero:=Azero) r c); auto.
   Qed.
   
 End mnth.
@@ -132,7 +132,7 @@ End mnth.
 (** ** Convert between function and matrix *)
 Section f2m_m2f.
   
-  Context `{Aeq:relation A} (A0:A).
+  Context `{Aeq:relation A} (Azero:A).
   Infix "==" := Aeq : A_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
 
@@ -140,7 +140,7 @@ Section f2m_m2f.
     mk_mat (@f2dl A r c f) (f2dl_length r c f) (f2dl_width r c f).
     
   Definition m2f {r c} (m : mat r c) : (nat -> nat -> A) :=
-    dl2f (r:=r) (c:=c) (A0:=A0) (mdata m).
+    dl2f (r:=r) (c:=c) (Azero:=Azero) (mdata m).
 
 End f2m_m2f.
 
@@ -404,9 +404,9 @@ End matmap2_sametype.
 (** ** zero matrix and unit matrix *)
 Section mat0_mat1.
 
-  Context {A:Type} (A0 A1 : A).
-  Definition mat0 {r c} := mk_mat (dlzero A0 r c) dlzero_length dlzero_width.
-  Definition mat1 {n} := mk_mat (dlunit A0 A1 n) dlunit_length dlunit_width.
+  Context {A:Type} (Azero Aone : A).
+  Definition mat0 {r c} := mk_mat (dlzero Azero r c) dlzero_length dlzero_width.
+  Definition mat1 {n} := mk_mat (dlunit Azero Aone n) dlunit_length dlunit_width.
 
 End mat0_mat1.
 
@@ -438,7 +438,7 @@ End mtrans.
 (** ** matrix addition,opposition,subtraction *)
 Section madd_opp_sub.
 
-  Context `{G:AGroup A Aadd A0 Aopp Aeq}.
+  Context `{G:AGroup A Aadd Azero Aopp Aeq}.
   Notation Asub := (fun a b => Aadd a (Aopp b)).
   Infix "==" := (eqlistA Aeq) : list_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
@@ -503,14 +503,14 @@ Section madd_opp_sub.
   Qed.
   
   (** 0 + m = m *)
-  Lemma madd_zero_l : forall {r c} (m : mat r c), (mat0 A0) + m == m.
+  Lemma madd_zero_l : forall {r c} (m : mat r c), (mat0 Azero) + m == m.
   Proof.
     intros. unfold meq,matmap2dl.
     apply dladd_zero_l; auto. apply mheight. apply mwidth.
   Qed.
 
   (** m + 0 = m *)
-  Lemma madd_zero_r : forall {r c} (m : mat r c), m + (mat0 A0) == m.
+  Lemma madd_zero_r : forall {r c} (m : mat r c), m + (mat0 Azero) == m.
   Proof.
     intros. unfold meq, madd.
     rewrite matmap2_comm. apply madd_zero_l.
@@ -533,7 +533,7 @@ Section madd_opp_sub.
     - rewrite H. rewrite mopp_opp. easy. 
   Qed.
 
-  Lemma mopp_mat0 : forall {r c:nat}, - (@mat0 A A0 r c) == mat0 A0.
+  Lemma mopp_mat0 : forall {r c:nat}, - (@mat0 A Azero r c) == mat0 Azero.
   Proof.
     intros. hnf. unfold mopp,mat0; simpl. unfold matmapdl; simpl.
     unfold dmap,dlzero. revert c.
@@ -542,7 +542,7 @@ Section madd_opp_sub.
     apply group_opp_zero_eq_zero.
   Qed.
 
-  Lemma madd_opp : forall {r c} (m : mat r c), m + (-m) == mat0 A0.
+  Lemma madd_opp : forall {r c} (m : mat r c), m + (-m) == mat0 Azero.
   Proof.
     intros. destruct m as [dl H W]. hnf.
     unfold mopp,madd,meq; simpl. unfold matmap2dl; simpl.
@@ -578,7 +578,7 @@ Section madd_opp_sub.
   
   (** 0 - m = - m *)
   Lemma msub_zero_l : forall {r c} (m : mat r c),
-      (mat0 A0) - m == - m.
+      (mat0 Azero) - m == - m.
   Proof.
     intros. unfold meq, msub, mopp, matmap2dl. simpl.
     unfold matmap2dl, matmapdl.
@@ -587,7 +587,7 @@ Section madd_opp_sub.
   
   (** m - 0 = m *)
   Lemma msub_zero_r : forall {r c} (m : mat r c),
-      m - (mat0 A0) == m.
+      m - (mat0 Azero) == m.
   Proof.
     intros. unfold meq, msub, mopp, matmap2dl. simpl.
     unfold matmap2dl, matmapdl.
@@ -596,7 +596,7 @@ Section madd_opp_sub.
   
   (** m - m = 0 *)
   Lemma msub_self : forall {r c} (m : mat r c),
-      m - m == (mat0 A0).
+      m - m == (mat0 Azero).
   Proof.
     intros. unfold meq, msub, mopp, matmap2dl. simpl.
     unfold matmap2dl, matmapdl.
@@ -610,8 +610,8 @@ End madd_opp_sub.
 (** ** matrix multiplication *)
 Section mcmul_mmulc_mmul.
 
-  Context {A:Type} {A0 A1:A}.
-  Context `{R:Ring A Aadd A0 Aopp Amul A1 Aeq}.
+  Context {A:Type} {Azero Aone:A}.
+  Context `{R:Ring A Aadd Azero Aopp Amul Aone Aeq}.
   Add Ring ring_inst : make_ring_theory.
   Infix "+" := Aadd : A_scope.
   Infix "*" := Amul : A_scope.
@@ -639,7 +639,7 @@ Section mcmul_mmulc_mmul.
   Infix "*c" := mmulc : mat_scope.
 
   Definition mmul {r c t : nat} (m1 : @mat A r c) (m2 : @mat A c t) : @mat A r t.
-    refine (mk_mat (dldotdl (Aadd:=Aadd) (A0:=A0) (Amul:=Amul)
+    refine (mk_mat (dldotdl (Aadd:=Aadd) (Azero:=Azero) (Amul:=Amul)
                       (mdata m1) (mdata (mtrans m2))) _ _).
     - destruct m1 as [dl1 H1 W1], m2 as [dl2 H2 W2]; simpl.
       apply dldotdl_length; auto.
@@ -684,7 +684,7 @@ Section mcmul_mmulc_mmul.
   Qed.
   
   (** 0 * A = 0 *)
-  Lemma mmul_0_l : forall {r c t} (m : mat c t), (mat0 A0) * m == (@mat0 A A0 r t).
+  Lemma mmul_0_l : forall {r c t} (m : mat c t), (mat0 Azero) * m == (@mat0 A Azero r t).
   Proof.
     intros. destruct m; simpl.
     unfold meq; simpl.
@@ -693,7 +693,7 @@ Section mcmul_mmulc_mmul.
   Qed.
   
   (** A * 0 = 0 *)
-  Lemma mmul_0_r : forall {r c t} (m : mat r c), m * (mat0 A0) == (@mat0 A A0 r t).
+  Lemma mmul_0_r : forall {r c t} (m : mat r c), m * (mat0 Azero) == (@mat0 A Azero r t).
   Proof.
     intros. destruct m; simpl.
     unfold meq; simpl.
@@ -701,7 +701,7 @@ Section mcmul_mmulc_mmul.
   Qed.
   
   (** 1 * A = A *)
-  Lemma mmul_1_l : forall {r c} (m : mat r c), (mat1 A0 A1) * m == m.
+  Lemma mmul_1_l : forall {r c} (m : mat r c), (mat1 Azero Aone) * m == m.
   Proof.
     intros. destruct m; simpl.
     unfold meq; simpl.
@@ -711,7 +711,7 @@ Section mcmul_mmulc_mmul.
   Qed.
   
   (** A * 1 = A *)
-  Lemma mmul_1_r : forall {r c} (m : mat r c), m * (mat1 A0 A1) == m.
+  Lemma mmul_1_r : forall {r c} (m : mat r c), m * (mat1 Azero Aone) == m.
   Proof.
     intros. destruct m; simpl.
     unfold meq; simpl.
@@ -773,17 +773,17 @@ Section mcmul_mmulc_mmul.
   Qed.
 
   (* 0 c* m = mat0 *)
-  Lemma mcmul_0_l : forall {r c} (m : mat r c), A0 c* m == mat0 A0.
+  Lemma mcmul_0_l : forall {r c} (m : mat r c), Azero c* m == mat0 Azero.
   Proof.
     intros. destruct m; simpl.
     unfold meq; simpl.
-    rewrite dmap_ext with (g:=(fun x => A0)).
+    rewrite dmap_ext with (g:=(fun x => Azero)).
     - apply dmap_eq_zero; auto.
     - intros. ring. 
   Qed.
   
   (* 1 c* m = m *)
-  Lemma mcmul_1 : forall {r c} (m : mat r c), A1 c* m == m.
+  Lemma mcmul_1 : forall {r c} (m : mat r c), Aone c* m == m.
   Proof.
     intros. destruct m; simpl.
     unfold meq; simpl. unfold dmap.
@@ -812,13 +812,13 @@ Section mcmul_mmulc_mmul.
   Qed.
 
   (** Properties below, need a field structure *)
-  Context `{F:Field A Aadd A0 Aopp Amul A1 Ainv Aeq}.
+  Context `{F:Field A Aadd Azero Aopp Amul Aone Ainv Aeq}.
   Context `{Dec_Aeq:Decidable A Aeq}.
   
   (** k * m = 0 -> (m = 0) \/ (k = 0) *)
   Lemma mcmul_eq0_imply_m0_or_k0 : forall {r c} (m : mat r c) k,
-      let m0 := mat0 A0 in
-      (k c* m == m0) -> (m == m0) \/ (k == A0)%A.
+      let m0 := mat0 Azero in
+      (k c* m == m0) -> (m == m0) \/ (k == Azero)%A.
   Proof.
     intros. unfold mcmul, meq in *; simpl in *.
     destruct m as [dl HH HW]; simpl in *.
@@ -828,15 +828,15 @@ Section mcmul_mmulc_mmul.
 
   (** (m <> 0 \/ k * m = 0) -> k = 0 *)
   Lemma mcmul_mnonzero_eq0_imply_k0 : forall {r c} (m : mat r c) k,
-      let m0 := mat0 A0 in
-      ~(m == m0) -> k c* m == m0 -> (k == A0)%A.
+      let m0 := mat0 Azero in
+      ~(m == m0) -> k c* m == m0 -> (k == Azero)%A.
   Proof.
     intros. apply mcmul_eq0_imply_m0_or_k0 in H0; auto. tauto.
   Qed.
 
   (** k * m = m -> k = 1 \/ m = 0 *)
   Lemma mcmul_same_imply_coef1_or_mzero : forall {r c} k (m : mat r c),
-      k c* m == m -> (k == A1)%A \/ (m == mat0 A0).
+      k c* m == m -> (k == Aone)%A \/ (m == mat0 Azero).
   Proof.
     intros. destruct m. unfold mcmul,meq in *; simpl in *.
     apply (dlcmul_fixpoint_imply_k1_or_dlzero (r:=r) (c:=c)) in H; auto.
@@ -844,11 +844,11 @@ Section mcmul_mmulc_mmul.
   
   (** (m1 <> 0 /\ m2 <> 0 /\ k * m1 = m2) -> k <> 0 *)
   Lemma mcmul_eq_mat_implfy_not_k0 : forall {r c} (m1 m2 : mat r c) k,
-      let m0 := mat0 A0 in
-      ~(m1 == m0) -> ~(m2 == m0) -> k c* m1 == m2 -> ~(k == A0)%A.
+      let m0 := mat0 Azero in
+      ~(m1 == m0) -> ~(m2 == m0) -> k c* m1 == m2 -> ~(k == Azero)%A.
   Proof.
     intros. intro. destruct m1,m2. unfold meq in *; simpl in *. unfold dmap in *.
-    rewrite (map_ext) with (g:=map (fun x=>A0)) (l:=mdata0) in H1.
+    rewrite (map_ext) with (g:=map (fun x=>Azero)) (l:=mdata0) in H1.
     - setoid_rewrite dmap_eq_zero with (dl:=mdata0) in H1.
       (* ToDo: why can not use "rewrite"? *)
       rewrite H1 in H0. destruct H0; easy. auto. auto.
@@ -858,7 +858,7 @@ Section mcmul_mmulc_mmul.
 
 End mcmul_mmulc_mmul.
 
-(* Arguments mmul A0 Aadd Amul {r c t}. *)
+(* Arguments mmul Azero Aadd Amul {r c t}. *)
 (* Arguments mcmul Amul {r c}. *)
 (* Arguments mmulc Amul {r c}. *)
 
@@ -867,12 +867,12 @@ End mcmul_mmulc_mmul.
 Section mat_1_1_to_scalar.
 
   Context {A:Type}.
-  Variable A0 : A.
+  Variable Azero : A.
   
   Definition mat_1_1_to_s (m : @mat A 1 1) : A.
   Proof.
     destruct m as [dl].
-    refine (hd A0 (hd [] dl)).
+    refine (hd Azero (hd [] dl)).
   Defined.
   
 End mat_1_1_to_scalar.
@@ -887,13 +887,13 @@ Section l2m.
   Infix "==" := (eqlistA Aeq) : list_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   Infix "==" := (meq (Aeq:=Aeq)) : mat_scope.
-  Variable A0 : A.
+  Variable Azero : A.
   
   (** list to fixed-length list *)
   Fixpoint l2v_aux (l : list A) (n : nat) : list A :=
     match n with
     | 0 => []
-    | S n' => (hd A0 l) :: (l2v_aux (tl l) n')
+    | S n' => (hd Azero l) :: (l2v_aux (tl l) n')
     end.
   
   Lemma l2v_aux_length : forall (l : list A) (n : nat),
@@ -959,7 +959,7 @@ Section l2m.
     apply l2m_aux_eq; auto. apply mheight. apply mwidth.
   Qed.
 
-  Context `{R : Ring A Aadd A0 (Aeq:=Aeq)}.
+  Context `{R : Ring A Aadd Azero (Aeq:=Aeq)}.
   Infix "+" := (madd (Aadd:=Aadd)) : mat_scope.
 
   (** m2l (m1 + m2) = (m2l m1) + (m2l m2) *)
@@ -982,7 +982,7 @@ End l2m.
 (** ** Extra Properties *)
 Section Extra.
 
-  Context {A:Type} (A0:A).
+  Context {A:Type} (Azero:A).
   (** Vector type *)
   Definition vecr n := @mat A 1 n.
   Definition vecc n := @mat A n 1.
@@ -998,7 +998,7 @@ Section Extra.
   (** Construct a matrix with a column row vector and a a matrix *)
   Definition mconsc {r c} (v : vecc r) (m : @mat A r c) : @mat A r (S c).
     destruct v as [v], m as [m].
-    refine (mk_mat (consc (hdc A0 v) m) _ _).
+    refine (mk_mat (consc (hdc Azero v) m) _ _).
     - apply consc_length; auto. rewrite hdc_length; auto.
     - apply consc_width; auto. rewrite hdc_length; subst; auto.
   Defined.
@@ -1040,16 +1040,16 @@ Section Extra.
   (* Proof. *)
   (*   destruct (v3_to_t3 v) as [[x y] z]. *)
   (*   refine (mk_mat_3_3  *)
-  (*     A0    (-z)    y *)
-  (*     z     A0     (-x) *)
-  (*     (-y)  x       A0)%A. *)
+  (*     Azero    (-z)    y *)
+  (*     z     Azero     (-x) *)
+  (*     (-y)  x       Azero)%A. *)
   (* Defined. *)
   
   (* Definition v3cross (v1 v2 : V3) : vec 3 := (skew_sym_mat_of_v3 v1) * v2. *)
   
   (* Definition so3 (m : mat 3 3) : Prop :=  *)
   (*   let so3_mul_unit : Prop := (m \T) * m = mat1 3 in *)
-  (*   let so3_det : Prop := (det_of_mat_3_3 m) = A1 in *)
+  (*   let so3_det : Prop := (det_of_mat_3_3 m) = Aone in *)
   (*     so3_mul_unit /\ so3_det. *)
 
 End Extra.
@@ -1110,23 +1110,23 @@ Section MatInv.
   Context `{F : Field}.
   Infix "+" := Aadd : A_scope.
   Infix "*" := Amul : A_scope.
-  Infix "*" := (mmul (A0:=A0)(Aadd:=Aadd)(Amul:=Amul)) : mat_scope.
+  Infix "*" := (mmul (Azero:=Azero)(Aadd:=Aadd)(Amul:=Amul)) : mat_scope.
 
   (* sum f(0) f(1) ... f(k-1) *)
-  Notation sum k f := (reduce k (fun acc x => (acc + f x)%A) A0).
+  Notation sum k f := (reduce k (fun acc x => (acc + f x)%A) Azero).
 
   (** (m1 * m2)[i,j] = m1.row[i] dot m2.col[j] *)
   Parameter Mtimes_help : forall {m n p} (m1: @mat A m n) (m2: @mat A n p),
     forall i j,
       i < m -> j < p ->
-      mnth A0 (m1 * m2) i j = sum n (fun k => ((mnth A0 m1 i k) * (mnth A0 m2 k j))%A).
+      mnth Azero (m1 * m2) i j = sum n (fun k => ((mnth Azero m1 i k) * (mnth Azero m2 k j))%A).
 
   (** (f m1 m2)[i,j] = f m1[i,j] m2[i,j] *)
   Parameter Melement_op_help :
     forall {m n} (m1: @mat A m n) (m2: @mat A m n) (op: A -> A -> A),
     forall i j,
       i < m -> j < n ->
-      mnth A0 (matmap2 op m1 m2) i j = op (mnth A0 m1 i j) (mnth A0 m2 i j).
+      mnth Azero (matmap2 op m1 m2) i j = op (mnth Azero m1 i j) (mnth Azero m2 i j).
   
 
 End MatInv.
@@ -1148,7 +1148,7 @@ Module coordinate_transform_test.
   Infix "*" := Rmult : A_scope.
   Infix "+" := Rplus : A_scope.
   Infix "+" := (madd (Aadd:=Rplus)) : mat_scope.
-  Infix "*" := (mmul (Aadd:=Rplus) (Amul:=Rmult) (A0:=R0)) : mat_scope.
+  Infix "*" := (mmul (Aadd:=Rplus) (Amul:=Rmult) (Azero:=R0)) : mat_scope.
   Infix "c*" := (mcmul (Amul:=Rmult)) : mat_scope.
   Notation "m \T" := (mtrans m) : mat_scope.
   Infix "==" := (meq (Aeq:=eq)) : mat_scope.
