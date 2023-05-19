@@ -10,7 +10,7 @@
 
 Require Import Nat PeanoNat Lia Bool.
 Require Export BasicConfig HierarchySetoid.
-Require RExt.
+Require Reals.
 
 
 Generalizable Variable A B C Aeq Beq Ceq Aadd Aopp Amul Ainv.
@@ -458,9 +458,9 @@ End Sum.
 
 Module Sequence_test.
   
-  Import RExt.
+  Import Reals.
 
-  Example seq1 := fun n => Z2R (Z.of_nat n).
+  Example seq1 := fun n => IZR (Z.of_nat n).
 
   (* Compute seqsum seq1 3. *)
   (* Compute @seqsum R Rplus R0 seq1 3. *)

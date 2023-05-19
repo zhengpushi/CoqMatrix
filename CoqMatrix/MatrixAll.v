@@ -19,7 +19,7 @@ Require Import
   DepRec.MatrixTheoryDR
   NatFun.MatrixTheoryNF
   SafeNatFun.MatrixTheorySF
-  FinFun.MatrixTheoryFF
+  (* FinFun.MatrixTheoryFF *)
   .
 
 (* ######################################################################### *)
@@ -749,7 +749,7 @@ Module EqDecidableFieldMatrixTheory (B: BaseType) (E: EqDecidableFieldElementTyp
   Module DR <: DecidableFieldMatrixTheory E := DecidableFieldMatrixTheoryDR E.
   Module NF <: DecidableFieldMatrixTheory E := DecidableFieldMatrixTheoryNF E.
   Module SF <: DecidableFieldMatrixTheory E := DecidableFieldMatrixTheorySF E.
-  Module FF <: DecidableFieldMatrixTheory E := DecidableFieldMatrixTheoryFF B E.
+  (* Module FF <: DecidableFieldMatrixTheory E := DecidableFieldMatrixTheoryFF B E. *)
 
   (** basic matrix theory, contain conversion and properties *)
   Module Export BasicMT := BasicMatrixTheory E.

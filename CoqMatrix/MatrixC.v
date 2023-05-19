@@ -56,12 +56,12 @@ Module MatrixC_SF.
   Open Scope mat_scope.
 End MatrixC_SF.
 
-Module MatrixC_FF.
-  Export Complex.
-  Include MatrixAllC.FF.
-  Open Scope C_scope.
-  Open Scope mat_scope.
-End MatrixC_FF.
+(* Module MatrixC_FF. *)
+(*   Export Complex. *)
+(*   Include MatrixAllC.FF. *)
+(*   Open Scope C_scope. *)
+(*   Open Scope mat_scope. *)
+(* End MatrixC_FF. *)
 
 
 (* ######################################################################### *)

@@ -56,12 +56,12 @@ Module MatrixR_SF.
   Open Scope mat_scope.
 End MatrixR_SF.
 
-Module MatrixR_FF.
-  Export RExt.
-  Include MatrixAllR.FF.
-  Open Scope R_scope.
-  Open Scope mat_scope.
-End MatrixR_FF.
+(* Module MatrixR_FF. *)
+(*   Export RExt. *)
+(*   Include MatrixAllR.FF. *)
+(*   Open Scope R_scope. *)
+(*   Open Scope mat_scope. *)
+(* End MatrixR_FF. *)
 
 
 (* ######################################################################### *)
