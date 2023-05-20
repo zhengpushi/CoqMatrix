@@ -813,6 +813,45 @@ Section Cinv.
     intros. rewrite Cmul_comm. apply Cmul_inv_l. auto.
   Qed.
 
+  (** A Coq-version-issue about inv_sqrt and sqrt_inv *)
+  Section coq_version_issue.
+    
+    (** There are two similiar lemmas: inv_sqrt and sqrt_inv *)
+  (*
+    Locate inv_sqrt.
+    (* Notation Coq.Reals.R_sqrt.inv_sqrt *)
+    Locate sqrt_inv.
+    (* Constant Coq.Reals.R_sqrt.sqrt_inv *)
+    Print inv_sqrt.
+    (* Warning: Notation inv_sqrt is deprecated since 8.16. Use sqrt_inv. *)
+    (* [deprecated-syntactic-definition,deprecated] *)
+    (* Notation inv_sqrt := inv_sqrt_depr *)
+    Check inv_sqrt_depr.
+    (* inv_sqrt *)
+    (*      : forall x : R, 0 < x -> (/ sqrt x)%R = sqrt (/ x) *)
+    Check sqrt_inv.
+   (* sqrt_inv *)
+   (*      : forall x : R, sqrt (/ x) = (/ sqrt x)%R *)
+   *)
+
+    (* 问题：
+       1. 若 coq <= 8.14.0，则不包含 sqrt_inv，因此要使用 inv_sqrt
+       2. 若 coq >= 8.16.0，则提示 inv_sqrt 过期，建议使用 sqrt_inv 。
+       3. 这两个引理并不通用，sqrt_inv相比inv_sqrt，不必提供 0<x 的条件。
+          长远来看，高版本下的引理更简洁了。
+       解决：
+       1. 为了同时适应二者，这里临时写一个 sqrt_inv，公理化的实现，结果是：
+          coq.8.14.0 可完成编译，标准库并无此实现。
+          coq.8.16.0 可完成编译，标准库已经有它的实现。
+       
+          待将来如果不想要这个公理化的引理，可以简单注释掉这里的定义即可。
+          简单的屏蔽这个定义即可。
+     *)
+    
+    Axiom sqrt_inv : forall x : R, sqrt (/ x) = (/ sqrt x)%R.
+
+  End coq_version_issue.
+  
   (** z <> 0 -> |/z| = / |z| *)
   (*
         |/(a,b)| = |(a/(a^2+b^2), -b/(a^2+b^2))| = /|(a,b)|
