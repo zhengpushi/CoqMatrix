@@ -45,6 +45,7 @@ Module BasicMatrixTheoryDL (E : ElementType) <: BasicMatrixTheory E.
   (** ** Matrix type and basic operations *)
 
   Definition mat r c := @mat A r c.
+  Definition smat n := mat n n.
 
   (** matrix equality *)
   Definition meq {r c : nat} := @meq A Aeq r c.

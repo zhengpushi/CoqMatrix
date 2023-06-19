@@ -47,6 +47,7 @@ Module Type BasicMatrixTheory (E : ElementType).
   (* ==================================== *)
   (** ** Matrix type and basic operations *)
   Parameter mat : nat -> nat -> Type.
+  Parameter smat : nat -> Type.
 
   (** matrix equality *)
   Parameter meq : forall {r c}, mat r c -> mat r c -> Prop.

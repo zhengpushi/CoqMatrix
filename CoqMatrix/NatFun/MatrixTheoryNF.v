@@ -40,6 +40,7 @@ Module BasicMatrixTheoryNF (E : ElementType) <: BasicMatrixTheory E.
       Note that, r and c are dummy parameters, it is designed to
       represent shape of matrix. *)
   Definition mat (r c : nat) := @mat A r c.
+  Definition smat n := mat n n.
 
   (* (** matrix equality *) *)
   Definition meq {r c : nat} (m1 m2 : mat r c) : Prop := @meq A Aeq r c m1 m2.
