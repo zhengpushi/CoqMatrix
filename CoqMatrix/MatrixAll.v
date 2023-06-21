@@ -443,7 +443,52 @@ Module BasicMatrixTheory (E : ElementType).
     apply DR.l2m_m2l_id; auto with mat. (* ToDo: why not completely finish it? *)
     apply DR.m2l_length. apply DR.m2l_width.
   Qed.
+
+
+  (** *** NF -- SF *)
+  Definition nf2sf {r c} (m : NF.mat r c) : SF.mat r c := SF.l2m (NF.m2l m).
+  Definition sf2nf {r c} (m : SF.mat r c) : NF.mat r c := NF.l2m (SF.m2l m).
   
+  Lemma nf2sf_bij {r c} : Bijective (Aeq:=NF.meq)(Beq:=SF.meq) (@nf2sf r c).
+  Proof.
+    unfold nf2sf. constructor;constructor; intros.
+    - apply SF.l2m_inj; auto with mat. apply NF.m2l_inj; auto.
+    - exists (NF.l2m (SF.m2l b)).
+      rewrite NF.m2l_l2m_id; auto with mat. apply SF.l2m_m2l_id.
+  Qed.
+  
+  Corollary nf2sf_surj {r c} : Surjective (Beq:=SF.meq) (@nf2sf r c).
+  Proof.
+    destruct (@nf2sf_bij r c); auto.
+  Qed.
+  
+  Lemma sf2nf_bij {r c} : Bijective (Aeq:=SF.meq)(Beq:=NF.meq) (@sf2nf r c).
+  Proof.
+    unfold sf2nf. constructor;constructor; intros.
+    - apply NF.l2m_inj; auto with mat. apply SF.m2l_inj; auto.
+    - exists (SF.l2m (NF.m2l b)).
+      rewrite SF.m2l_l2m_id; auto with mat. apply NF.l2m_m2l_id.
+  Qed.
+  
+  Corollary sf2nf_surj {r c} : Surjective (Beq:=NF.meq) (@sf2nf r c).
+  Proof.
+    destruct (@sf2nf_bij r c); auto.
+  Qed.
+
+  Lemma nf2sf_sf2nf_id : forall r c (m : SF.mat r c), SF.meq (nf2sf (sf2nf m)) m.
+  Proof.
+    intros. unfold nf2sf,sf2nf. rewrite NF.m2l_l2m_id; auto with mat.
+    apply SF.l2m_m2l_id.
+  Qed.
+  
+  Lemma sf2nf_nf2sf_id : forall r c (m : NF.mat r c), NF.meq (sf2nf (nf2sf m)) m.
+  Proof.
+    intros. unfold nf2sf,sf2nf. rewrite SF.m2l_l2m_id.
+    apply NF.l2m_m2l_id; auto with mat. (* ToDo: why not completely finish it? *)
+    apply NF.m2l_length. apply NF.m2l_width.
+  Qed.
+  
+
   (* (** *** DR -- FF *) *)
   (* Definition dr2ff {r c} (m : DR.mat r c) : FF.mat r c := FF.l2m (DR.m2l m). *)
   (* Definition ff2dr {r c} (m : FF.mat r c) : DR.mat r c := DR.l2m (FF.m2l m). *)

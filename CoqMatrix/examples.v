@@ -107,18 +107,18 @@ Module Example4Cvt.
   
   (* Note!! next evaluation on FF is crashed! *)
   (* Compute nf2ff m. *)
-
+  
   (** prove that {SF -> DL -> DP -> DR -> NF -> DL -> SF} return back *)
-  Goal forall r c (m0 : SF.mat r c),
-    let m1 : DL.mat r c := sf2dl m0 in
-    let m2 : DP.mat r c := dl2dp m1 in
-    let m3 : DR.mat r c := dp2dr m2 in
-    let m4 : NF.mat r c := dr2nf m3 in
-    let m5 : DL.mat r c := nf2dl m4 in
-    let m6 : SF.mat r c := dl2sf m5 in
-    m6 == m0.
+  Goal forall r c (m1 : SF.mat r c),
+    let m2 : DL.mat r c := sf2dl m1 in
+    let m3 : DP.mat r c := dl2dp m2 in
+    let m4 : DR.mat r c := dp2dr m3 in
+    let m5 : NF.mat r c := dr2nf m4 in
+    let m6 : DL.mat r c := nf2dl m5 in
+    let m7 : SF.mat r c := dl2sf m6 in
+    m7 == m1.
   Proof.
-    intros. unfold m6,m5,m4,m3,m2,m1,dl2dp,dp2dr,dr2nf,nf2dl,dl2sf,sf2dl.
+    intros. unfold m7,m6,m5,m4,m3,m2,dl2dp,dp2dr,dr2nf,nf2dl,dl2sf,sf2dl.
     rewrite DR.m2l_l2m_id; auto with mat.
     rewrite NF.m2l_l2m_id; auto with mat.
     rewrite DP.m2l_l2m_id; auto with mat.
