@@ -108,22 +108,20 @@ Module Example4Cvt.
   (* Note!! next evaluation on FF is crashed! *)
   (* Compute nf2ff m. *)
   
-  (** prove that {SF -> DL -> DP -> DR -> NF -> DL -> SF} return back *)
+  (** prove that {SF -> DL -> DP -> DR -> NF -> SF} return back *)
   Goal forall r c (m1 : SF.mat r c),
     let m2 : DL.mat r c := sf2dl m1 in
     let m3 : DP.mat r c := dl2dp m2 in
     let m4 : DR.mat r c := dp2dr m3 in
     let m5 : NF.mat r c := dr2nf m4 in
-    let m6 : DL.mat r c := nf2dl m5 in
-    let m7 : SF.mat r c := dl2sf m6 in
-    m7 == m1.
+    let m6 : SF.mat r c := nf2sf m5 in
+    m6 == m1.
   Proof.
-    intros. unfold m7,m6,m5,m4,m3,m2,dl2dp,dp2dr,dr2nf,nf2dl,dl2sf,sf2dl.
+    intros. unfold m6,m5,m4,m3,m2,dl2dp,dp2dr,dr2nf,nf2sf,sf2dl.
     rewrite DR.m2l_l2m_id; auto with mat.
+    rewrite DL.m2l_l2m_id; auto with mat.
     rewrite NF.m2l_l2m_id; auto with mat.
     rewrite DP.m2l_l2m_id; auto with mat.
-    rewrite DL.m2l_l2m_id; auto with mat.
-    rewrite DL.m2l_l2m_id; auto with mat.
     rewrite SF.l2m_m2l_id; auto with mat.
     reflexivity.
   Qed.
