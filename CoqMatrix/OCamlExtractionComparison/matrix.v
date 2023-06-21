@@ -86,13 +86,15 @@ Module MatrixR_DR := EqMatrixAllR.DR.
 Module MatrixR_DP := EqMatrixAllR.DP.
 Module MatrixR_DL := EqMatrixAllR.DL.
 Module MatrixR_NF := EqMatrixAllR.NF.
-Module MatrixR_FF := EqMatrixAllR.FF.
+Module MatrixR_SF := EqMatrixAllR.SF.
+(* Module MatrixR_FF := EqMatrixAllR.FF. *)
 
 Module DL <: FloatMatrixSig := MatrixR_DL.
 Module DP <: FloatMatrixSig := MatrixR_DP.
 Module DR <: FloatMatrixSig := MatrixR_DR.
 Module NF <: FloatMatrixSig := MatrixR_NF.
-Module FF <: FloatMatrixSig := MatrixR_FF.
+Module SF <: FloatMatrixSig := MatrixR_SF.
+(* Module FF <: FloatMatrixSig := MatrixR_FF. *)
 
 (* Module DL <: FloatMatrixSig. *)
 (*   Import MatrixR_DL. *)
@@ -159,6 +161,6 @@ Extract Constant total_order_T => "fun r1 r2 ->
   if c < 0 then Some true
   else (if c = 0 then None else Some false)".
 
-Extraction "matrix.ml" DL DP DR NF FF.
+Extraction "matrix.ml" DL DP DR NF SF. (* FF. *)
 
 

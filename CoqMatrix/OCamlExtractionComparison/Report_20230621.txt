@@ -1,0 +1,92 @@
+Date: 2023.06.21 08:58
+PC: Thinkbook 14 G2-ITL
+OS: Debian 12
+
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=DP
+Program for test matrix.
+1: model:DP, size:50, time:  0.01 seconds
+2: model:DP, size:60, time:  0.01 seconds
+3: model:DP, size:72, time:  0.01 seconds
+4: model:DP, size:86, time:  0.02 seconds
+5: model:DP, size:103, time:  0.03 seconds
+6: model:DP, size:123, time:  0.05 seconds
+7: model:DP, size:147, time:  0.09 seconds
+8: model:DP, size:176, time:  0.15 seconds
+9: model:DP, size:211, time:  0.26 seconds
+10: model:DP, size:253, time:  0.46 seconds
+11: model:DP, size:303, time:  0.81 seconds
+12: model:DP, size:363, time:  1.50 seconds
+13: model:DP, size:435, time:  2.84 seconds
+14: model:DP, size:522, time:  5.21 seconds
+15: model:DP, size:626, time:  9.51 seconds
+16: model:DP, size:751, time: 16.86 seconds
+17: model:DP, size:901, time: 29.88 seconds
+18: model:DP, size:1081, time: 52.21 seconds
+19: model:DP, size:1297, time: 99.16 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=DR
+Program for test matrix.
+1: model:DR, size:50, time:  0.01 seconds
+2: model:DR, size:60, time:  0.00 seconds
+3: model:DR, size:72, time:  0.01 seconds
+4: model:DR, size:86, time:  0.01 seconds
+5: model:DR, size:103, time:  0.02 seconds
+6: model:DR, size:123, time:  0.04 seconds
+7: model:DR, size:147, time:  0.06 seconds
+8: model:DR, size:176, time:  0.10 seconds
+9: model:DR, size:211, time:  0.17 seconds
+10: model:DR, size:253, time:  0.29 seconds
+11: model:DR, size:303, time:  0.50 seconds
+12: model:DR, size:363, time:  0.91 seconds
+13: model:DR, size:435, time:  1.75 seconds
+14: model:DR, size:522, time:  3.30 seconds
+15: model:DR, size:626, time:  5.81 seconds
+16: model:DR, size:751, time: 10.50 seconds
+17: model:DR, size:901, time: 18.73 seconds
+18: model:DR, size:1081, time: 33.17 seconds
+19: model:DR, size:1297, time: 57.30 seconds
+20: model:DR, size:1556, time:103.94 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=DL
+Program for test matrix.
+1: model:DL, size:50, time:  0.07 seconds
+2: model:DL, size:60, time:  0.12 seconds
+3: model:DL, size:72, time:  0.26 seconds
+4: model:DL, size:86, time:  0.52 seconds
+5: model:DL, size:103, time:  1.06 seconds
+6: model:DL, size:123, time:  2.62 seconds
+7: model:DL, size:147, time:  5.63 seconds
+8: model:DL, size:176, time: 12.77 seconds
+9: model:DL, size:211, time: 28.51 seconds
+10: model:DL, size:253, time: 64.28 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=NF
+Program for test matrix.
+1: model:NF, size:50, time:  0.04 seconds
+2: model:NF, size:60, time:  0.08 seconds
+3: model:NF, size:72, time:  0.17 seconds
+4: model:NF, size:86, time:  0.36 seconds
+5: model:NF, size:103, time:  0.74 seconds
+6: model:NF, size:123, time:  1.54 seconds
+7: model:NF, size:147, time:  3.73 seconds
+8: model:NF, size:176, time:  7.41 seconds
+9: model:NF, size:211, time: 13.54 seconds
+10: model:NF, size:253, time: 34.16 seconds
+11: model:NF, size:303, time: 86.40 seconds
+
+[OCamlExtractionComparison]$ ./matrix -benchmark=true -mm=SF
+Program for test matrix.
+1: model:SF, size:50, time:  0.04 seconds
+2: model:SF, size:60, time:  0.08 seconds
+3: model:SF, size:72, time:  0.17 seconds
+4: model:SF, size:86, time:  0.35 seconds
+5: model:SF, size:103, time:  0.74 seconds
+6: model:SF, size:123, time:  1.74 seconds
+7: model:SF, size:147, time:  4.28 seconds
+8: model:SF, size:176, time:  7.19 seconds
+9: model:SF, size:211, time: 17.05 seconds
+10: model:SF, size:253, time: 33.34 seconds
+11: model:SF, size:303, time: 71.39 seconds
+
+

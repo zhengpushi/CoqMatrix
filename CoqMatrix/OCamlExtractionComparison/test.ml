@@ -63,7 +63,7 @@ let dl_gen (m:int) (n:int) : float list list =
 
 (** matrix model types*)
 type matmodel =
-  | MM_DL | MM_DP | MM_DR | MM_NF | MM_FF
+  | MM_DL | MM_DP | MM_DR | MM_NF | MM_SF
 
 (** Print a dlist of any type to string *)
 let dl2str (dl:'a list list) (a2str:'a -> string) : string =
@@ -155,7 +155,7 @@ let mmul_ex ?(mm=MM_DL) (r:int) (c:int) (s:int) (is_print:bool) =
                m2l r c (mmul r c s (l2m r c l1) (l2m c s l2))
     | MM_NF -> let (l2m,m2l,mmul) = (NF.l2m, NF.m2l, NF.mmul) in
                m2l r c (mmul r c s (l2m r c l1) (l2m c s l2))
-    | MM_FF -> let (l2m,m2l,mmul) = (FF.l2m, FF.m2l, FF.mmul) in
+    | MM_SF -> let (l2m,m2l,mmul) = (SF.l2m, SF.m2l, SF.mmul) in
                m2l r c (mmul r c s (l2m r c l1) (l2m c s l2))
   in
   (* output the data *)
@@ -183,13 +183,18 @@ let cmdopt_benchmarkall : bool ref = ref false
 let set_matrix_model (s:string) =
   let mm = match s with
     | "DL" -> MM_DL | "DP" -> MM_DP | "DR" -> MM_DR
-    | "NF" -> MM_NF | "FF" -> MM_FF | _ -> failwith "model error, see -help" in
+    | "NF" -> MM_NF | "SF" -> MM_SF | _ -> failwith "model error, see -help" in
   cmdopt_matrix_model := mm
 
+(* model to string *)
+let mm2str (mm : matmodel) : string =
+  let str = match mm with
+  | MM_DL -> "DL" | MM_DP -> "DP" | MM_DR -> "DR"
+  | MM_NF -> "NF" | MM_SF -> "SF" in
+  str
+
 let show_matrix_model mm =
-  let msg = match mm with
-    | MM_DL -> "DL" | MM_DP -> "DP" | MM_DR -> "DR"
-    | MM_NF -> "NF" | MM_FF -> "FF" in
+  let msg = mm2str mm in
   print_endline (sprintf "matrix model : %s" msg)
 
 let set_matrix_size (i:int)   = cmdopt_matrix_size := i
@@ -204,9 +209,7 @@ let show_matrix_size n =
 
 let show_benchmark_result_once id mm size time =
   let str_id = sprintf "%d: " id in
-  let str_mm = match mm with
-    | MM_DL -> "DL" | MM_DP -> "DP" | MM_DR -> "DR"
-    | MM_NF -> "NF" | MM_FF -> "FF" in
+  let str_mm = mm2str mm in
   let str_size = sprintf  "%d" size in
   let str_time = sprintf "%6.2f seconds" time in
   let str =
@@ -223,7 +226,7 @@ let set_benchmarkall (b:bool)  = cmdopt_benchmarkall := b
 let read_options () : string =
   let speclist =
     [
-      ("-mm", Arg.String set_matrix_model, "Set matrix model (DL/DP/DR/NF/FF)");
+      ("-mm", Arg.String set_matrix_model, "Set matrix model (DL/DP/DR/NF/SF)");
       ("-size", Arg.Int set_matrix_size, "Set matrix dimension");
       ("-print", Arg.Bool set_show_matrix, "Show matrix content");
       ("-benchmark", Arg.Bool set_benchmark, "Benchmark mode, test one model");
@@ -253,7 +256,7 @@ let benchmark_run_one mm =
 (** Benchmark, automatic test first four models, also output running time *)
 let benchmark_run_all () =
   (* list of models *)
-  let mm_lst = [MM_DL; MM_DP; MM_DR; MM_NF] in
+  let mm_lst = [MM_DL; MM_DP; MM_DR; MM_SF] in
   (* update model index, and check if finished the model loop *)
   let next_mmidx i : int * bool =
     if (i+1) mod 4 = 0 then (0,true) else (i+1,false) in

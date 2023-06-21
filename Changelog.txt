@@ -31,4 +31,9 @@ v1.0.4
 2. Preliminary calculus theory.
 3. Better notation for mnth function, with "m!i!j" instead of "m$i$j".
 4. change A0,A1 to Azero,Aone, because A1 is conflict to the name in Reals.
-5. Temporarily block the "FinFun" model, because the upgrade of math-comp library to 2.0.
+5. Temporarily block the "FinFun" model, because the upgrade of math-comp library to 2.0,
+   and this version is unstable now.
+
+2023.06.20
+v1.0.5
+1. Add SF model to ocaml_test_example.
