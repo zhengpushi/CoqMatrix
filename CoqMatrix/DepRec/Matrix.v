@@ -29,6 +29,9 @@ Open Scope mat_scope.
 (** ** Definition of Matrix Type *)
 Section mat_def.
 
+  (* I have another idea, if the properties mheight and mwidth should defined 
+     with a boolean equation, such as "legnth mdata =? r" ? Thus the proof effort
+     should be reduced or automated? *)
   Record mat {A : Type} (r c : nat) : Type :=
     mk_mat {
         mdata : list (list A);
