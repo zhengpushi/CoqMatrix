@@ -17,6 +17,10 @@
   rewrite ?A: rewriting A as long as possible (possibly never)
   rewrite 3?A: rewriting A at most three times
   rewrite 3 A or rewrite 3!A: rewriting A exact 3 times
+
+  reasoning on dependent types
+  1. dependent destruction, instead of destruct
+  2. dependent induction, instead of induction
   
  *)
 
@@ -31,6 +35,7 @@ Require Import Extraction.
 Require Import Relations.
 Require Import FunctionalExtensionality.
 Require Import Lia.
+Require Import Coq.Program.Equality. (* convenient for reasoning of dependent type *)
 
 Import ListNotations.   (* list_scope, delimiting with list *)
 Export VectorNotations. (* vector_scope, delimiting with vector *)
@@ -105,14 +110,16 @@ Module Demo_matrix_def_improve.
     (** all vec 0 are same *)
     Lemma vec_0 (v : @vec A 0) : v = nil.
     Proof.
-      refine (match v with nil => _ end). auto.
+      (* refine (match v with nil => _ end). auto. *)
+      dependent destruction v. auto.
     Qed.
 
     (** vec (S n) could be decomposed, exist: x:A, v':vec n *)
     Lemma vec_S {n : nat} (v : @vec A (S n)) :
       {x & {v' | v = cons x v'}}.  (* sig T *)
     Proof.
-      refine (match v with | cons x v' => _ end); eauto.
+      (* refine (match v with | cons x v' => _ end); eauto. *)
+      dependent destruction v. exists a; exists v. auto.
     Qed.
 
     (** Inductive property on two vectors *)
@@ -422,8 +429,8 @@ Section fin_decompose.
        2. the user can leave some holes in the term.
        3. generate as many subgoals as there are remaining holes in the
           elaborated term.
-    *)
-    refine (match i with end). 
+     *)
+    refine (match i with end).
   Qed.
   
   (** Decompose "fin (S n)" object *)
