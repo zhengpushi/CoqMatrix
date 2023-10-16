@@ -65,6 +65,9 @@ CoqMatrix/SafeNatFun/Matrix.v
 CoqMatrix/SafeNatFun/MatrixTheorySF.v
 CoqMatrix/SafeNatFun/Vector.v
 CoqMatrix/SafeNatFun/VectorTheorySF.v
+CoqMatrix/SafeNatFun2/vec.v
+CoqMatrix/SafeNatFun2/MatrixTheorySF2.v
+CoqMatrix/SafeNatFun2/VectorTheorySF2.v
 # CoqMatrix/FinFun/Matrix.v
 # CoqMatrix/FinFun/MatrixTheoryFF.v
 CoqMatrix/MatrixAll.v
