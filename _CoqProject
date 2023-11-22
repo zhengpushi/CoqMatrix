@@ -31,6 +31,7 @@ CoqMatrix/CoqExt/ExtrOcamlR.v
 CoqMatrix/CoqExt/SetoidListExt.v
 CoqMatrix/CoqExt/SetoidListListExt.v
 CoqMatrix/CoqExt/HierarchySetoid.v
+CoqMatrix/CoqExt/Hierarchy.v
 CoqMatrix/CoqExt/Sequence.v
 #CoqMatrix/CoqExt/MyExtrOCamlInt63.v
 CoqMatrix/CoqExt/MyExtrOCamlPArray.v
