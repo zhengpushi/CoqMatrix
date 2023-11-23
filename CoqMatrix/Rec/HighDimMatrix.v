@@ -10,6 +10,7 @@
   remark    :
   1. No dependent type, to unify "vec (2+3)" and "vec 5"
   2. Support any dimension, and the shape information is stored specially
+  3. Simulate C style as many as possible
  *)
 
 Require Export Lia.
@@ -156,6 +157,11 @@ Defined.
 Compute mreshape mat_ex3_231 [1;3;2].
 Compute mreshape mat_ex3_231 [6].
 
+Require Import Extraction.
+Recursive Extraction mreshape.
+
+
+(* 数组打印，高于二维的都显式为索引的形式 *)
 ?
   (** ** Get matrix element *)
   Section mget.
