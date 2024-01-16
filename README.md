@@ -58,7 +58,7 @@
 * Basic usage
 
   ```coq
-  From CoqMatrix Import MatrixNat. (* use "MatrixZ, MatrixQ, MatrixQc, MatrixR" as you need *)
+  From CoqMatrix Require Import MatrixNat. (* use "MatrixZ, MatrixQ, MatrixQc, MatrixR" as you need *)
   
   (** Then, all functions, theorems, notations are available *)
   Example dl := [[1;2;3];[4;5;6]].
