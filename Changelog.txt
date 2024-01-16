@@ -45,5 +45,5 @@ v1.0.5
    SF2: first define vector, then deriving matrix. This model has good scalability for higher dimensional vectors.
 
 2024.01.16
-(preparing new version)
-1. To support Coq 8.18.
+v1.0.6 (for Coq 8.18)
+1. Fix the error and warning for Coq 8.18

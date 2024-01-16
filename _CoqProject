@@ -13,6 +13,7 @@
 -arg -w -arg -redundant-canonical-projection
 -arg -w -arg -ambiguous-paths
 -arg -w -arg -local-declaration
+-arg -w -arg -hiding-delimiting-key
 
 # ===== CoqExt =====
 CoqMatrix/CoqExt/CoqSetting.v

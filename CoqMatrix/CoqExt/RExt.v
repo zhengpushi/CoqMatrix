@@ -117,7 +117,7 @@ Global Hint Unfold
   Ropp_involutive     (* - - r = r *)
   Rplus_opp_r         (* r + - r = 0 *)
   Rplus_opp_l         (* - r + r = 0 *)
-  Rminus_eq_0         (* r - r = 0 *)
+  Rminus_diag         (* r - r = 0 *)
 
   (* x *)
   Rsqr_0              (* 0² = 0 *)
@@ -420,6 +420,10 @@ Lemma Rplus_sqr_neq0_iff4 : forall r1 r2 r3 r4 : R,
   r1 <> 0 \/ r2 <> 0 \/ r3 <> 0 \/ r4 <> 0 <-> r1² + r2² + r3² + r4² <> 0.
 Proof. ra. Qed.
 
+(* Note, Rplus_sqr_eq_0_l is deprecated since 8.19 *)
+Lemma Rplus_sqr_eq_0_l : forall r1 r2 : R, r1² + r2² = 0 -> r1 = 0.
+Proof. intros. apply Rplus_sqr_eq_0 in H. destruct H; auto. Qed.
+  
 Global Hint Resolve
   Rle_0_xx             (* 0 <= x * x *)
   Rplus_sqr_ge0        (* 0 <= r1² + r2² *)
@@ -914,7 +918,11 @@ Proof.
   replace (/b * (b * c)) with c in *; try field; auto with R.
 Qed.
 Global Hint Resolve Rmul_gt_imply_Rdiv_le : R.
-  
+
+(* Note, Rlt_Rminus is deprecated since 8.19 *)
+Lemma Rlt_Rminus : forall a b : R, a < b -> 0 < b - a.
+Proof. intros. apply (proj2 (Rlt_0_minus a b)); auto. Qed.
+
 (* Global Hint Resolve  *)
 (*     Rminus_gt_0_lt  (* 0 < b - a -> a < b *) *)
 (*     Rlt_Rminus      (* a < b -> 0 < b - a *) *)
@@ -929,7 +937,7 @@ Ltac tac_le :=
   | |- ?a * /?b < ?c => assert (a < b * c); assert (0 < b)
   | |- _ => idtac
   end; try lra; auto with R.
-  
+
 Section TEST_tac_le.
 
   (** This proof cannot be finished in one step *)

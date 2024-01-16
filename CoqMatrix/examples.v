@@ -242,7 +242,7 @@ Module Example4SimplifyProofByTypeclass.
     Infix "==" := (eqlistA Aeq) : list_scope.
     
     (** 0 + l = l *)
-    Let ladd_zero_l : forall l n,
+    Example ladd_zero_l : forall l n,
         length l = n -> ladd (Aadd:=Aadd) (lzero Azero n) l == l.
     Proof.
       induction l; intros.
@@ -263,7 +263,7 @@ Module Example4SimplifyProofByTypeclass.
     Infix "==" := (eqlistA Aeq) : list_scope.
     
     (** 0 + l = l *)
-    Let ladd_zero_l : forall l n,
+    Example ladd_zero_l' : forall l n,
         length l = n -> ladd (Aadd:=Aadd) (lzero Azero n) l == l.
     Proof.
       induction l; intros.
@@ -273,6 +273,5 @@ Module Example4SimplifyProofByTypeclass.
     Qed.
 
   End OLD_proof.
-
 
 End Example4SimplifyProofByTypeclass.

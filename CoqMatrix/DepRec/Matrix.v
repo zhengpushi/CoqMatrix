@@ -27,6 +27,8 @@ Open Scope dlist_scope.
 Open Scope mat_scope.
 
 (** ** Definition of Matrix Type *)
+Notation dlist A := (list (list A)).
+
 Section mat_def.
 
   (* I have another idea, if the properties mheight and mwidth should defined 
@@ -151,65 +153,19 @@ End f2m_m2f.
 (** ** matrix with specific size *)
 
 (** mat_1_1 *)
-Section mat_1_1.
-
-  Context {A:Type}.
-  Variable a : A.
-  
-  Let data := [[a]].
-  Let cond_h : length data = 1. auto. Qed.  
-  Let cond_w : width data 1. constructor; auto. Qed.
-  
-  Definition mk_mat_1_1 : mat 1 1 := mk_mat data cond_h cond_w.
-
-End mat_1_1.
-
-
-(** mat_1_2 *)
-Section mat_1_2.
-  
-  Context {A:Type}.
-  Variable a b : A.
-  
-  Let data : list (list A) := [[a; b]].
-  Let cond_h : length data = 1. auto. Qed.  
-  Let cond_w : width data 2. constructor; auto. Qed.
-  
-  Definition mk_mat_1_2' : mat 1 2 := mk_mat data cond_h cond_w.
-
-End mat_1_2.
-
+Definition mk_mat_1_1 {A} (a11 : A) : @mat A 1 1.
+  refine (mk_mat [[a11]] _ _); auto. constructor; auto.
+Defined.
 
 (** mat_0_c *)
-Section mat_0_c.
-  
-  Context {A:Type}.
-  Variable c : nat.
-
-  Let data : list (list A) := [].
-  Let cond_h : length data = 0. auto. Qed.  
-  Let cond_w : width data c. constructor; auto. Qed.
-  
-  Definition mk_mat_0_c : mat 0 c := mk_mat data cond_h cond_w.
-
-End mat_0_c.
-
+Definition mk_mat_0_c {A} c : @mat A 0 c.
+  refine (mk_mat [] _ _); auto. constructor; auto.
+Defined.
 
 (** mat_1_c *)
-Section mat_1_c.
-  
-  Context {A:Type}.
-  Variable l : list A.
-  Variable c : nat.
-  Variable H1 : length l = c.
-  
-  Let data : list (list A) := [l].
-  Let cond_h : length data = 1. auto. Qed.  
-  Let cond_w : width data c. constructor; auto. Qed.
-  
-  Definition mk_mat_1_c : mat 1 c := mk_mat data cond_h cond_w.
-
-End mat_1_c.
+Definition mk_mat_1_c {A} (l : list A) c (H : length l = c) : @mat A 1 c.
+  refine (mk_mat [l] _ _); auto. constructor; auto.
+Defined.
 
 
 (** mat_1_2, mat_1_3, ... *)
@@ -224,40 +180,17 @@ Definition mk_mat_1_4 {A} (a1 a2 a3 a4 : A) : mat 1 4 :=
 
 
 (** mat_r_0 *)
-Section mat_r_0.
-  
-  Context {A:Type}.
-  Variable l : list A.
-  Variable r : nat.
-  Variable H1 : length l = r.
-  
-  Let data : list (list A) := @dnil A r.
-  Let cond_h : length data = r. unfold data. rewrite dnil_length. auto. 
-  Qed.
-  Let cond_w : width data 0. unfold data. apply dnil_width. Qed.
-  
-  Definition mk_mat_r_0 : mat r 0 := mk_mat data cond_h cond_w.
-
-End mat_r_0.
+Definition mk_mat_r_0 {A} r : @mat A r 0.
+  refine (mk_mat (@dnil A r) _ _); auto.
+  apply dnil_length. apply dnil_width.
+Defined.
 
 
 (** mat_r_1 *)
-Section mat_r_1.
-  
-  Context {A:Type}.
-  Variable l : list A.
-  Variable r : nat.
-  Variable H1 : length l = r.
-  
-  Let data : list (list A) := row2col l.
-  Let cond_h : length data = r. unfold data. rewrite row2col_length. auto. 
-  Qed.
-  Let cond_w : width data 1. unfold data. apply row2col_width; auto. Qed.
-  
-  Definition mk_mat_r_1 : mat r 1 := mk_mat data cond_h cond_w.
-
-End mat_r_1.
-
+Definition mk_mat_r_1 {A} (l : list A) r (H : length l = r) : @mat A r 1.
+  refine (mk_mat (row2col l) _ _); auto.
+  rewrite row2col_length; auto. apply row2col_width.
+Defined.
 
 (** mat_2_1, mat_3_1, ... *)
 Definition mk_mat_2_1 {A} (a1 a2 : A) : mat 2 1 := 
@@ -271,33 +204,16 @@ Definition mk_mat_4_1 {A} (a1 a2 a3 a4 : A) : mat 4 1 :=
 
 
 (** mat_2_2 *)
-Section mat_2_2.
-  
-  Context {A:Type}.
-  Variable a11 a12 a21 a22 : A.
-  
-  Let data : list (list A) := [[a11;a12];[a21;a22]].
-  Let cond_h : length data = 2. auto. Qed.
-  Let cond_w : width data 2. unfold data. constructor; auto. Qed.
-  
-  Definition mk_mat_2_2 : mat 2 2 := mk_mat data cond_h cond_w.
-
-End mat_2_2.
+Definition mk_mat_2_2 {A} (a11 a12 a21 a22 : A) : @mat A 2 2.
+  refine (mk_mat [[a11;a12];[a21;a22]] _ _); auto. constructor; auto.
+Defined.
 
 
 (** mat_3_3 *)
-Section mat_3_3.
-  
-  Context {A:Type}.
-  Variable a11 a12 a13 a21 a22 a23 a31 a32 a33 : A.
-  
-  Let data : list (list A) := [[a11;a12;a13];[a21;a22;a23];[a31;a32;a33]].
-  Let cond_h : length data = 3. auto. Qed.
-  Let cond_w : width data 3. unfold data. constructor; auto. Qed.
-  
-  Definition mk_mat_3_3 : mat 3 3 := mk_mat data cond_h cond_w.
-
-End mat_3_3.
+Definition mk_mat_3_3 {A} (a11 a12 a13 a21 a22 a23 a31 a32 a33 : A) : @mat A 3 3.
+  refine (mk_mat [[a11;a12;a13];[a21;a22;a23];[a31;a32;a33]] _ _); auto.
+  constructor; auto.
+Defined.
 
 
 (** ** Matrix map to a dlist *)

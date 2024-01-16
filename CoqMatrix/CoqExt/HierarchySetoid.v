@@ -440,9 +440,10 @@ Class Surjective {A B : Type} {Beq: relation B} (phi: A -> B) := {
 (** ** Class *)
 
 Class Bijective {A B : Type} {Aeq: relation A} {Beq: relation B} (phi: A -> B) := {
-    bijInjective :> Injective (Aeq:=Aeq) (Beq:=Beq) phi;
-    bijSurjective :> Surjective (Beq:=Beq) phi
+    bijInjective :: Injective (Aeq:=Aeq) (Beq:=Beq) phi;
+    bijSurjective :: Surjective (Beq:=Beq) phi
   }.
+
 
 (** ** Instances *)
 
@@ -614,11 +615,11 @@ Class Isomorphism2 {A B : Type} {Aeq: relation A} {Beq: relation B}
 
 (** ** Class *)
 Class Monoid {A:Type} (Aadd : A -> A -> A) (Azero : A) (Aeq:A->A->Prop) := {
-    monoidAaddProper :> Proper (Aeq ==> Aeq ==> Aeq) Aadd;
-    monoidEquiv :> Equivalence Aeq;
-    monoidAssoc :> Associative Aadd Aeq;
-    monoidIdL :> IdentityLeft Aadd Azero Aeq;
-    monoidIdR :> IdentityRight Aadd Azero Aeq;
+    monoidAaddProper :: Proper (Aeq ==> Aeq ==> Aeq) Aadd;
+    monoidEquiv :: Equivalence Aeq;
+    monoidAssoc :: Associative Aadd Aeq;
+    monoidIdL :: IdentityLeft Aadd Azero Aeq;
+    monoidIdR :: IdentityRight Aadd Azero Aeq;
   }.
 
 (** ** Instances *)
@@ -699,8 +700,8 @@ End Examples.
 
 (** ** Class *)
 Class AMonoid {A} Aadd Azero Aeq := {
-    amonoidMonoid :> @Monoid A Aadd Azero Aeq;
-    amonoidComm :> Commutative Aadd Aeq;
+    amonoidMonoid :: @Monoid A Aadd Azero Aeq;
+    amonoidComm :: Commutative Aadd Aeq;
   }.
 
 (** ** Instances *)
@@ -761,13 +762,13 @@ End Examples.
 
 (** ** Class *)
 Class Group {A} Aadd Azero (Aopp : A -> A) Aeq := {
-    groupMonoid :> @Monoid A Aadd Azero Aeq;
-    groupInvL :> InverseLeft Aadd Azero Aopp Aeq;
-    groupInvR :> InverseRight Aadd Azero Aopp Aeq;
-    groupAaddProper :> Proper (Aeq ==> Aeq ==> Aeq) Aadd;
-    groupAoppProper :> Proper (Aeq ==> Aeq) Aopp;
-    (* groupDistrAinv :> DistributiveUnary Aop Ainv Aeq; *)
-    (* groupInvoAinv :> Involution Ainv Aeq; *)
+    groupMonoid :: @Monoid A Aadd Azero Aeq;
+    groupInvL :: InverseLeft Aadd Azero Aopp Aeq;
+    groupInvR :: InverseRight Aadd Azero Aopp Aeq;
+    groupAaddProper :: Proper (Aeq ==> Aeq ==> Aeq) Aadd;
+    groupAoppProper :: Proper (Aeq ==> Aeq) Aopp;
+    (* groupDistrAinv :: DistributiveUnary Aop Ainv Aeq; *)
+    (* groupInvoAinv :: Involution Ainv Aeq; *)
   }.
 
 (** ** Instances *)
@@ -1096,9 +1097,9 @@ End Examples.
 (** ** Definition and theory *)
 
 Class AGroup {A} Aadd Azero Aopp Aeq := {
-    agroupGroup :> @Group A Aadd Azero Aopp Aeq;
-    agroupAM :> @AMonoid A Aadd Azero Aeq;
-    agroupComm :> Commutative Aadd Aeq;
+    agroupGroup :: @Group A Aadd Azero Aopp Aeq;
+    agroupAM :: @AMonoid A Aadd Azero Aeq;
+    agroupComm :: Commutative Aadd Aeq;
   }.
 
 Section Theory.
@@ -1160,10 +1161,10 @@ End Instances.
 (* Note that, in mathematics, mul needn't commutative, but ring_theory in Coq 
   need it. Because we want use ring tactic, so add this properties. *)
 Class Ring {A} Aadd Azero Aopp Amul Aone Aeq := {
-    ringAddAG :> @AGroup A Aadd Azero Aopp Aeq;
-    ringMulAM :> @AMonoid A Amul Aone Aeq;
-    ringDistrL :> DistributiveLeft Aadd Amul Aeq;
-    ringDistrR :> DistributiveRight Aadd Amul Aeq;
+    ringAddAG :: @AGroup A Aadd Azero Aopp Aeq;
+    ringMulAM :: @AMonoid A Amul Aone Aeq;
+    ringDistrL :: DistributiveLeft Aadd Amul Aeq;
+    ringDistrR :: DistributiveRight Aadd Amul Aeq;
   }.
 
 (** ** Instances *)
@@ -1303,11 +1304,11 @@ End Demo_ConcrateRing.
 (** ** Class *)
 Class Field {A} Aadd Azero Aopp Amul Aone Ainv Aeq := {
     (** Field: Ring + mult inversion + (1≠0) *)
-    fieldRing :> @Ring A Aadd Azero Aopp Amul Aone Aeq;
+    fieldRing :: @Ring A Aadd Azero Aopp Amul Aone Aeq;
     field_mulInvL : forall a, ~(Aeq a Azero) -> Aeq (Amul (Ainv a) a) Aone;
     field_1_neq_0 : ~(Aeq Aone Azero);
     (** additional: Ainv is proper morphism *)
-    fieldAinvProper :> Proper (Aeq ==> Aeq) Ainv
+    fieldAinvProper :: Proper (Aeq ==> Aeq) Ainv
   }.
 
 (** ** Instances *)

@@ -398,8 +398,8 @@ Class Surjective {A B : Type} (phi: A -> B) := {
 (** ** Class *)
 
 Class Bijective {A B : Type} (phi: A -> B) := {
-    bijInjective :> Injective phi;
-    bijSurjective :> Surjective phi
+    bijInjective :: Injective phi;
+    bijSurjective :: Surjective phi
   }.
 
 (** ** Instances *)
@@ -547,9 +547,9 @@ Class Isomorphism2 {A B : Type}
 
 (** ** Class *)
 Class Monoid {A:Type} (Aadd : A -> A -> A) (Azero : A) := {
-    monoidAssoc :> Associative Aadd;
-    monoidIdL :> IdentityLeft Aadd Azero;
-    monoidIdR :> IdentityRight Aadd Azero;
+    monoidAssoc :: Associative Aadd;
+    monoidIdL :: IdentityLeft Aadd Azero;
+    monoidIdR :: IdentityRight Aadd Azero;
   }.
 
 (** ** Instances *)
@@ -652,8 +652,8 @@ End Examples.
 
 (** ** Class *)
 Class AMonoid {A} Aadd Azero := {
-    amonoidMonoid :> @Monoid A Aadd Azero;
-    amonoidComm :> Commutative Aadd;
+    amonoidMonoid :: @Monoid A Aadd Azero;
+    amonoidComm :: Commutative Aadd;
   }.
 
 (** ** Instances *)
@@ -714,9 +714,9 @@ End Examples.
 
 (** ** Class *)
 Class Group {A} Aadd Azero (Aopp : A -> A) := {
-    groupMonoid :> @Monoid A Aadd Azero;
-    groupInvL :> InverseLeft Aadd Azero Aopp;
-    groupInvR :> InverseRight Aadd Azero Aopp;
+    groupMonoid :: @Monoid A Aadd Azero;
+    groupInvL :: InverseLeft Aadd Azero Aopp;
+    groupInvR :: InverseRight Aadd Azero Aopp;
   }.
 
 (** ** Instances *)
@@ -1035,9 +1035,9 @@ End Examples.
 (** ** Definition and theory *)
 
 Class AGroup {A} Aadd Azero Aopp := {
-    agroupGroup :> @Group A Aadd Azero Aopp;
-    agroupAM :> @AMonoid A Aadd Azero;
-    agroupComm :> @Commutative A Aadd;
+    agroupGroup :: @Group A Aadd Azero Aopp;
+    agroupAM :: @AMonoid A Aadd Azero;
+    agroupComm :: @Commutative A Aadd;
   }.
 
 Section Theory.
@@ -1098,10 +1098,10 @@ End Instances.
 (* Note that, in mathematics, mul needn't commutative, but ring_theory in Coq 
   need it. Because we want use ring tactic, so add this properties. *)
 Class Ring {A} Aadd Azero Aopp Amul Aone := {
-    ringAddAG :> @AGroup A Aadd Azero Aopp;
-    ringMulAM :> @AMonoid A Amul Aone;
-    ringDistrL :> DistributiveLeft Aadd Amul;
-    ringDistrR :> DistributiveRight Aadd Amul;
+    ringAddAG :: @AGroup A Aadd Azero Aopp;
+    ringMulAM :: @AMonoid A Amul Aone;
+    ringDistrL :: DistributiveLeft Aadd Amul;
+    ringDistrR :: DistributiveRight Aadd Amul;
   }.
 
 (** ** Instances *)
@@ -1251,7 +1251,7 @@ End Demo_ConcrateRing.
 (** ** Class *)
 Class Field {A} Aadd Azero Aopp Amul Aone Ainv := {
     (** Field: Ring + mult inversion + (1≠0) *)
-    fieldRing :> @Ring A Aadd Azero Aopp Amul Aone;
+    fieldRing :: @Ring A Aadd Azero Aopp Amul Aone;
     field_mulInvL : forall a, a <> Azero -> Amul (Ainv a) a = Aone;
     field_1_neq_0 : Aone <> Azero;
   }.

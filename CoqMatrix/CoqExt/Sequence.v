@@ -444,8 +444,8 @@ Section Sum.
           rewrite Nat.div_small; auto.  (* a < b -> a / b = 0 *)
         * f_equiv.
           (* (m * n + i) % n = i *)
-          rewrite Nat.add_mod; auto.  (* (a + b) % n = a % n + b % n) % n *)
-          rewrite Nat.mod_mul; auto.  (* (a * b) mod b = 0 *)
+          rewrite Nat.Div0.add_mod.   (* (a + b) % n = a % n + b % n) % n *)
+          rewrite Nat.Div0.mod_mul.   (* (a * b) mod b = 0 *)
           rewrite Nat.add_0_l.
           repeat rewrite Nat.mod_small; auto. (* a < b -> a % b = 0 *)
       }

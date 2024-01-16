@@ -553,7 +553,6 @@ Section mtrans.
     mtlc (m\T) == (mtlr m)\T.
   Proof.
     unfold mtlr. induction c; destruct m; simpl; auto. split; try easy.
-    rewrite IHc. simpl. easy.
   Qed.
 
   (** Transpose twice return back *)
@@ -601,7 +600,6 @@ Section mtrans.
   Lemma mtrans_r1 : forall {n} (m : @mat A 1 n), m\T == v2cm (rm2v m).
   Proof. 
     induction n; intros; destruct m; simpl; auto. split; try easy.
-    rewrite IHn. simpl. easy.
   Qed.
 
   (** Transpose a one column matrix *)
@@ -1210,9 +1208,7 @@ Section mat_alg.
   Lemma vdotm_cons : forall {r c} a (v : vec c) (m : mat r (S c)),
       (@vdotm r (S c) (a, v) m == (a c* (mhdc m)) + (vdotm v (mtlc m)))%vec.
   Proof.
-    induction r; intros; destruct m; simpl; auto.
-    split; try easy.
-    rewrite IHr. easy.
+    induction r; intros; destruct m; simpl; auto. split; try easy.
   Qed.
   
   Lemma vdotm_vcmul : forall {r c} a (v : vec c) (m : mat r c),
@@ -1311,8 +1307,7 @@ Section mat_alg.
   Lemma mtlc_mdot : forall {r c t} (m1 : mat r c) (m2 : mat (S t) c),
       mtlc (mdot m1 m2) == mdot m1 (mtlr m2).
   Proof. 
-    induction r; intros; destruct m1,m2; simpl; auto. split; auto.
-    easy. apply IHr. 
+    induction r; intros; destruct m1,m2; simpl; auto. split; try easy.
   Qed.
 
   (** (v, m1) . m2 = ((v . m2), (m1 . m2)) *)
@@ -1389,8 +1384,7 @@ Section mat_alg.
       mdot m1 (m2 + m3) == (mdot m1 m2) + (mdot m1 m3).
   Proof.
     induction r; intros; destruct m1; simpl; auto. split; auto.
-    - apply vdotm_add_distr_l.
-    - apply IHr.
+    apply vdotm_add_distr_l.
   Qed.
 
   (** (m1 + m2) . m3 = (m1 . m3) + (m2 . m3) *)
