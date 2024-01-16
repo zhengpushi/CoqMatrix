@@ -37,3 +37,13 @@ v1.0.4
 2023.06.20
 v1.0.5
 1. Add SF model to ocaml_test_example.
+
+2023.10.17
+(no public version)
+1. Add a new model naming SF2 (SafeNatFun2), which is a variant of SF.
+   SF: first define matrix, then deriving row vector or column vector
+   SF2: first define vector, then deriving matrix. This model has good scalability for higher dimensional vectors.
+
+2024.01.16
+(preparing new version)
+1. To support Coq 8.18.

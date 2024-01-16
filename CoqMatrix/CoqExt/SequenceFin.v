@@ -73,8 +73,6 @@ Section seqeq.
 
   (** seqeq of S has a equivalent form. *)
   (* Lemma seqeq_S : forall n (f g : Fin.t n -> A), *)
-  (*     let f' := fun i => *)
-  (*     seqeq (S n) f g <-> (seqeq n f g) /\ (f n == g n). *)
   (*     seqeq (S n) f g <-> (seqeq n f g) /\ (f n == g n). *)
   (* Proof. *)
   (*   split; intros. *)
@@ -108,14 +106,20 @@ Section seqeq.
     Context {Aeqb_false_iff : forall a b : A, Aeqb a b = false <-> ~(Aeq a b)}.
 
     (** Boolean equality of two sequence *)
-    (* Fixpoint seqeqb n (f g : Fin.t (S n) -> A) : bool := *)
-    (*   match n with *)
-    (*   | O => true *)
-    (*   | 1 => Aeqb (f F1) (g F1) *)
-    (*   | S n' => *)
-    (*       (* (seqeqb n' f g) && *) *)
-    (*         Aeqb (f n') (g n') *)
-    (*   end. *)
+    Fixpoint fin2finS {n:nat} (i : Fin.t n) : Fin.t (S n):=
+      match i with
+      | F1 => F1
+      | FS i' => FS (fin2finS i')
+      end.
+
+    Fixpoint seqeqb n : (Fin.t n -> A) -> (Fin.t n -> A) -> bool :=
+      match n with
+      | O => fun _ _ => true
+      | S n' => fun (f:Fin.t (S n')->A) (g:Fin.t (S n')->A) =>
+          (seqeqb n' (fun i => f (fin2finS i)) (fun j => g (fin2finS j))) &&
+            Aeqb (f F1) (g F1)
+      end.
+    
     (* Fixpoint seqeqb n (f g : Fin.t n -> A) : bool := *)
     (*   match n with *)
     (*   | O => true *)
