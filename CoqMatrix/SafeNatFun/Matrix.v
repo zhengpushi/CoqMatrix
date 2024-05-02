@@ -581,7 +581,7 @@ Section malg.
     intros. unfold mrow.
     rewrite (list_eq_iff_nth Azero c).
     - intros. unfold ladd.
-      pose proof (map2_nth (Aadd:=Aadd)
+      pose proof (nth_map2 (Aadd:=Aadd)
                     (map (fun j : nat => m1$i$j) (seq 0 c))
                     (map (fun j : nat => m2$i$j) (seq 0 c)) i0 Azero).
       rewrite H1.

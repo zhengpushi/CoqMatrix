@@ -109,7 +109,7 @@ Section Props_listA.
   Defined.
 
   (** list equality is decidable on setoid *)
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Lemma list_eq_dec : (forall x y : A, {(x == y)%A} + {~(x == y)%A}) ->
                       forall l1 l2 : list A, {l1 == l2} + {~(l1 == l2)}.
   Proof.
@@ -128,7 +128,7 @@ End Props_listA.
 (** ** Properties of hd and tl *)
 Section hd_tl.
   
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -161,7 +161,7 @@ End hd_tl.
 
 Section nth.
   
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -226,7 +226,7 @@ End nth.
 
 Section chg.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -290,7 +290,7 @@ End chg.
 (** ** Properties of length *)
 Section length.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -354,7 +354,7 @@ End length.
 
 Section ind.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -390,7 +390,7 @@ End ind.
 
 Section repeat.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := (eqlistA Aeq).
 
   Lemma repeat_aeq_mor : Proper (Aeq ==> eq ==> (eqlistA Aeq)) (@repeat A).
@@ -418,7 +418,7 @@ End repeat.
 
 Section lzero.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq).
   
@@ -446,7 +446,7 @@ End lzero.
 (** map for three types *)
 
 Section map_A_B_C.
-  Context `{Aeq : relation A} `{Beq : relation B} `{Equiv_Ceq : Equivalence C Ceq}.
+  Context `{Aeq : relation A} `{Beq : relation B} `{Ceq_equiv : Equivalence C Ceq}.
   Infix "==" := (eqlistA Ceq).
 
   (** map_map setoid version *)
@@ -464,8 +464,8 @@ End map_A_B_C.
 (** map for two types *)
 Section map_A_B.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq}.
-  Context `{Equiv_Beq:Equivalence B Beq}.
+  Context `{Aequiv : Equivalence A Aeq}.
+  Context `{Bequiv : Equivalence B Beq}.
   Infix "==" := (Beq) : A_scope.
   Infix "==" := (eqlistA Beq).
 
@@ -528,7 +528,7 @@ End map_A_B.
 (** map for one type *)
 Section map_A.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "==" := (Aeq) : A_scope.
   Infix "==" := (eqlistA Aeq).
 
@@ -605,7 +605,7 @@ Section map2.
 
   Context {A B C :Type} {Aeq:relation A} {Beq:relation B} {Ceq:relation C}.
   Context {Aadd : A -> B -> C}.
-  Context `{Equiv_Ceq : Equivalence C Ceq}.
+  Context `{Ceq_equiv : Equivalence C Ceq}.
   Infix "==" := (eqlistA Ceq).
 
   (** map operation to two list *)
@@ -667,7 +667,7 @@ Arguments map2 {A B C}.
 
 Section map2_dlist.
 
-  Context {A B C :Type} `{Ceq:relation C}.
+  Context {A B C : Type} `{Ceq:relation C}.
   Context `{EqEquivC:Equivalence C Ceq}.
   Infix "==" := (eqlistA (eqlistA Ceq)).
   Variable f : A -> B -> C.
@@ -687,7 +687,7 @@ End map2_dlist.
 (** ** map2 properties with same base type *)
 Section map2_sametype.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Context `{Aadd:A->A->A} `{Aopp:A->A}.
   Infix "+" := Aadd : A_scope.
   Notation "- a" := (Aopp a) : A_scope.
@@ -696,7 +696,7 @@ Section map2_sametype.
   Infix "==" := (eqlistA Aeq).
 
   (** nth (map2 f l1 l2) i = f (nth l1 i) (nth l2 i) *)
-  Lemma map2_nth : forall (l1 l2 : list A) i (a : A),
+  Lemma nth_map2 : forall (l1 l2 : list A) i (a : A),
     i < length l1 -> i < length l2 ->
     (nth i (map2 Aadd l1 l2) a == Aadd (nth i l1 a) (nth i l2 a))%A.
   Proof.
@@ -891,7 +891,7 @@ End concat.
 (** ** Convert between list and function *)
 Section f2l_l2f.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
+  Context `{Aequiv : Equivalence A Aeq} {Azero : A}.
   Infix "==" := (Aeq) : A_scope.
   Infix "==" := (eqlistA Aeq).
 
