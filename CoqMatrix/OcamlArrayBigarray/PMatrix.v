@@ -32,7 +32,7 @@
 
 
 Require Export Extraction NatExt ListExt Hierarchy QcExt RExt.
-Require Export Extraction ExtrOcamlBasic ExtrOcamlNatInt MyExtrOCamlR.
+(* Require Export Extraction ExtrOcamlBasic ExtrOcamlNatInt MyExtrOCamlR. *)
 
 (** Control the scope *)
 Open Scope nat_scope.
@@ -60,12 +60,12 @@ Ltac nat_cmp :=
       intros;
       let E := fresh "E" in
       try match goal with
-        | [ H : context [?i ??= ?j] |- _]  => destruct (i ??= j) as [E|E]
-        | [ |- context [?i ??= ?j]]        => destruct (i ??= j) as [E|E]
-        | [ H : context [?i ??< ?j] |- _]  => destruct (i ??< j) as [E|E]
-        | [ |- context [?i ??< ?j]]        => destruct (i ??< j) as [E|E]
-        | [ H : context [?i ??<= ?j] |- _] => destruct (i ??<= j) as [E|E]
-        | [ |- context [?i ??<= ?j]]       => destruct (i ??<= j) as [E|E]
+        | [ H : context [?i =? ?j] |- _]  => destruct (i =? j) as [E|E]
+        | [ |- context [?i =? ?j]]        => destruct (i =? j) as [E|E]
+        | [ H : context [?i <? ?j] |- _]  => destruct (i <? j) as [E|E]
+        | [ |- context [?i <? ?j]]        => destruct (i <? j) as [E|E]
+        | [ H : context [?i <=? ?j] |- _] => destruct (i <=? j) as [E|E]
+        | [ |- context [?i <=? ?j]]       => destruct (i <=? j) as [E|E]
         (* `i = j |- _`, use it to rewrite *)
         | [H : ?i = ?j |- _] => match type of i with | nat => try rewrite H in * end
         end;
@@ -1006,9 +1006,9 @@ End test_R.
           (* | [ |- context [?a.[?i<-_].[?i<-_]]]      => rewrite mset_shadow *)
           (* ((mcreate a).[i<-a] = (mcreate a) *)
           (* | [ |- context [(mcreate _ ?a).[?i<-?a]]]  => rewrite mset_mcreate_same *)
-          (* destruct `??=, ??<, ??<=` *)
-          (* | [ H : context [?i ??= ?j] |- _]  => destruct (i ??= j) as [E|E] *)
-          (* | [ |- context [?i ??= ?j]]        => destruct (i ??= j) as [E|E] *)
+          (* destruct `=?, ??<, ??<=` *)
+          (* | [ H : context [?i =? ?j] |- _]  => destruct (i =? j) as [E|E] *)
+          (* | [ |- context [?i =? ?j]]        => destruct (i =? j) as [E|E] *)
           (* | [ H : context [?i ??< ?j] |- _]  => destruct (i ??< j) as [E|E] *)
           (* | [ |- context [?i ??< ?j]]        => destruct (i ??< j) as [E|E] *)
           (* | [ H : context [?i ??<= ?j] |- _] => destruct (i ??<= j) as [E|E] *)

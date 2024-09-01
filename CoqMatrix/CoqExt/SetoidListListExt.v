@@ -3,7 +3,7 @@
   This file is part of CoqExt. It is distributed under the MIT
   "expat license". You should have recieved a LICENSE file with it.
 
-  purpose   : Extension for general list list
+  purpose   : Extension for dlist
   author    : ZhengPu Shi
   date      : 2021.12
   
@@ -23,18 +23,21 @@
 
 Require Export SetoidListExt.
 
+Open Scope dlist_scope.
+
 Generalizable Variables A B C Aeq Beq Ceq Azero Aone Aadd Aopp Amul Ainv.
 
+Notation dlist A := (list (list A)).
 
 (* ======================================================================= *)
-(** ** width of a dlist (list (list A)) *)
+(** ** width of a dlist *)
 
 Section dlist_width.
   
   Context {A : Type}.
 
-  (** A proposition that every list of a list list has same length *)
-  Definition width {A:Type} (dl : list (list A)) (n : nat) : Prop :=
+  (** A proposition that every list of a dlist has same length *)
+  Definition width {A:Type} (dl : dlist A) (n : nat) : Prop :=
     Forall (fun l => length l = n) dl.
 
   (** width property should be kept by its child structure *)
@@ -56,7 +59,7 @@ Section dlist_width.
   Qed.
 
   (** app operation won't change width property *)
-  Lemma app_width : forall (dl1 : list (list A)) dl2 n, 
+  Lemma app_width : forall (dl1 : dlist A) dl2 n, 
       width (dl1 ++ dl2) n <-> width dl1 n /\ width dl2 n.
   Proof.
     unfold width in *.
@@ -66,14 +69,14 @@ Section dlist_width.
   Qed.
 
   (** rev operation won't change width property *)
-  Lemma rev_width : forall (dl : list (list A)) n, width (rev dl) n -> width dl n.
+  Lemma rev_width : forall (dl : dlist A) n, width (rev dl) n -> width dl n.
   Proof.
     unfold width in *.
     induction dl; simpl; intros; auto.
     apply app_width in H. destruct H. inv H0. constructor; auto.
   Qed.
 
-  (** repeat generated list list will keep width property same as seed element *)
+  (** repeat generated dlist will keep width property same as seed element *)
   Lemma repeat_width : forall (l : list A) n k,
       length l = k -> width (repeat l n) k.
   Proof.
@@ -81,7 +84,7 @@ Section dlist_width.
   Qed.
 
   (** width promise i-th row has same length *)
-  Lemma width_imply_nth_length : forall i c (dl : list (list A)), 
+  Lemma width_imply_nth_length : forall i c (dl : dlist A), 
       i < length dl -> width dl c -> length (nth i dl []) = c.
   Proof.
     unfold width. intros i c dl. revert i c.
@@ -104,11 +107,11 @@ End dlist_width.
 Section SetByConstant.
   
   (* --------------------------------------------------------------------- *)
-  (** *** Modify a list list *)
+  (** *** Modify a dlist *)
   
   (** Definition *)
-  Fixpoint dlst_chg {A} (dl : list (list A)) (i j : nat) (x : A) 
-    : list (list A) :=
+  Fixpoint dlst_chg {A} (dl : dlist A) (i j : nat) (x : A) 
+    : dlist A :=
     match dl, i with
     | [], _ => []
     | l :: dl, 0 => (lst_chg l j x) :: dl
@@ -148,9 +151,9 @@ End SetByConstant.
 Section SetByFunction.
 
   (** Inner version, i0 is given position, i is changed in every loop *)
-  Fixpoint dlst_chgf_aux {A} (dl : list (list A)) (i0 i j : nat) 
+  Fixpoint dlst_chgf_aux {A} (dl : dlist A) (i0 i j : nat) 
     (f : nat -> nat -> A) 
-    : list (list A) :=
+    : dlist A :=
     match dl, i with
     | [], _ => []
     | l :: dl, 0 => (lst_chgf l j (f i0)) :: dl
@@ -158,9 +161,9 @@ Section SetByFunction.
     end. 
   
   (** User version that hide i0 parameter *)
-  Definition dlst_chgf {A} (dl : list (list A)) (i j : nat) 
+  Definition dlst_chgf {A} (dl : dlist A) (i j : nat) 
     (f : nat -> nat -> A) 
-    : list (list A) :=
+    : dlist A :=
     dlst_chgf_aux dl i i j f.
   
   (* Let f_gen := fun (i j : nat) => (i + j + 10).
@@ -217,8 +220,8 @@ End SetByFunction.
 Section SetRowByConstant.
   
   (** Definition *)
-  Fixpoint dlst_chgrow {A} (dl : list (list A)) (i : nat) (x : list A) 
-    : list (list A) :=
+  Fixpoint dlst_chgrow {A} (dl : dlist A) (i : nat) (x : list A) 
+    : dlist A :=
     match dl, i with
     | [], _ => []
     | l :: dl, 0 => x :: dl
@@ -257,9 +260,9 @@ End SetRowByConstant.
 Section SetRowByFunction.
   
   (** Inner version, i0 is given position, i is changed in every loop *)
-  Fixpoint dlst_chgrowf_aux {A} (dl : list (list A)) (i0 i : nat) 
+  Fixpoint dlst_chgrowf_aux {A} (dl : dlist A) (i0 i : nat) 
     (f : nat -> list A) 
-    : list (list A) :=
+    : dlist A :=
     match dl, i with
     | [], _ => []
     | l :: dl, 0 => (f i0) :: dl
@@ -267,9 +270,9 @@ Section SetRowByFunction.
     end. 
   
   (** User version that hide i0 parameter *)
-  Definition dlst_chgrowf {A} (dl : list (list A)) (i : nat) 
+  Definition dlst_chgrowf {A} (dl : dlist A) (i : nat) 
     (f : nat -> list A) 
-    : list (list A) :=
+    : dlist A :=
     dlst_chgrowf_aux dl i i f.
   
   (*   Let f_gen := fun (i : nat) => [i+10;i+11;i+12].
@@ -320,22 +323,22 @@ End SetRowByFunction.
 (** ** Properties of dlist *)
 Section props_dlist.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Context `{Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)).
   Open Scope nat.
 
   (** ** Length of a empty dlist *)
-  Lemma dlist_h0_iff : forall (dl : list (list A)), 
+  Lemma dlist_h0_iff : forall (dl : dlist A), 
       length dl = 0 -> dl == nil.
   Proof.
     destruct dl; simpl; auto. intros H; easy.
   Qed.
   
-  (** Two list list equal iff all nth nth visit equal *)
+  (** Two dlist equal iff corresponded elements all equal *)
   Lemma dlist_eq_iff_nth_nth :
-    forall r c (dl1 dl2 : list (list A))
+    forall r c (dl1 dl2 : dlist A)
       (H1 : length dl1 = r) (H2 : length dl2 = r)
       (H3 : width dl1 c) (H4 : width dl2 c),
       dl1 == dl2 <->
@@ -351,7 +354,7 @@ Section props_dlist.
 
   (** dlist_eq is decidable *)
   Context `{Aeq_dec : Decidable A Aeq}.
-  Lemma dlist_eq_dec : forall (dl1 dl2 : list (list A)), {dl1 == dl2} + {~(dl1 == dl2)}.
+  Lemma dlist_eq_dec : forall (dl1 dl2 : dlist A), {dl1 == dl2} + {~(dl1 == dl2)}.
   Proof.
     apply list_eq_dec.
     apply list_eq_dec. apply Aeq_dec.
@@ -370,8 +373,8 @@ Section dnil.
   Infix "==" := (eqlistA (eqlistA Aeq)).
   Open Scope nat.
   
-  (** a list list that every list is nil, named as dnil *)
-  Fixpoint dnil n : list (list A) :=
+  (** a dlist that every list is nil, named as dnil *)
+  Fixpoint dnil n : dlist A :=
     match n with
     | O => nil
     | S n' => nil :: (dnil n')
@@ -399,7 +402,7 @@ Section dnil.
   Qed.
 
   (** width dl is zero imply it is a dnil *)
-  Lemma dlist_w0_eq_dnil : forall (dl : list (list A)), 
+  Lemma dlist_w0_eq_dnil : forall (dl : dlist A), 
       width dl 0 -> dl == dnil (length dl).
   Proof.
     unfold width; induction dl; simpl; auto.
@@ -453,15 +456,15 @@ End map2.
 (** ** Convert between dlist and function *)
 Section f2dl_dl2f.
 
-  Context `{Equiv_Aeq : Equivalence A Aeq} {Azero : A}.
-  Infix "==" := (Aeq) : A_scope.
-  Infix "==" := (eqlistA Aeq).
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Context `{Aequiv : Equivalence A Aeq} {Azero : A}.
+  Infix "==" := Aeq : A_scope.
+  Infix "==" := (eqlistA Aeq) : list_scope.
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
 
-  Definition f2dl {r c : nat} (f : nat -> nat -> A) : list (list A) :=
+  Definition f2dl {r c : nat} (f : nat -> nat -> A) : dlist A :=
     map (fun i => f2l (n:=c) (f i)) (seq 0 r).
 
-  Definition dl2f {r c : nat} (dl : list (list A)) : nat -> nat -> A :=
+  Definition dl2f {r c : nat} (dl : dlist A) : nat -> nat -> A :=
     fun i j => nth j (nth i dl []) Azero.
 
   Lemma f2dl_length : forall r c f, length (@f2dl r c f) = r.
@@ -498,11 +501,11 @@ Section convert_row_and_col.
   Context `{M:Monoid}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   
   
   (** Convert a list to a dlist, it looks like converting a row to a column. *)
-  Fixpoint row2col (l : list A) : list (list A) :=
+  Fixpoint row2col (l : list A) : dlist A :=
     match l with
     | [] => []
     | x :: tl => [x] :: (row2col tl)
@@ -532,14 +535,14 @@ Section convert_row_and_col.
   
   (** Convert a dlist to a list which contain head element, it looks like 
     converting a column to a row. *)
-  Fixpoint col2row (dl : list (list A)) : list A :=
+  Fixpoint col2row (dl : dlist A) : list A :=
     match dl with
     | [] => []
     | l :: tl => (hd Azero l) :: (col2row tl)
     end.
   
   (** Convert a dlist to list then convert it to a dlist, equal to original dlist. *)
-  Lemma row2col_col2row : forall (dl : list (list A)),
+  Lemma row2col_col2row : forall (dl : dlist A),
       width dl 1 -> row2col (col2row dl) == dl.
   Proof.
     unfold width; induction dl; simpl; auto; intros. inv H.
@@ -548,8 +551,7 @@ Section convert_row_and_col.
     apply List.length_zero_iff_nil in H0. subst. easy.
   Qed.
   
-  (** Convert a list to dlist then convert it to a list, equal to original 
-    list. *)
+  (** Convert a list to dlist then convert it to a list, equal to original list. *)
   Lemma col2row_row2col : forall (l : list A), 
       (col2row (row2col l) == l)%list.
   Proof.
@@ -565,7 +567,7 @@ Section hdc.
   Context {A : Type} {Azero : A}.
   
   (** Get head column of a dlist *)
-  Fixpoint hdc (dl : list (list A)) : list A :=
+  Fixpoint hdc (dl : dlist A) : list A :=
     match dl with
     | [] => []
     | l :: tl => (hd Azero l) :: (hdc tl)
@@ -589,7 +591,7 @@ Section tlc.
   Context {A : Type}.
   
   (** Get tail columns of a dlist *)
-  Fixpoint tlc (dl : list (list A)) : list (list A) :=
+  Fixpoint tlc (dl : dlist A) : dlist A :=
     match dl with
     | [] => []
     | l :: tl => (tail l) :: (tlc tl)
@@ -625,13 +627,13 @@ End tlc.
 (** ** construct a dlist with a list and a dlist by column *)
 Section consc.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq} {Azero:A}.
+  Context `{Aequiv : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   
   (** Construct a dlist by column with a list and a dlist *)
-  Fixpoint consc (l : list A) (dl : list (list A)) : list (list A) :=
+  Fixpoint consc (l : list A) (dl : dlist A) : dlist A :=
     match l, dl with
     | xl :: tl, xdl :: tdl => (xl :: xdl) :: (consc tl tdl)
     | _, _ => []
@@ -652,7 +654,7 @@ Section consc.
 
   
   (** consc_eq, seems like f_equal *)
-  Lemma consc_eq_iff : forall (l1 l2 : list A) (dl1 dl2 : list (list A)) n
+  Lemma consc_eq_iff : forall (l1 l2 : list A) (dl1 dl2 : dlist A) n
                          (H1:length l1 = n) (H2:length l2 = n)
                          (H3:length dl1 = n) (H4:length dl2 = n),
       consc l1 dl1 == consc l2 dl2 <-> (l1 == l2)%list /\ dl1 == dl2.
@@ -727,7 +729,7 @@ End consc.
 
 (* ======================================================================= *)
 (** ** Append two objects of dlist type to one object of dlist *)
-Section dlist_app.
+Section dlapp.
   
   Context {A : Type}.
   
@@ -735,13 +737,13 @@ Section dlist_app.
   Definition dlappr := app.
   
   (** dlist apend by column *)
-  Fixpoint dlappc (dl1 dl2 : list (list A)) : list (list A) :=
+  Fixpoint dlappc (dl1 dl2 : dlist A) : dlist A :=
     match dl1, dl2 with
     | l1 :: tl1, l2 :: tl2 => (app l1 l2) :: (dlappc tl1 tl2)
     | _, _ => []
     end.
 
-End dlist_app.
+End dlapp.
 
 Notation "l @@ r" := (dlappc l r) (at level 40) : dlist_scope.
 
@@ -750,10 +752,10 @@ Notation "l @@ r" := (dlappc l r) (at level 40) : dlist_scope.
 (** ** Zero dlist *)
 Section dlzero.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq} {Azero:A}.
+  Context `{Aequiv : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   
   (** dlist constructed by repeated lzero, named as dlzero *)
   Definition dlzero r c := repeat (lzero Azero c) r.
@@ -770,13 +772,13 @@ Section dlzero.
     intros. simpl. cbn. easy.
   Qed.
   
-  (** dlzero with 0 rows equal to dnil *)
-  Lemma dlzero_dnil : forall {c}, dlzero c 0 == dnil c.
+  (** dlzero with 0 columns equal to dnil *)
+  Lemma dlzero_c0 : forall {c}, dlzero c 0 == dnil c.
   Proof.
     induction c; simpl; try easy. rewrite <- IHc. easy.
   Qed.
   
-  (** dlzero heigth law *)
+  (** dlzero height law *)
   Lemma dlzero_length : forall {r c}, length (dlzero r c) = r.
   Proof.
     intros. apply repeat_length.
@@ -787,12 +789,6 @@ Section dlzero.
   Proof.
     unfold width, dlzero; induction r; intros; simpl; auto. constructor; auto.
     apply lzero_length.
-  Qed.
-  
-  (** dlzero with 0 rows equal to dnil *)
-  Lemma dlzero_w0_eq_dnil : forall r, (dlzero r 0) == dnil r.
-  Proof. 
-    induction r; try easy. unfold dlzero in *. simpl in *. rewrite IHr. easy.
   Qed.
   
   (** append two dlzeros by row equal to whole *)
@@ -819,7 +815,7 @@ Arguments dlzero {A}.
 (** ** transpose a dlist *)
 Section dltrans.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq} {Azero:A}.
+  Context `{Aequiv : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)).
@@ -833,7 +829,7 @@ Section dltrans.
       [] 3 => [[];[];[]]
       [[];[];[]] 0 => []
    *)
-  Fixpoint dltrans (dl : list (list A)) (c : nat) : list (list A) :=
+  Fixpoint dltrans (dl : dlist A) (c : nat) : dlist A :=
     match dl with
     | [] => @dnil A c
     | l :: tl => consc l (dltrans tl c)
@@ -923,7 +919,7 @@ Section dltrans.
   Lemma dltrans_zero : forall r c,
       dltrans (dlzero Azero r c ) c == dlzero Azero c r.
   Proof.
-    induction r; intros; simpl; auto. rewrite dlzero_dnil; easy.
+    induction r; intros; simpl; auto. rewrite dlzero_c0; easy.
     unfold dlzero in *; simpl in *. rewrite IHr.
     rewrite repeat_consr. easy.
   Qed.
@@ -935,18 +931,18 @@ End dltrans.
 (** ** dlist unit, like a identity matrix *)
 Section dlunit.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq} {Azero Aone:A}.
+  Context `{Aequiv : Equivalence A Aeq} {Azero Aone:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   
-  (** Build a identity matrix with list list. *)
+  (** Build a identity matrix with dlist. *)
   (* there are 4 parts of a dlunit [n x n]: 
       left top element [1 x 1], 
       right top list [1 x (n-1)], 
       left bottom list [(n-1) x 1],
       right bottom square is another small dlunit [(n-1) x (n-1)] *)
-  Fixpoint dlunit (n : nat) : list (list A) :=
+  Fixpoint dlunit (n : nat) : dlist A :=
     match n with
     | O => []
     | S n0 => (Aone :: (repeat Azero n0)) :: (consc (repeat Azero n0) (dlunit n0))
@@ -990,9 +986,10 @@ Arguments dlunit {A}.
 (** ** map of dlist with f : A -> B *)
 Section dmap_A_B.
   
-  Context `{Equiv_Aeq:Equivalence A Aeq}.
-  Context `{Equiv_Beq:Equivalence B Beq}.
+  Context `{Aequiv : Equivalence A Aeq}.
+  Context `{Bequiv : Equivalence B Beq}.
   Variable f : A -> B.
+  Context {fProper : (Proper (Aeq ==> Beq) f)}.
   Infix "==" := Beq : A_scope.
   Infix "==" := (eqlistA Beq) : list_scope.
   Infix "==" := (eqlistA (eqlistA Beq)).
@@ -1001,7 +998,6 @@ Section dmap_A_B.
   Definition dmap dl := map (map f) dl.
 
   (** dmap is a proper morphism *)
-  Context {fProper : (Proper (Aeq ==> Beq) f)}.
   Lemma dmap_aeq_mor : Proper (eqlistA (eqlistA Aeq) ==> eqlistA (eqlistA Beq)) dmap.
   Proof.
     unfold Proper, respectful.
@@ -1053,12 +1049,12 @@ End dmap_A_B.
 (* ======================================================================= *)
 (** ** map of dlist with f : A -> B *)
 Section dmap_A_B.
-  Context {A:Type} `{Equiv_Beq:Equivalence B Beq}.
+  Context {A:Type} `{Bequiv : Equivalence B Beq}.
   Infix "==" := Beq : A_scope.
   Infix "==" := (eqlistA (eqlistA Beq)) : dlist_scope.
 
   (** dmap extensional law  *)
-  Lemma dmap_ext : forall dl (f g : A -> B) (H : forall a, f a == g a),
+  Lemma dmap_ext : forall dl (f g : A -> B) (H : forall a, (f a == g a)%A),
       (dmap f dl == dmap g dl)%dlist.
   Proof.
     intros. unfold dmap.
@@ -1071,7 +1067,7 @@ End dmap_A_B.
 (* ======================================================================= *)
 (** ** map of dlist with f : A -> A *)
 Section dmap_A_A.
-  Context `{Equiv_Aeq:Equivalence A Aeq} {Azero:A}.
+  Context `{Aequiv : Equivalence A Aeq} {Azero:A}.
   Infix "==" := Aeq : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
   Infix "==" := (eqlistA (eqlistA Aeq)).
@@ -1175,7 +1171,7 @@ Section dmap2.
     intros. unfold dmap2. rewrite map2_dnil_r; easy.
   Qed.
 
-  Lemma dmap2_tail : forall dl1 dl2,
+  Lemma tl_dmap2 : forall dl1 dl2,
       length dl1 = length dl2 ->
       tl (dmap2 dl1 dl2) == dmap2 (tl dl1) (tl dl2).
   Proof.
@@ -1207,10 +1203,10 @@ End dmap2.
 Section dmap2_sametype.
 
   Context `{Aadd:A->A->A}.
-  Context `{Equiv_Aeq:Equivalence A Aeq}.
+  Context `{Aequiv : Equivalence A Aeq}.
   Infix "+" := Aadd : A_scope.
   Infix "==" := Aeq : A_scope.
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
 
   (** dmap2 is a proper morphism *)
   Context {AaddProper : Proper (Aeq ==> Aeq ==> Aeq) Aadd}.
@@ -1227,7 +1223,7 @@ Section dmap2_sametype.
   
   Context {Comm : Commutative Aadd Aeq}.
   (** dl1 . dl2 = dl2 . dl1 *)
-  Lemma dmap2_comm : forall (dl1 dl2 : list (list A)),
+  Lemma dmap2_comm : forall (dl1 dl2 : dlist A),
       dmap2 Aadd dl1 dl2 == dmap2 Aadd dl2 dl1.
   Proof.
     induction dl1,dl2; simpl; auto. apply cons_eq_iff; split; auto.
@@ -1236,7 +1232,7 @@ Section dmap2_sametype.
 
   (** (dl1 . dl2) . dl3 = dl1 . (dl2 . dl3) *)
   Context {Assoc : Associative Aadd Aeq}.
-  Lemma dmap2_assoc : forall (dl1 dl2 dl3 : list (list A)),
+  Lemma dmap2_assoc : forall (dl1 dl2 dl3 : dlist A),
       dmap2 Aadd (dmap2 Aadd dl1 dl2) dl3 ==
         dmap2 Aadd dl1 (dmap2 Aadd dl2 dl3).
   Proof.
@@ -1271,7 +1267,7 @@ End dmap2_sametype.
 (** ** Square Zero dlist *)
 Section sdlzero.
 
-  Context `{Equiv_Aeq:Equivalence A Aeq} (Azero:A).
+  Context `{Aequiv : Equivalence A Aeq} (Azero:A).
   Infix "==" := (eqlistA (eqlistA Aeq)).
 
   (** Square dlist with element zero *)
@@ -1458,13 +1454,13 @@ Section ldotdl_dldotdl.
   Infix "-" := Asub : A_scope.
   Infix "==" := (Aeq) : A_scope.
   Infix "==" := (eqlistA Aeq) : list_scope.
-  Infix "==" := (eqlistA (eqlistA Aeq)).
+  Infix "==" := (eqlistA (eqlistA Aeq)) : dlist_scope.
   
   (* a convenient notation in this section *)
   Notation ldot := (ldot (Aadd:=Aadd) (Azero:=Azero) (Amul:=Amul)).
   
   (** list dot product to dlist *)
-  Fixpoint ldotdl (l : list A) (dl : list (list A)) : list A :=
+  Fixpoint ldotdl (l : list A) (dl : dlist A) : list A :=
     match dl with
     | h :: t => (ldot l h) :: (ldotdl l t)
     | [] => []
@@ -1643,7 +1639,7 @@ Section ldotdl_dldotdl.
   Qed.
   
   (** dlist dot product *)
-  Fixpoint dldotdl (dl1 dl2 : list (list A)) : list (list A) :=
+  Fixpoint dldotdl (dl1 dl2 : dlist A) : dlist A :=
     match dl1 with
     | h1 :: t1 => (ldotdl h1 dl2) :: (dldotdl t1 dl2)
     | [] => []
@@ -1829,7 +1825,7 @@ Section ldotdl_dldotdl.
   Qed.
   
   (** dldotdl left with dlunit *)
-  Lemma dldotdl_dlunit_l : forall (dl : list (list A)) {c},
+  Lemma dldotdl_dlunit_l : forall (dl : dlist A) {c},
       width dl c -> 
       dldotdl (dlunit Azero Aone c) dl == dltrans dl c.
   Proof.
@@ -1842,7 +1838,7 @@ Section ldotdl_dldotdl.
   Qed.
   
   (** dldotdl right with dlunit *)
-  Lemma dldotdl_dlunit_r : forall (dl : list (list A)) {c},
+  Lemma dldotdl_dlunit_r : forall (dl : dlist A) {c},
       width dl c -> 
       dldotdl dl (dlunit Azero Aone c) == dl.
   Proof.
@@ -1875,7 +1871,7 @@ Section dlcmul_properties.
   
   (** Mapping cmul to dlist keep unchanged imply k = 1 or dlist is zero *)
   Lemma dlcmul_fixpoint_imply_k1_or_dlzero : 
-    forall {r c} k (dl : list (list A)) (H1 : length dl = r) (H2 : width dl c),
+    forall {r c} k (dl : dlist A) (H1 : length dl = r) (H2 : width dl c),
       map (map (fun x => Amul k x)) dl == dl ->
       ((k == Aone)%A \/ dl == dlzero Azero r c).
   Proof.
@@ -1892,7 +1888,7 @@ Section dlcmul_properties.
   
   (** Mapping mulc to dlist keep unchanged imply k = 1 or dlist is zero *)
   Lemma dlmulc_fixpoint_imply_k1_or_dlzero : 
-    forall {r c} k (dl : list (list A)) (H1 : length dl = r) (H2 : width dl c),
+    forall {r c} k (dl : dlist A) (H1 : length dl = r) (H2 : width dl c),
       map (map (fun x => Amul x k)) dl == dl ->
       ((k == Aone)%A \/ dl == dlzero Azero r c).
   Proof.
@@ -1904,7 +1900,7 @@ Section dlcmul_properties.
 
   (** Mapping cmul to dlist got zero imply k = 0 or dlist is zero *)
   Lemma dlcmul_zero_imply_k0_or_dlzero : 
-    forall {r c} k (dl : list (list A)) (H1 : length dl = r) (H2 : width dl c),
+    forall {r c} k (dl : dlist A) (H1 : length dl = r) (H2 : width dl c),
       map (map (fun x => Amul k x)) dl == (dlzero Azero r c) ->
       ((k == Azero)%A \/ dl == dlzero Azero r c).
   Proof.

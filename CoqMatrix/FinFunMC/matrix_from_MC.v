@@ -309,7 +309,8 @@ Section ordinal.
   Proof.
     intros. rewrite pmap_filter.
     - Unset Printing Notations.
-      apply all_filterP. 
+      (* apply all_filterP.  *)
+  Abort.
 
 
 End ordinal.
@@ -438,7 +439,7 @@ finfun_of (aT : Finite.type) (rT : forall _ : aT, Type)
 
   (** 补充，MC书上 p147 补充了 ffun 的解释 *)
   Fail Check {ffun nat -> nat}. (* nat作为定义域无法构成 ffun *)
-  Check {ffun 'I_3 -> nat}.   (* I_7是ordinal 7，是可以构成 ffun 的 *)
+  Check {ffun 'I_3 -> nat}.   (* I_3是ordinal 3，是可以构成 ffun 的 *)
   Check {ffun 'I_2 -> 'I_3 -> nat}. (* 轻松构成了 2x3 的矩阵 *)
   Check {ffun 'I_4 -> 'I_2 -> 'I_3 -> nat}. (* 可以一直嵌套下去 *)
 
@@ -454,12 +455,31 @@ End finfun_of.
 (* matrix类型 *)
 Section matrix.
 
+  (* 看看matrix类型有多复杂？ *)
+  Section matrix_complexity.
+    Set Printing All.
+    Print matrix.
+    Print finfun_of.
+    Print finfun_on.
+    Print prod_finType.
+    Print prod_choiceType.
+    Print Choice.eqType.
+    Print ordinal_finType.
+    Print ordinal_choiceType.
+    Print ordinal.
+    Print enum_mem.
+    Print Finite.
+    Print Equality.
+    Print Finite.sort.
+
+  End matrix_complexity.
+
   Print matrix. (* Variant matrix (R : Type) (m n : nat) : predArgType :=
     Matrix : {ffun 'I_m * 'I_n -> R} -> 'M_(m, n) *)
   (* Variant matrix (R : Type) (m n : nat) : predArgType :=
     Matrix : 
       forall _ : finfun_of (Phant (forall _ : prod (ordinal m) (ordinal n), R)),
-             matrix R m n *)
+              matrix R m n *)
   Print predArgType.  (* = Type *)
   
   Print Phant. (* Variant phant (p : Type) : Prop :=  Phant : phant p *)
@@ -482,10 +502,31 @@ Section matrix.
         (@Ordinal 3 0 is_true_true).
 (*       Compute m1 (@Ordinal 3 0 is_true_true) (@Ordinal 3 0 is_true_true). *)
       Variable x : nat.
+      (* 2*3 matrix, all elements = 1 *)
       Let m2 := @const_mx nat 2 3 1.
+      Eval cbn in m2.
+
+      (* 如何取出矩阵的元素？
+         matrix 的类型可简单理解(去掉Inductive定义)为 (Ordinal m * Ordinal n) -> A，
+         函数 fun_of_matrix 将矩阵转换成了 Ordinal m -> Ordinal n -> A 类型，
+         并且该函数被声明成了自动隐式类型转换，
+         所以，使用 M i j 这种函数作用即可取出矩阵 M 的第 (i,j) 个元素 *)
       Let x00 := m2 (@Ordinal 2 0 is_true_true) (@Ordinal 3 0 is_true_true).
       Eval simpl in x00.
-(*       Compute x00. *)
+
+      (* 问题是，无法取出元素 *)
+      Eval cbv in x00.
+
+      (* 在交互式的证明中也无法取出元素，即使我已经去掉了可能的 lock  *)
+      Goal m2 (@Ordinal 2 0 is_true_true) (@Ordinal 3 0 is_true_true) = 1.
+        unfold m2. simpl.
+        unfold const_mx. simpl.
+        rewrite unlock. simpl.
+        rewrite unlock. simpl.
+        cbn.
+        (* finfun.fun_of_fin_rec 递归函数我不知如何展开，或许要先处理 mem_enum 结构。
+           初步分析， mem_enum 的结构比较复杂，还有 eq_mem, in_mem 等定义 *)
+      Abort.
       
     End test.
     
@@ -494,7 +535,7 @@ Section matrix.
     
     (* 取出元素 *)
     Print const_mx_key. (* 因其被声明为 Opaque，导致无法计算，
-      咱不知道这个设计意图，也许需要修改源码重新编译来尝试 *) 
+      暂不知道这个设计意图，也许需要修改源码重新编译来尝试 *) 
     Check m_34 (@Ordinal _ 0 _) (@Ordinal _ 0 _).
     
     (* 矩阵形状改变 *)
@@ -573,6 +614,10 @@ Section matrix.
     Check drsubmx m5.
     
     (* 分块矩阵的转置有关的性质 *)
+    (* 
+       [m1 m2] \ T = [m1\T m3\T]
+       [m3 m4]       [m2\T m4\T]
+ *)
     Goal trmx (block_mx m1 m2 m3 m4) = block_mx m1^T m3^T m2^T m4^T.
     apply tr_block_mx. Qed.
     
@@ -710,3 +755,7 @@ Section matrix.
   
 End matrix.
 
+(* 测试Ocaml代码抽取 *)
+Require Import Extraction.
+Extraction mulmx.               (* 含有 Obj.magic *)
+Extraction determinant.         (* 含有 Obj.magic *)
